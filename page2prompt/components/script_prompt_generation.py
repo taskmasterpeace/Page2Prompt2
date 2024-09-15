@@ -18,20 +18,30 @@ class ScriptPromptGenerator:
         shot_description: str,
         directors_notes: str,
         style: Optional[str] = None,
-        style_prefix: Optional[str] = None,
-        style_suffix: Optional[str] = None,
         director_style: Optional[str] = None,
-        camera_settings: Optional[Dict[str, str]] = None,
-        end_parameters: Optional[str] = None,
         stick_to_script: bool = False,
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
+        end_parameters: Optional[str] = None,
+        camera_shot: Optional[str] = None,
+        camera_move: Optional[str] = None,
+        camera_size: Optional[str] = None,
+        framing: Optional[str] = None,
+        depth_of_field: Optional[str] = None,
     ) -> Dict[str, str]:
 
         # 1. Get active subjects
         active_subjects = self.subject_manager.get_active_subjects()
 
         # 2. Generate prompts using MetaChain
+        camera_settings = {
+            "camera_shot": camera_shot,
+            "camera_move": camera_move,
+            "camera_size": camera_size,
+            "framing": framing,
+            "depth_of_field": depth_of_field
+        }
+        
         prompts = await self.meta_chain.generate_prompt(
             style=style,
             highlighted_text=highlighted_text,
@@ -47,10 +57,16 @@ class ScriptPromptGenerator:
             director_style=director_style
         )
 
-        # 3. Format prompts with style prefix/suffix
-        formatted_prompts = {}
-        for prompt_type, prompt in prompts.items():
-            formatted_prompt = f"{style_prefix or ''}{prompt}{style_suffix or ''}"
-            formatted_prompts[prompt_type] = formatted_prompt
+        # 3. Format prompts with style prefix/suffix if needed
+        if style:
+            style_data = self.style_manager.get_style(style)
+            style_prefix = style_data.get("Prefix", "")
+            style_suffix = style_data.get("Suffix", "")
+            formatted_prompts = {}
+            for prompt_type, prompt in prompts.items():
+                formatted_prompt = f"{style_prefix}{prompt}{style_suffix}"
+                formatted_prompts[prompt_type] = formatted_prompt
+        else:
+            formatted_prompts = prompts
 
         return formatted_prompts
