@@ -2,7 +2,7 @@ import asyncio
 from typing import Dict, List, Optional
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
-from utils.style_manager import StyleManager
+from page2prompt.utils.style_manager import StyleManager
 from page2prompt.utils.subject_manager import SubjectManager
 from page2prompt.components.meta_chain import MetaChain
 
