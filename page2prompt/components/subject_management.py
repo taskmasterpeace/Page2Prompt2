@@ -53,3 +53,17 @@ class SubjectManager:
             writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project", "Active"])
             writer.writeheader()
             writer.writerows(self.subjects)
+from typing import List, Dict
+
+class SubjectManager:
+    def __init__(self):
+        self.subjects = []
+
+    def add_subject(self, subject: Dict):
+        self.subjects.append(subject)
+
+    def get_subjects(self) -> List[Dict]:
+        return self.subjects
+
+    def get_active_subjects(self) -> List[Dict]:
+        return [subject for subject in self.subjects if subject.get('active', False)]

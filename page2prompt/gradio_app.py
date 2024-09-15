@@ -72,3 +72,31 @@ with gr.Blocks() as demo:
 
 # Launch the Gradio interface
 demo.launch()
+import gradio as gr
+from components.script_prompt_generation import ScriptPromptGenerator
+from components.subject_management import SubjectManager
+from utils.style_manager import StyleManager
+
+# Initialize components
+style_manager = StyleManager()
+subject_manager = SubjectManager()
+script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager)
+
+# Gradio interface setup
+def generate_prompts(script_excerpt, shot_description, directors_notes):
+    # Placeholder function, to be implemented
+    return "Placeholder prompt"
+
+demo = gr.Interface(
+    fn=generate_prompts,
+    inputs=[
+        gr.Textbox(label="Script Excerpt"),
+        gr.Textbox(label="Shot Description"),
+        gr.Textbox(label="Director's Notes")
+    ],
+    outputs=gr.Textbox(label="Generated Prompt")
+)
+
+# Launch the Gradio interface
+if __name__ == "__main__":
+    demo.launch()

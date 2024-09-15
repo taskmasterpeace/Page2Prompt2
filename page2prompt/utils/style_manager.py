@@ -66,3 +66,17 @@ class StyleManager:
             writer = csv.DictWriter(csvfile, fieldnames=["Style Name", "Prefix", "Suffix", "Genre", "Descriptors"])
             writer.writeheader()
             writer.writerows(self.styles)
+from typing import List, Dict
+
+class StyleManager:
+    def __init__(self):
+        self.styles = []
+
+    def add_style(self, style: Dict):
+        self.styles.append(style)
+
+    def get_styles(self) -> List[Dict]:
+        return self.styles
+
+    def get_style(self, style_name: str) -> Dict:
+        return next((style for style in self.styles if style['name'] == style_name), None)

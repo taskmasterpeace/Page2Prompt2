@@ -85,3 +85,14 @@ class ScriptPromptGenerator:
             generation_message,
             active_subjects_display
         )
+from utils.style_manager import StyleManager
+from components.subject_management import SubjectManager
+
+class ScriptPromptGenerator:
+    def __init__(self, style_manager: StyleManager, subject_manager: SubjectManager):
+        self.style_manager = style_manager
+        self.subject_manager = subject_manager
+
+    def generate_prompt(self, script_excerpt: str, shot_description: str, directors_notes: str) -> str:
+        # Placeholder implementation
+        return f"Generated prompt based on:\nScript: {script_excerpt}\nShot: {shot_description}\nNotes: {directors_notes}"
