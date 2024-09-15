@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
 from utils.style_manager import StyleManager
-from page2prompt.utils.subject_manager import SubjectManager
-from gradio_meta_chain import MetaChain
+from ..utils.subject_manager import SubjectManager
+from ..components.meta_chain import MetaChain
 
 class ScriptPromptGenerator:
     def __init__(self, style_manager: StyleManager, subject_manager: SubjectManager, meta_chain: MetaChain):
