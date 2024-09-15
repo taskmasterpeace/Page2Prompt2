@@ -4,17 +4,11 @@ from page2prompt.components.script_prompt_generation import ScriptPromptGenerato
 from page2prompt.utils.subject_manager import SubjectManager
 from page2prompt.utils.style_manager import StyleManager
 from page2prompt.components.meta_chain import MetaChain
-from config import Config
-from core import PromptForgeCore
-from prompt_manager import PromptManager
 
 # Initialize components
-config = Config()
-core = PromptForgeCore()
-prompt_manager = PromptManager()
 style_manager = StyleManager("styles.csv")
 subject_manager = SubjectManager("subjects.csv")
-meta_chain = MetaChain(core)
+meta_chain = MetaChain()
 script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
 
 # Gradio interface setup
