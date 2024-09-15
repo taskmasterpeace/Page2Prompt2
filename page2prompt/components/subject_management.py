@@ -68,11 +68,12 @@ class SubjectManager:
             with open(self.subjects_file, 'r', newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
+                    row['Active'] = row.get('Active', 'False').lower() == 'true'
                     subjects.append(row)
         except FileNotFoundError:
             # Create the file if it doesn't exist
             with open(self.subjects_file, 'w', newline='', encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project"])
+                writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project", "Active"])
                 writer.writeheader()
         return subjects
 
@@ -86,6 +87,7 @@ class SubjectManager:
 
     def add_subject(self, subject_data: Dict) -> None:
         """Adds a new subject to the list and saves to the CSV file."""
+        subject_data['Active'] = subject_data.get('Active', False)
         self.subjects.append(subject_data)
         self._save_subjects()
 
@@ -93,6 +95,7 @@ class SubjectManager:
         """Updates an existing subject in the list and saves to the CSV file."""
         for i, subject in enumerate(self.subjects):
             if subject["Name"] == subject_data["Name"]:
+                subject_data['Active'] = subject_data.get('Active', False)
                 self.subjects[i] = subject_data
                 break
         self._save_subjects()
@@ -105,6 +108,8 @@ class SubjectManager:
     def _save_subjects(self) -> None:
         """Saves the subjects to the CSV file."""
         with open(self.subjects_file, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project"])
+            writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project", "Active"])
             writer.writeheader()
+            for subject in self.subjects:
+                subject['Active'] = str(subject.get('Active', False))
             writer.writerows(self.subjects)
