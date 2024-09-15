@@ -48,6 +48,9 @@ class ScriptPromptGenerator:
         )
 
         # 3. Format prompts with style prefix/suffix
-        # ... (Implementation for formatting prompts)
+        formatted_prompts = {}
+        for prompt_type, prompt in prompts.items():
+            formatted_prompt = f"{style_prefix or ''}{prompt}{style_suffix or ''}"
+            formatted_prompts[prompt_type] = formatted_prompt
 
-        return prompts
+        return formatted_prompts

@@ -21,9 +21,9 @@ class StyleManager:
                 writer.writeheader()
         return styles
 
-    def get_styles(self) -> List[Dict]:
-        """Returns the list of styles."""
-        return self.styles
+    def get_styles(self) -> List[str]:
+        """Returns the list of style names."""
+        return [style["Style Name"] for style in self.styles]
 
     def get_style(self, style_name: str) -> Dict:
         """Returns the style with the given name."""
@@ -31,6 +31,16 @@ class StyleManager:
             if style["Style Name"] == style_name:
                 return style
         return {}  # Return an empty dictionary if the style is not found
+
+    def get_style_prefix(self, style_name: str) -> str:
+        """Returns the prefix for the given style name."""
+        style = self.get_style(style_name)
+        return style.get("Prefix", "")
+
+    def get_style_suffix(self, style_name: str) -> str:
+        """Returns the suffix for the given style name."""
+        style = self.get_style(style_name)
+        return style.get("Suffix", "")
 
     def add_style(self, style_data: Dict) -> None:
         """Adds a new style to the list and saves to the CSV file."""

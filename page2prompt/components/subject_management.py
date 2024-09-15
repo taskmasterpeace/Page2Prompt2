@@ -17,7 +17,7 @@ class SubjectManager:
         except FileNotFoundError:
             # Create the file if it doesn't exist
             with open(self.subjects_file, 'w', newline='', encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project"])
+                writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project", "Active"])
                 writer.writeheader()
         return subjects
 
@@ -27,7 +27,7 @@ class SubjectManager:
 
     def get_active_subjects(self) -> List[Dict]:
         """Returns a list of active subjects."""
-        return [s for s in self.subjects if s.get("Active", False)]
+        return [s for s in self.subjects if s.get("Active", "False").lower() == "true"]
 
     def add_subject(self, subject_data: Dict) -> None:
         """Adds a new subject to the list and saves to the CSV file."""
@@ -50,6 +50,6 @@ class SubjectManager:
     def _save_subjects(self) -> None:
         """Saves the subjects to the CSV file."""
         with open(self.subjects_file, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project"])
+            writer = csv.DictWriter(csvfile, fieldnames=["Name", "Category", "Description", "Alias", "Inventory", "Project", "Active"])
             writer.writeheader()
             writer.writerows(self.subjects)

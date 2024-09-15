@@ -17,7 +17,19 @@ with gr.Blocks() as demo:
             script_input = gr.Textbox(label="Script Excerpt")
             shot_description_input = gr.Textbox(label="Shot Description")
             directors_notes_input = gr.Textbox(label="Director's Notes")
-            # ... (other inputs)
+            style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles())
+            director_style_input = gr.Textbox(label="Director's Style")
+            stick_to_script_input = gr.Checkbox(label="Stick to Script")
+            highlighted_text_input = gr.Textbox(label="Highlighted Text")
+            full_script_input = gr.Textbox(label="Full Script")
+            end_parameters_input = gr.Textbox(label="End Parameters")
+
+            with gr.Row():
+                camera_shot_input = gr.Dropdown(label="Camera Shot", choices=["Close-up", "Medium", "Wide"])
+                camera_move_input = gr.Dropdown(label="Camera Move", choices=["Static", "Pan", "Tilt", "Dolly"])
+                camera_size_input = gr.Dropdown(label="Camera Size", choices=["Small", "Medium", "Large"])
+                framing_input = gr.Dropdown(label="Framing", choices=["Center", "Rule of Thirds", "Golden Ratio"])
+                depth_of_field_input = gr.Dropdown(label="Depth of Field", choices=["Shallow", "Medium", "Deep"])
 
         with gr.Column():
             concise_prompt = gr.Textbox(label="Concise Prompt")
@@ -35,7 +47,17 @@ with gr.Blocks() as demo:
             script_input,
             shot_description_input,
             directors_notes_input,
-            # ... (other inputs)
+            style_input,
+            director_style_input,
+            stick_to_script_input,
+            highlighted_text_input,
+            full_script_input,
+            end_parameters_input,
+            camera_shot_input,
+            camera_move_input,
+            camera_size_input,
+            framing_input,
+            depth_of_field_input,
         ],
         outputs=[
             concise_prompt,
