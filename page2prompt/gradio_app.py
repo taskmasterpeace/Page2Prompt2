@@ -3,12 +3,18 @@ import asyncio
 from components.script_prompt_generation import ScriptPromptGenerator
 from components.subject_management import SubjectManager
 from utils.style_manager import StyleManager
-from components.meta_chain import MetaChain
+from gradio_meta_chain import MetaChain
+from config import Config
+from core import PromptForgeCore
+from prompt_manager import PromptManager
 
 # Initialize components
+config = Config()
+core = PromptForgeCore()
+prompt_manager = PromptManager()
 style_manager = StyleManager("styles.csv")
 subject_manager = SubjectManager("subjects.csv")
-meta_chain = MetaChain()
+meta_chain = MetaChain(core)
 script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
 
 # Gradio interface setup
@@ -19,18 +25,21 @@ with gr.Blocks() as demo:
             shot_description_input = gr.Textbox(label="Shot Description")
             directors_notes_input = gr.Textbox(label="Director's Notes")
             style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles())
+            style_prefix_input = gr.Textbox(label="Style Prefix")
+            style_suffix_input = gr.Textbox(label="Style Suffix")
             director_style_input = gr.Textbox(label="Director's Style")
             stick_to_script_input = gr.Checkbox(label="Stick to Script")
             highlighted_text_input = gr.Textbox(label="Highlighted Text")
             full_script_input = gr.Textbox(label="Full Script")
             end_parameters_input = gr.Textbox(label="End Parameters")
 
-            with gr.Row():
-                camera_shot_input = gr.Dropdown(label="Camera Shot", choices=["Close-up", "Medium", "Wide"])
-                camera_move_input = gr.Dropdown(label="Camera Move", choices=["Static", "Pan", "Tilt", "Dolly"])
-                camera_size_input = gr.Dropdown(label="Camera Size", choices=["Small", "Medium", "Large"])
-                framing_input = gr.Dropdown(label="Framing", choices=["Center", "Rule of Thirds", "Golden Ratio"])
-                depth_of_field_input = gr.Dropdown(label="Depth of Field", choices=["Shallow", "Medium", "Deep"])
+            camera_settings_input = gr.JSON(label="Camera Settings", value={
+                "shot": "Medium",
+                "move": "Static",
+                "size": "Medium",
+                "framing": "Center",
+                "depth_of_field": "Medium"
+            })
 
         with gr.Column():
             concise_prompt = gr.Textbox(label="Concise Prompt")
@@ -49,16 +58,14 @@ with gr.Blocks() as demo:
             shot_description_input,
             directors_notes_input,
             style_input,
+            style_prefix_input,
+            style_suffix_input,
             director_style_input,
+            camera_settings_input,
+            end_parameters_input,
             stick_to_script_input,
             highlighted_text_input,
             full_script_input,
-            end_parameters_input,
-            camera_shot_input,
-            camera_move_input,
-            camera_size_input,
-            framing_input,
-            depth_of_field_input,
         ],
         outputs=[
             concise_prompt,
