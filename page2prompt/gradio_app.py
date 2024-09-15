@@ -1,7 +1,7 @@
 import gradio as gr
 import asyncio
 from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
-from page2prompt.components.subject_management import SubjectManager
+from page2prompt.utils.subject_manager import SubjectManager
 from page2prompt.utils.style_manager import StyleManager
 from page2prompt.components.meta_chain import MetaChain
 from config import Config
