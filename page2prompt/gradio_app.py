@@ -42,7 +42,7 @@ with gr.Blocks() as demo:
     generate_button = gr.Button("Generate Prompts")
 
     generate_button.click(
-        script_prompt_generator.generate_prompts,
+        fn=lambda *args: script_prompt_generator.generate_prompts(*args),
         inputs=[
             script_input,
             shot_description_input,

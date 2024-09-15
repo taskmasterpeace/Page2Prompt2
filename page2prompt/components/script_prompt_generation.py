@@ -28,7 +28,7 @@ class ScriptPromptGenerator:
         camera_size: Optional[str] = None,
         framing: Optional[str] = None,
         depth_of_field: Optional[str] = None,
-    ) -> Dict[str, str]:
+    ) -> Tuple[str, str, str, str, str, str]:
 
         # 1. Get active subjects
         active_subjects = self.subject_manager.get_active_subjects()
@@ -69,4 +69,19 @@ class ScriptPromptGenerator:
         else:
             formatted_prompts = prompts
 
-        return formatted_prompts
+        # 4. Prepare the return values
+        concise_prompt = formatted_prompts.get("concise", "")
+        normal_prompt = formatted_prompts.get("normal", "")
+        detailed_prompt = formatted_prompts.get("detailed", "")
+        structured_prompt = formatted_prompts.get("structured", "")
+        generation_message = "Prompts generated successfully."
+        active_subjects_display = ", ".join([subject["Name"] for subject in active_subjects])
+
+        return (
+            concise_prompt,
+            normal_prompt,
+            detailed_prompt,
+            structured_prompt,
+            generation_message,
+            active_subjects_display
+        )
