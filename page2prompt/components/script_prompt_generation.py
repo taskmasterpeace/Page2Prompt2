@@ -1,10 +1,10 @@
 import asyncio
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
 from utils.style_manager import StyleManager
-from components.subject_management import SubjectManager
-from components.meta_chain import MetaChain
+from utils.subject_manager import SubjectManager
+from gradio_meta_chain import MetaChain
 
 class ScriptPromptGenerator:
     def __init__(self, style_manager: StyleManager, subject_manager: SubjectManager, meta_chain: MetaChain):
@@ -18,30 +18,19 @@ class ScriptPromptGenerator:
         shot_description: str,
         directors_notes: str,
         style: Optional[str] = None,
+        style_prefix: Optional[str] = None,
+        style_suffix: Optional[str] = None,
         director_style: Optional[str] = None,
+        camera_settings: Optional[Dict[str, str]] = None,
+        end_parameters: Optional[str] = None,
         stick_to_script: bool = False,
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
-        end_parameters: Optional[str] = None,
-        camera_shot: Optional[str] = None,
-        camera_move: Optional[str] = None,
-        camera_size: Optional[str] = None,
-        framing: Optional[str] = None,
-        depth_of_field: Optional[str] = None,
-    ) -> Tuple[str, str, str, str, str, str]:
-
+    ) -> Dict[str, str]:
         # 1. Get active subjects
         active_subjects = self.subject_manager.get_active_subjects()
 
         # 2. Generate prompts using MetaChain
-        camera_settings = {
-            "camera_shot": camera_shot,
-            "camera_move": camera_move,
-            "camera_size": camera_size,
-            "framing": framing,
-            "depth_of_field": depth_of_field
-        }
-        
         prompts = await self.meta_chain.generate_prompt(
             style=style,
             highlighted_text=highlighted_text,
@@ -57,34 +46,15 @@ class ScriptPromptGenerator:
             director_style=director_style
         )
 
-        # 3. Format prompts with style prefix/suffix if needed
-        if style:
-            style_data = self.style_manager.get_style(style)
-            style_prefix = style_data.get("Prefix", "")
-            style_suffix = style_data.get("Suffix", "")
+        # 3. Format prompts with style prefix/suffix
+        if style_prefix or style_suffix:
             formatted_prompts = {}
             for prompt_type, prompt in prompts.items():
-                formatted_prompt = f"{style_prefix}{prompt}{style_suffix}"
+                formatted_prompt = f"{style_prefix or ''}{prompt}{style_suffix or ''}"
                 formatted_prompts[prompt_type] = formatted_prompt
+            return formatted_prompts
         else:
-            formatted_prompts = prompts
-
-        # 4. Prepare the return values
-        concise_prompt = formatted_prompts.get("concise", "")
-        normal_prompt = formatted_prompts.get("normal", "")
-        detailed_prompt = formatted_prompts.get("detailed", "")
-        structured_prompt = formatted_prompts.get("structured", "")
-        generation_message = "Prompts generated successfully."
-        active_subjects_display = ", ".join([subject["Name"] for subject in active_subjects])
-
-        return (
-            concise_prompt,
-            normal_prompt,
-            detailed_prompt,
-            structured_prompt,
-            generation_message,
-            active_subjects_display
-        )
+            return prompts
 from utils.style_manager import StyleManager
 from components.subject_management import SubjectManager
 
