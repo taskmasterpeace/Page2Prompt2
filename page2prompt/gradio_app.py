@@ -1,4 +1,5 @@
 import gradio as gr
+import asyncio
 from components.script_prompt_generation import ScriptPromptGenerator
 from components.subject_management import SubjectManager
 from utils.style_manager import StyleManager
@@ -42,7 +43,7 @@ with gr.Blocks() as demo:
     generate_button = gr.Button("Generate Prompts")
 
     generate_button.click(
-        fn=lambda *args: script_prompt_generator.generate_prompts(*args),
+        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
         inputs=[
             script_input,
             shot_description_input,
