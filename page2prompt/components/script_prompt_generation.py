@@ -4,7 +4,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
 from utils.style_manager import StyleManager
 from components.subject_management import SubjectManager
-from gradio_meta_chain import MetaChain  # Assuming you have a MetaChain class
+from components.meta_chain import MetaChain
 
 class ScriptPromptGenerator:
     def __init__(self, style_manager: StyleManager, subject_manager: SubjectManager, meta_chain: MetaChain):

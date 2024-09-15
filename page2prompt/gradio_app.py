@@ -2,7 +2,7 @@ import gradio as gr
 from components.script_prompt_generation import ScriptPromptGenerator
 from components.subject_management import SubjectManager
 from utils.style_manager import StyleManager
-from gradio_meta_chain import MetaChain
+from components.meta_chain import MetaChain
 
 # Initialize components
 style_manager = StyleManager("styles.csv")
