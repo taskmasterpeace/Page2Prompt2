@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
 from utils.style_manager import StyleManager
