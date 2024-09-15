@@ -1,9 +1,9 @@
 import gradio as gr
 import asyncio
-from components.script_prompt_generation import ScriptPromptGenerator
-from components.subject_management import SubjectManager
-from utils.style_manager import StyleManager
-from components.meta_chain import MetaChain
+from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
+from page2prompt.components.subject_management import SubjectManager
+from page2prompt.utils.style_manager import StyleManager
+from page2prompt.components.meta_chain import MetaChain
 from config import Config
 from core import PromptForgeCore
 from prompt_manager import PromptManager
