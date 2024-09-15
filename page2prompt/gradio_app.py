@@ -80,9 +80,9 @@ with gr.Blocks() as demo:
 # Launch the Gradio interface
 demo.launch()
 import gradio as gr
-from components.script_prompt_generation import ScriptPromptGenerator
-from components.subject_management import SubjectManager
-from utils.style_manager import StyleManager
+from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
+from page2prompt.utils.subject_manager import SubjectManager
+from page2prompt.utils.style_manager import StyleManager
 
 # Initialize components
 style_manager = StyleManager()

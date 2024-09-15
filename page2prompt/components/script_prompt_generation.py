@@ -53,8 +53,8 @@ class ScriptPromptGenerator:
             formatted_prompts[prompt_type] = formatted_prompt
 
         return formatted_prompts
-from utils.style_manager import StyleManager
-from components.subject_management import SubjectManager
+from page2prompt.utils.style_manager import StyleManager
+from page2prompt.utils.subject_manager import SubjectManager
 
 class ScriptPromptGenerator:
     def __init__(self, style_manager: StyleManager, subject_manager: SubjectManager):
