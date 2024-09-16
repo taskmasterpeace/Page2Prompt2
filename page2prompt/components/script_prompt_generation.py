@@ -47,7 +47,7 @@ class ScriptPromptGenerator:
         # 3. Format the generated prompts using the style prefix/suffix and append end_parameters
         formatted_prompts = {}
         for prompt_type, prompt in prompts.items():
-            formatted_prompt = f"{style_prefix or ''}{prompt}{style_suffix or ''}"
+            formatted_prompt = f"{style_prefix + ' ' if style_prefix else ''}{prompt}{' ' + style_suffix if style_suffix else ''}"
             if end_parameters:
                 formatted_prompt += f" {end_parameters}"
             formatted_prompts[prompt_type] = formatted_prompt
