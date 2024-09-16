@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from page2prompt.utils.style_manager import StyleManager
 from page2prompt.utils.subject_manager import SubjectManager
 from page2prompt.components.meta_chain import MetaChain
