@@ -110,7 +110,7 @@ with gr.Blocks() as demo:
 
 # Launch the Gradio interface
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(share=True)
 import gradio as gr
 import asyncio
 from page2prompt.components.script_prompt_generation import ScriptPromptGenerator

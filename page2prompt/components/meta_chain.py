@@ -26,11 +26,11 @@ class MetaChain:
         Active Subjects: {active_subjects}
         Full Script: {full_script}
         Shot Configuration:
-        - Camera Shot: {shot_configuration[shot]}
-        - Camera Movement: {shot_configuration[move]}
-        - Shot Size: {shot_configuration[size]}
-        - Framing: {shot_configuration[framing]}
-        - Depth of Field: {shot_configuration[depth_of_field]}
+        - Camera Shot: {shot_configuration_shot}
+        - Camera Movement: {shot_configuration_move}
+        - Shot Size: {shot_configuration_size}
+        - Framing: {shot_configuration_framing}
+        - Depth of Field: {shot_configuration_depth_of_field}
         Director's Style: {director_style}
 
         Ensure that the prompt incorporates the provided information and is creative and coherent.
@@ -40,6 +40,7 @@ class MetaChain:
     async def generate_prompt(self, style: Optional[str], highlighted_text: Optional[str], shot_description: str, directors_notes: str, script: Optional[str], stick_to_script: bool, end_parameters: str, active_subjects: Optional[List[Dict[str, Any]]] = None, full_script: str = "", shot_configuration: Optional[Dict[str, str]] = None, length: str = "detailed", director_style: Optional[str] = None) -> Dict[str, str]:
         prompt_template = self._get_prompt_template(length)
         
+        shot_config = shot_configuration or {}
         input_dict = {
             "style": style or "",
             "highlighted_text": highlighted_text or "",
@@ -50,7 +51,11 @@ class MetaChain:
             "end_parameters": end_parameters,
             "active_subjects": ", ".join([s["Name"] for s in (active_subjects or [])]),
             "full_script": full_script,
-            "shot_configuration": shot_configuration or {},
+            "shot_configuration_shot": shot_config.get("shot", ""),
+            "shot_configuration_move": shot_config.get("move", ""),
+            "shot_configuration_size": shot_config.get("size", ""),
+            "shot_configuration_framing": shot_config.get("framing", ""),
+            "shot_configuration_depth_of_field": shot_config.get("depth_of_field", ""),
             "length": length,
             "director_style": director_style or ""
         }
