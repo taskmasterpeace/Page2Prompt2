@@ -25,14 +25,14 @@ class MetaChain:
         Style: {style}
         Style Prefix: {style_prefix}
         Director's Style: {director_style}
-        Camera Shot: {shot_configuration[shot]}
-        Camera Move: {shot_configuration[move]}
-        Camera Size: {shot_configuration[size]}
-        Framing: {shot_configuration[framing]}
-        Depth of Field: {shot_configuration[depth_of_field]}
-        Camera Type: {shot_configuration[camera_type]}
-        Camera Name: {shot_configuration[camera_name]}
-        Lens Type: {shot_configuration[lens_type]}
+        Camera Shot: {camera_shot}
+        Camera Move: {camera_move}
+        Camera Size: {camera_size}
+        Framing: {camera_framing}
+        Depth of Field: {camera_depth_of_field}
+        Camera Type: {camera_type}
+        Camera Name: {camera_name}
+        Lens Type: {camera_lens_type}
 
         Important:
         1. Incorporate the camera work description seamlessly into the scene description.
@@ -56,7 +56,9 @@ class MetaChain:
             input_variables=[
                 "style", "style_prefix", "shot_description", "directors_notes",
                 "highlighted_text", "full_script", "subject_info", "end_parameters",
-                "script_adherence", "director_style", "shot_configuration"
+                "script_adherence", "director_style", "camera_shot", "camera_move",
+                "camera_size", "camera_framing", "camera_depth_of_field", "camera_type",
+                "camera_name", "camera_lens_type"
             ],
             template=base_template
         )
@@ -65,6 +67,16 @@ class MetaChain:
         prompt_template = self._get_prompt_template()
         
         shot_config = shot_configuration or {}
+        camera_settings = {
+            "camera_shot": shot_config.get("shot", ""),
+            "camera_move": shot_config.get("move", ""),
+            "camera_size": shot_config.get("size", ""),
+            "camera_framing": shot_config.get("framing", ""),
+            "camera_depth_of_field": shot_config.get("depth_of_field", ""),
+            "camera_type": shot_config.get("camera_type", ""),
+            "camera_name": shot_config.get("camera_name", ""),
+            "camera_lens_type": shot_config.get("lens_type", "")
+        }
         subject_info = ", ".join([f"{s['Name']}: {s['Description']}" for s in (active_subjects or [])])
         script_adherence = "Strictly adhere to the script content." if stick_to_script else "You can be creative with the script content while maintaining its essence."
 
@@ -79,7 +91,7 @@ class MetaChain:
             "end_parameters": end_parameters,
             "script_adherence": script_adherence,
             "director_style": director_style or "",
-            "shot_configuration": shot_config
+            **camera_settings
         }
 
         try:
@@ -100,10 +112,11 @@ class MetaChain:
                 "structured": content
             }
         except Exception as e:
-            print(f"Error generating prompt: {str(e)}")
+            error_message = f"Error generating prompt: {str(e)}"
+            print(error_message)
             return {
-                "concise": "Error generating concise prompt",
-                "normal": "Error generating normal prompt",
-                "detailed": "Error generating detailed prompt",
-                "structured": f"Error: {str(e)}"
+                "concise": error_message,
+                "normal": error_message,
+                "detailed": error_message,
+                "structured": error_message
             }

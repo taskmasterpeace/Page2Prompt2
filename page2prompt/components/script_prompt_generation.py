@@ -90,6 +90,15 @@ class ScriptPromptGenerator:
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
     ) -> Tuple[str, str, str, str, str, str]:
+        # Ensure all optional parameters have default values
+        style = style or ""
+        style_prefix = style_prefix or ""
+        style_suffix = style_suffix or ""
+        director_style = director_style or ""
+        camera_settings = camera_settings or {}
+        end_parameters = end_parameters or ""
+        highlighted_text = highlighted_text or ""
+        full_script = full_script or ""
         # 1. Get active subjects from SubjectManager
         active_subjects = self.subject_manager.get_active_subjects()
 
