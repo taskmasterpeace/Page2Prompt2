@@ -46,15 +46,14 @@ with gr.Blocks() as demo:
             full_script_input = gr.Textbox(label="Full Script")
             end_parameters_input = gr.Textbox(label="End Parameters")
 
-            with gr.Box():
-                gr.Markdown("### Camera Settings")
-                shot_size = gr.Dropdown(label="Shot Size", choices=camera_settings.get('size', []))
-                shot_movement = gr.Dropdown(label="Shot Movement", choices=camera_settings.get('move', []))
-                framing = gr.Dropdown(label="Framing", choices=camera_settings.get('framing', []))
-                depth_of_field = gr.Dropdown(label="Depth of Field", choices=camera_settings.get('depth_of_field', []))
-                camera_type = gr.Dropdown(label="Camera Type", choices=camera_settings.get('camera_type', []))
-                camera_name = gr.Dropdown(label="Camera Name", choices=camera_settings.get('camera_name', []))
-                lens_type = gr.Dropdown(label="Lens Type", choices=camera_settings.get('lens_type', []))
+            gr.Markdown("### Camera Settings")
+            shot_size = gr.Dropdown(label="Shot Size", choices=camera_settings.get('size', []))
+            shot_movement = gr.Dropdown(label="Shot Movement", choices=camera_settings.get('move', []))
+            framing = gr.Dropdown(label="Framing", choices=camera_settings.get('framing', []))
+            depth_of_field = gr.Dropdown(label="Depth of Field", choices=camera_settings.get('depth_of_field', []))
+            camera_type = gr.Dropdown(label="Camera Type", choices=camera_settings.get('camera_type', []))
+            camera_name = gr.Dropdown(label="Camera Name", choices=camera_settings.get('camera_name', []))
+            lens_type = gr.Dropdown(label="Lens Type", choices=camera_settings.get('lens_type', []))
 
         with gr.Column():
             concise_prompt = gr.Textbox(label="Concise Prompt")
