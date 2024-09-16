@@ -10,7 +10,7 @@ class MetaChain:
         self.api_key = os.environ.get("OPENAI_API_KEY")
         if not self.api_key:
             raise ValueError("OpenAI API key not found in environment variables")
-        self.llm = ChatOpenAI(temperature=0.7, model_name="gpt-4-0613", openai_api_key=self.api_key)
+        self.llm = ChatOpenAI(temperature=0.7, model_name="gpt-4o-mini", openai_api_key=self.api_key)
 
     def _get_prompt_template(self) -> PromptTemplate:
         base_template = """
