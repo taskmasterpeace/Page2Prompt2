@@ -87,7 +87,7 @@ class ScriptPromptGenerator:
         stick_to_script: bool = False,
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
-    ) -> Dict[str, str]:
+    ) -> Tuple[str, str, str, str, str, str]:
         # 1. Get active subjects from SubjectManager
         active_subjects = self.subject_manager.get_active_subjects()
 
@@ -113,4 +113,12 @@ class ScriptPromptGenerator:
             formatted_prompt = f"{style_prefix or ''}{prompt}{style_suffix or ''}"
             formatted_prompts[prompt_type] = formatted_prompt
 
-        return formatted_prompts
+        # 4. Prepare the output tuple
+        return (
+            formatted_prompts.get("concise", ""),
+            formatted_prompts.get("normal", ""),
+            formatted_prompts.get("detailed", ""),
+            formatted_prompts.get("structured", ""),
+            "Prompts generated successfully",
+            ", ".join([subject["Name"] for subject in active_subjects])
+        )
