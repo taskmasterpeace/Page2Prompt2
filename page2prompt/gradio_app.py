@@ -1,5 +1,10 @@
 import gradio as gr
 import asyncio
+import os
+import sys
+# Add the current directory to sys.path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from components.script_prompt_generation import ScriptPromptGenerator
 from utils.subject_manager import SubjectManager
 from utils.style_manager import StyleManager
