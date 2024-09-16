@@ -1,23 +1,20 @@
 import os
-from typing import Dict, Any, List
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.callbacks import get_openai_callback
-import langsmith
-
-# Initialize LangSmith
-langsmith.set_project("page2prompt")
+from typing import Dict, Any, List, Optional
+from langchain_community.chat_models import ChatOpenAI
+from langchain_community.callbacks.manager import get_openai_callback
+from langchain.prompts import PromptTemplate
+from langchain_core.runnables import RunnableSequence
 
 class MetaChain:
     def __init__(self):
         self.api_key = os.environ.get("OPENAI_API_KEY")
         if not self.api_key:
             raise ValueError("OpenAI API key not found in environment variables")
-        self.llm = ChatOpenAI(temperature=0.7, model_name="gpt-4-0613")
+        self.llm = ChatOpenAI(temperature=0.7, model_name="gpt-4-0613", openai_api_key=self.api_key)
 
-    def _get_prompt_template(self) -> ChatPromptTemplate:
+    def _get_prompt_template(self, length: str) -> PromptTemplate:
         template = """
-        Generate creative prompts for a script based on the following information:
+        Generate a {length} creative prompt for a script based on the following information:
 
         Style: {style}
         Highlighted Text: {highlighted_text}
@@ -29,55 +26,50 @@ class MetaChain:
         Active Subjects: {active_subjects}
         Full Script: {full_script}
         Shot Configuration:
-        - Camera Shot: {shot_configuration.shot}
-        - Camera Movement: {shot_configuration.move}
-        - Shot Size: {shot_configuration.size}
-        - Framing: {shot_configuration.framing}
-        - Depth of Field: {shot_configuration.depth_of_field}
-        Length: {length}
+        - Camera Shot: {shot_configuration[shot]}
+        - Camera Movement: {shot_configuration[move]}
+        - Shot Size: {shot_configuration[size]}
+        - Framing: {shot_configuration[framing]}
+        - Depth of Field: {shot_configuration[depth_of_field]}
         Director's Style: {director_style}
 
-        Please generate three prompts:
-        1. A concise prompt (about 20 words)
-        2. A normal prompt (about 50 words)
-        3. A detailed prompt (about 100 words)
-
-        Ensure that the prompts incorporate the provided information and are creative and coherent.
+        Ensure that the prompt incorporates the provided information and is creative and coherent.
         """
-        return ChatPromptTemplate.from_template(template)
+        return PromptTemplate.from_template(template)
 
-    async def generate_prompt(self, **kwargs: Any) -> Dict[str, str]:
-        prompt_template = self._get_prompt_template()
+    async def generate_prompt(self, style: Optional[str], highlighted_text: Optional[str], shot_description: str, directors_notes: str, script: Optional[str], stick_to_script: bool, end_parameters: str, active_subjects: Optional[List[Dict[str, Any]]] = None, full_script: str = "", shot_configuration: Optional[Dict[str, str]] = None, length: str = "detailed", director_style: Optional[str] = None) -> Dict[str, str]:
+        prompt_template = self._get_prompt_template(length)
         
-        # Prepare the input for the prompt template
         input_dict = {
-            "style": kwargs.get("style", ""),
-            "highlighted_text": kwargs.get("highlighted_text", ""),
-            "shot_description": kwargs.get("shot_description", ""),
-            "directors_notes": kwargs.get("directors_notes", ""),
-            "script": kwargs.get("script", ""),
-            "stick_to_script": str(kwargs.get("stick_to_script", False)),
-            "end_parameters": kwargs.get("end_parameters", ""),
-            "active_subjects": ", ".join([s["Name"] for s in kwargs.get("active_subjects", [])]),
-            "full_script": kwargs.get("full_script", ""),
-            "shot_configuration": kwargs.get("shot_configuration", {}),
-            "length": kwargs.get("length", "normal"),
-            "director_style": kwargs.get("director_style", "")
+            "style": style or "",
+            "highlighted_text": highlighted_text or "",
+            "shot_description": shot_description,
+            "directors_notes": directors_notes,
+            "script": script or "",
+            "stick_to_script": str(stick_to_script),
+            "end_parameters": end_parameters,
+            "active_subjects": ", ".join([s["Name"] for s in (active_subjects or [])]),
+            "full_script": full_script,
+            "shot_configuration": shot_configuration or {},
+            "length": length,
+            "director_style": director_style or ""
         }
 
         try:
             with get_openai_callback() as cb:
-                result = await self.llm.agenerate([prompt_template.format_messages(**input_dict)])
+                chain = RunnableSequence(
+                    prompt_template,
+                    self.llm
+                )
+                result = await chain.ainvoke(input_dict)
                 
-            # Parse the result to extract the three prompts
-            content = result.generations[0][0].text
-            prompts = content.split("\n\n")
+            content = result.content
             
             return {
-                "concise": prompts[0].strip() if len(prompts) > 0 else "",
-                "normal": prompts[1].strip() if len(prompts) > 1 else "",
-                "detailed": prompts[2].strip() if len(prompts) > 2 else "",
-                "structured": content  # Keep the full structured output
+                "concise": content if length == "concise" else "",
+                "normal": content if length == "normal" else "",
+                "detailed": content if length == "detailed" else "",
+                "structured": content
             }
         except Exception as e:
             print(f"Error generating prompt: {str(e)}")
