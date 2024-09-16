@@ -109,10 +109,12 @@ class ScriptPromptGenerator:
             director_style=director_style
         )
 
-        # 3. Format the generated prompts using the style prefix/suffix
+        # 3. Format the generated prompts using the style prefix/suffix and append end_parameters
         formatted_prompts = {}
         for prompt_type, prompt in prompts.items():
             formatted_prompt = f"{style_prefix or ''}{prompt}{style_suffix or ''}"
+            if end_parameters:
+                formatted_prompt += f" {end_parameters}"
             formatted_prompts[prompt_type] = formatted_prompt
 
         # 4. Prepare the output tuple

@@ -49,24 +49,8 @@ with gr.Blocks() as demo:
 
     generate_button = gr.Button("Generate Prompts")
 
-    async def generate_prompts_with_end_params(*args):
-        # Separate end_parameters from other arguments
-        end_parameters = args[8]
-        other_args = args[:8] + args[9:]
-        
-        # Call the original generate_prompts method
-        results = await script_prompt_generator.generate_prompts(*other_args)
-        
-        # Append end_parameters to each prompt
-        updated_results = list(results)
-        for i in range(4):  # Update the first 4 outputs (prompts)
-            if updated_results[i]:
-                updated_results[i] = f"{updated_results[i]} {end_parameters}"
-        
-        return tuple(updated_results)
-
     generate_button.click(
-        fn=generate_prompts_with_end_params,
+        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
         inputs=[
             script_input,
             shot_description_input,
