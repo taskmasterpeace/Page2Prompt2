@@ -94,23 +94,19 @@ class ScriptPromptGenerator:
         active_subjects = self.subject_manager.get_active_subjects()
 
         # 2. Generate prompts using MetaChain (interacting with the LLM)
-        prompts = {}
-        for length in ["concise", "normal", "detailed"]:
-            prompt = await self.meta_chain.generate_prompt(
-                style=style,
-                highlighted_text=highlighted_text,
-                shot_description=shot_description,
-                directors_notes=directors_notes,
-                script=script_excerpt,
-                stick_to_script=stick_to_script,
-                end_parameters=end_parameters,
-                active_subjects=active_subjects,
-                full_script=full_script,
-                shot_configuration=camera_settings,
-                length=length,
-                director_style=director_style
-            )
-            prompts[length] = prompt[length]
+        prompts = await self.meta_chain.generate_prompt(
+            style=style,
+            highlighted_text=highlighted_text,
+            shot_description=shot_description,
+            directors_notes=directors_notes,
+            script=script_excerpt,
+            stick_to_script=stick_to_script,
+            end_parameters=end_parameters,
+            active_subjects=active_subjects,
+            full_script=full_script,
+            shot_configuration=camera_settings,
+            director_style=director_style
+        )
 
         # 3. Format the generated prompts using the style prefix/suffix and append end_parameters
         formatted_prompts = {}

@@ -78,7 +78,7 @@ with gr.Blocks() as demo:
     generate_button = gr.Button("Generate Prompts")
 
     def update_camera_settings(*args):
-        camera_settings_input.update(value={
+        return {
             "shot": args[0],
             "move": args[1],
             "size": args[2],
@@ -87,7 +87,7 @@ with gr.Blocks() as demo:
             "camera_type": args[5],
             "camera_name": args[6],
             "lens_type": args[7]
-        })
+        }
 
     for setting in [shot, move, size, framing, depth_of_field, camera_type, camera_name, lens_type]:
         setting.change(update_camera_settings, inputs=[shot, move, size, framing, depth_of_field, camera_type, camera_name, lens_type], outputs=[camera_settings_input])
