@@ -46,6 +46,17 @@ with gr.Blocks() as demo:
             full_script_input = gr.Textbox(label="Full Script")
             end_parameters_input = gr.Textbox(label="End Parameters")
 
+            camera_settings_input = gr.JSON(label="Camera Settings", value={
+                "shot": "",
+                "move": "",
+                "size": "",
+                "framing": "",
+                "depth_of_field": "",
+                "camera_type": "",
+                "camera_name": "",
+                "lens_type": ""
+            })
+
             with gr.Accordion("Camera Settings"):
                 shot = gr.Dropdown(label="Shot", choices=camera_settings.get('shot', []))
                 move = gr.Dropdown(label="Move", choices=camera_settings.get('move', []))
@@ -66,8 +77,8 @@ with gr.Blocks() as demo:
 
     generate_button = gr.Button("Generate Prompts")
 
-    def prepare_camera_settings(*args):
-        return {
+    def update_camera_settings(*args):
+        camera_settings_input.update(value={
             "shot": args[0],
             "move": args[1],
             "size": args[2],
@@ -76,7 +87,10 @@ with gr.Blocks() as demo:
             "camera_type": args[5],
             "camera_name": args[6],
             "lens_type": args[7]
-        }
+        })
+
+    for setting in [shot, move, size, framing, depth_of_field, camera_type, camera_name, lens_type]:
+        setting.change(update_camera_settings, inputs=[shot, move, size, framing, depth_of_field, camera_type, camera_name, lens_type], outputs=[camera_settings_input])
 
     generate_button.click(
         fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
