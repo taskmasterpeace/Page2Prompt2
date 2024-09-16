@@ -19,7 +19,8 @@ script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, 
 # Load camera settings from CSV
 def load_camera_settings(csv_file):
     settings = {}
-    with open(csv_file, 'r') as file:
+    file_path = os.path.join(os.path.dirname(__file__), csv_file)
+    with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
             if row['type'] not in settings:
