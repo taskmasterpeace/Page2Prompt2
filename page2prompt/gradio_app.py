@@ -1,5 +1,6 @@
 import sys
 import os
+import csv
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import gradio as gr
@@ -14,6 +15,19 @@ style_manager = StyleManager("styles.csv")
 subject_manager = SubjectManager("subjects.csv")
 meta_chain = MetaChain()
 script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
+
+# Load camera settings from CSV
+def load_camera_settings(csv_file):
+    settings = {}
+    with open(csv_file, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['type'] not in settings:
+                settings[row['type']] = []
+            settings[row['type']].append(row['display'])
+    return settings
+
+camera_settings = load_camera_settings("camera_settings.csv")
 
 # Gradio interface setup
 with gr.Blocks() as demo:
@@ -31,13 +45,14 @@ with gr.Blocks() as demo:
             full_script_input = gr.Textbox(label="Full Script")
             end_parameters_input = gr.Textbox(label="End Parameters")
 
-            camera_settings_input = gr.JSON(label="Camera Settings", value={
-                "shot": "Medium",
-                "move": "Static",
-                "size": "Medium",
-                "framing": "Center",
-                "depth_of_field": "Medium"
-            })
+            with gr.Box():
+                gr.Markdown("### Camera Settings")
+                shot_size = gr.Dropdown(label="Shot Size", choices=camera_settings.get('size', []))
+                shot_movement = gr.Dropdown(label="Shot Movement", choices=camera_settings.get('move', []))
+                framing = gr.Dropdown(label="Framing", choices=camera_settings.get('framing', []))
+                depth_of_field = gr.Dropdown(label="Depth of Field", choices=camera_settings.get('depth_of_field', []))
+                camera_type = gr.Dropdown(label="Camera Type", choices=camera_settings.get('camera_type', []))
+                lens_type = gr.Dropdown(label="Lens Type", choices=camera_settings.get('lens_type', []))
 
         with gr.Column():
             concise_prompt = gr.Textbox(label="Concise Prompt")
@@ -49,8 +64,18 @@ with gr.Blocks() as demo:
 
     generate_button = gr.Button("Generate Prompts")
 
+    def prepare_camera_settings(*args):
+        return {
+            "size": args[0],
+            "move": args[1],
+            "framing": args[2],
+            "depth_of_field": args[3],
+            "camera_type": args[4],
+            "lens_type": args[5]
+        }
+
     generate_button.click(
-        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
+        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args[:8], prepare_camera_settings(*args[8:14]), *args[14:])),
         inputs=[
             script_input,
             shot_description_input,
@@ -59,8 +84,13 @@ with gr.Blocks() as demo:
             style_prefix_input,
             style_suffix_input,
             director_style_input,
-            camera_settings_input,
             end_parameters_input,
+            shot_size,
+            shot_movement,
+            framing,
+            depth_of_field,
+            camera_type,
+            lens_type,
             stick_to_script_input,
             highlighted_text_input,
             full_script_input,
