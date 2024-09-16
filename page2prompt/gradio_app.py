@@ -79,7 +79,7 @@ with gr.Blocks() as demo:
         }
 
     generate_button.click(
-        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args[:8], prepare_camera_settings(*args[8:16]), *args[16:])),
+        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
         inputs=[
             script_input,
             shot_description_input,
@@ -88,15 +88,8 @@ with gr.Blocks() as demo:
             style_prefix_input,
             style_suffix_input,
             director_style_input,
+            camera_settings_input,
             end_parameters_input,
-            shot,
-            move,
-            size,
-            framing,
-            depth_of_field,
-            camera_type,
-            camera_name,
-            lens_type,
             stick_to_script_input,
             highlighted_text_input,
             full_script_input,
@@ -113,7 +106,7 @@ with gr.Blocks() as demo:
 
 # Launch the Gradio interface
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(share=True)
 import gradio as gr
 import asyncio
 from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
