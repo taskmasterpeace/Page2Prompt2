@@ -1,8 +1,8 @@
 import asyncio
 from typing import Dict, List, Optional, Tuple
-from ..utils.style_manager import StyleManager
-from ..utils.subject_manager import SubjectManager
-from .meta_chain import MetaChain
+from page2prompt.utils.style_manager import StyleManager
+from page2prompt.utils.subject_manager import SubjectManager
+from page2prompt.components.meta_chain import MetaChain
 
 class ScriptPromptGenerator:
     def __init__(self, style_manager: StyleManager, subject_manager: SubjectManager, meta_chain: MetaChain):
