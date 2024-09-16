@@ -12,52 +12,71 @@ class MetaChain:
             raise ValueError("OpenAI API key not found in environment variables")
         self.llm = ChatOpenAI(temperature=0.7, model_name="gpt-4-0613", openai_api_key=self.api_key)
 
-    def _get_prompt_template(self, length: str) -> PromptTemplate:
-        template = """
-        Generate a {length} creative prompt for a script based on the following information:
+    def _get_prompt_template(self) -> PromptTemplate:
+        base_template = """
+        Generate three prompts (concise, normal, and detailed) based on the following information:
 
-        Style: {style}
-        Highlighted Text: {highlighted_text}
+        Subjects: {subject_info}
         Shot Description: {shot_description}
         Director's Notes: {directors_notes}
-        Script Excerpt: {script}
-        Stick to Script: {stick_to_script}
-        End Parameters: {end_parameters}
-        Active Subjects: {active_subjects}
+        Highlighted Script: {highlighted_text}
         Full Script: {full_script}
-        Shot Configuration:
-        - Camera Shot: {shot_configuration_shot}
-        - Camera Movement: {shot_configuration_move}
-        - Shot Size: {shot_configuration_size}
-        - Framing: {shot_configuration_framing}
-        - Depth of Field: {shot_configuration_depth_of_field}
+        End Parameters: {end_parameters}
+        Style: {style}
+        Style Prefix: {style_prefix}
         Director's Style: {director_style}
+        Camera Shot: {shot_configuration[shot]}
+        Camera Move: {shot_configuration[move]}
+        Camera Size: {shot_configuration[size]}
+        Framing: {shot_configuration[framing]}
+        Depth of Field: {shot_configuration[depth_of_field]}
 
-        Ensure that the prompt incorporates the provided information and is creative and coherent.
+        Important:
+        1. Incorporate the camera work description seamlessly into the scene description.
+        2. Describe the scene positively. Don't use phrases like "no additional props" or "no objects present". Instead, focus on what is in the scene.
+        3. Only include camera information if it's provided in the input.
+        4. Never include style information in the image prompt. That is done in the Style and Style Prefix Only.
+        5. Generate three separate paragraphs: concise (about 20 words), normal (about 50 words), and detailed (about 100 words). Separate them by a space. Do not add headings for these.
+        6. Consider the main subject and its placement. Think about depth. Include elements in the foreground, middle ground, and background to create a sense of dimension when the shot requires it; do not force it.
+        7. Adapt character descriptions based on the framing of the shot:
+           - For close-ups, focus on facial features, expressions, and upper body details visible in the frame.
+           - For medium shots, describe visible clothing, posture, and general body language.
+           - For wide or establishing shots, mention only broad, distinguishing characteristics visible from a distance.
+        8. Ensure consistency across the three prompt lengths, prioritizing the most important visual elements for each shot type.
+        9. For each prompt length, maintain a balance between character details, setting description, and action, appropriate to the shot type and framing.
+        10. Incorporate the descriptions of active subjects provided in the 'Subjects' field into the prompts, but only include details that would be visible in the current shot type.
+        11. {script_adherence}
+
+        Prompts:
         """
-        return PromptTemplate.from_template(template)
+        return PromptTemplate(
+            input_variables=[
+                "style", "style_prefix", "shot_description", "directors_notes",
+                "highlighted_text", "full_script", "subject_info", "end_parameters",
+                "script_adherence", "director_style", "shot_configuration"
+            ],
+            template=base_template
+        )
 
-    async def generate_prompt(self, style: Optional[str], highlighted_text: Optional[str], shot_description: str, directors_notes: str, script: Optional[str], stick_to_script: bool, end_parameters: str, active_subjects: Optional[List[Dict[str, Any]]] = None, full_script: str = "", shot_configuration: Optional[Dict[str, str]] = None, length: str = "detailed", director_style: Optional[str] = None) -> Dict[str, str]:
-        prompt_template = self._get_prompt_template(length)
+    async def generate_prompt(self, style: Optional[str], highlighted_text: Optional[str], shot_description: str, directors_notes: str, script: Optional[str], stick_to_script: bool, end_parameters: str, active_subjects: Optional[List[Dict[str, Any]]] = None, full_script: str = "", shot_configuration: Optional[Dict[str, str]] = None, director_style: Optional[str] = None, style_prefix: Optional[str] = None) -> Dict[str, str]:
+        prompt_template = self._get_prompt_template()
         
         shot_config = shot_configuration or {}
+        subject_info = ", ".join([f"{s['Name']}: {s['Description']}" for s in (active_subjects or [])])
+        script_adherence = "Strictly adhere to the script content." if stick_to_script else "You can be creative with the script content while maintaining its essence."
+
         input_dict = {
             "style": style or "",
+            "style_prefix": style_prefix or "",
             "highlighted_text": highlighted_text or "",
             "shot_description": shot_description,
             "directors_notes": directors_notes,
-            "script": script or "",
-            "stick_to_script": str(stick_to_script),
-            "end_parameters": end_parameters,
-            "active_subjects": ", ".join([s["Name"] for s in (active_subjects or [])]),
             "full_script": full_script,
-            "shot_configuration_shot": shot_config.get("shot", ""),
-            "shot_configuration_move": shot_config.get("move", ""),
-            "shot_configuration_size": shot_config.get("size", ""),
-            "shot_configuration_framing": shot_config.get("framing", ""),
-            "shot_configuration_depth_of_field": shot_config.get("depth_of_field", ""),
-            "length": length,
-            "director_style": director_style or ""
+            "subject_info": subject_info,
+            "end_parameters": end_parameters,
+            "script_adherence": script_adherence,
+            "director_style": director_style or "",
+            "shot_configuration": shot_config
         }
 
         try:
@@ -69,11 +88,12 @@ class MetaChain:
                 result = await chain.ainvoke(input_dict)
                 
             content = result.content
+            prompts = content.split('\n\n')
             
             return {
-                "concise": content if length == "concise" else "",
-                "normal": content if length == "normal" else "",
-                "detailed": content if length == "detailed" else "",
+                "concise": prompts[0] if len(prompts) > 0 else "",
+                "normal": prompts[1] if len(prompts) > 1 else "",
+                "detailed": prompts[2] if len(prompts) > 2 else "",
                 "structured": content
             }
         except Exception as e:
