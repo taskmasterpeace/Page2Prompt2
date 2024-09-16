@@ -64,7 +64,7 @@ class ScriptPromptGenerator:
 
         return output
 import asyncio
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from page2prompt.utils.style_manager import StyleManager
 from page2prompt.utils.subject_manager import SubjectManager
 from page2prompt.components.meta_chain import MetaChain
@@ -89,7 +89,7 @@ class ScriptPromptGenerator:
         stick_to_script: bool = False,
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
-    ) -> Tuple[str, str, str, str, str, str]:
+    ) -> Dict[str, str]:
         # 1. Get active subjects from SubjectManager
         active_subjects = self.subject_manager.get_active_subjects()
 
