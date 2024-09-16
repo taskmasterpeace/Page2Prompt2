@@ -1,9 +1,9 @@
 import gradio as gr
 import asyncio
-from components.script_prompt_generation import ScriptPromptGenerator
-from utils.subject_manager import SubjectManager
-from utils.style_manager import StyleManager
-from components.meta_chain import MetaChain
+from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
+from page2prompt.utils.subject_manager import SubjectManager
+from page2prompt.utils.style_manager import StyleManager
+from page2prompt.components.meta_chain import MetaChain
 
 # Initialize components
 style_manager = StyleManager("styles.csv")
@@ -149,8 +149,4 @@ with gr.Blocks() as demo:
 
 # Launch the Gradio interface
 if __name__ == "__main__":
-    import os
-    import sys
-    # Add the current directory to sys.path
-    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     demo.launch()
