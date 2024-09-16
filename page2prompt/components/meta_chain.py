@@ -30,6 +30,9 @@ class MetaChain:
         Camera Size: {shot_configuration[size]}
         Framing: {shot_configuration[framing]}
         Depth of Field: {shot_configuration[depth_of_field]}
+        Camera Type: {shot_configuration[camera_type]}
+        Camera Name: {shot_configuration[camera_name]}
+        Lens Type: {shot_configuration[lens_type]}
 
         Important:
         1. Incorporate the camera work description seamlessly into the scene description.

@@ -47,8 +47,9 @@ with gr.Blocks() as demo:
             end_parameters_input = gr.Textbox(label="End Parameters")
 
             with gr.Accordion("Camera Settings"):
-                shot_size = gr.Dropdown(label="Shot Size", choices=camera_settings.get('size', []))
-                shot_movement = gr.Dropdown(label="Shot Movement", choices=camera_settings.get('move', []))
+                shot = gr.Dropdown(label="Shot", choices=camera_settings.get('shot', []))
+                move = gr.Dropdown(label="Move", choices=camera_settings.get('move', []))
+                size = gr.Dropdown(label="Size", choices=camera_settings.get('size', []))
                 framing = gr.Dropdown(label="Framing", choices=camera_settings.get('framing', []))
                 depth_of_field = gr.Dropdown(label="Depth of Field", choices=camera_settings.get('depth_of_field', []))
                 camera_type = gr.Dropdown(label="Camera Type", choices=camera_settings.get('camera_type', []))
@@ -67,17 +68,18 @@ with gr.Blocks() as demo:
 
     def prepare_camera_settings(*args):
         return {
-            "size": args[0],
+            "shot": args[0],
             "move": args[1],
-            "framing": args[2],
-            "depth_of_field": args[3],
-            "camera_type": args[4],
-            "camera_name": args[5],
-            "lens_type": args[6]
+            "size": args[2],
+            "framing": args[3],
+            "depth_of_field": args[4],
+            "camera_type": args[5],
+            "camera_name": args[6],
+            "lens_type": args[7]
         }
 
     generate_button.click(
-        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args[:8], prepare_camera_settings(*args[8:15]), *args[15:])),
+        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args[:8], prepare_camera_settings(*args[8:16]), *args[16:])),
         inputs=[
             script_input,
             shot_description_input,
@@ -87,8 +89,9 @@ with gr.Blocks() as demo:
             style_suffix_input,
             director_style_input,
             end_parameters_input,
-            shot_size,
-            shot_movement,
+            shot,
+            move,
+            size,
             framing,
             depth_of_field,
             camera_type,
@@ -110,7 +113,7 @@ with gr.Blocks() as demo:
 
 # Launch the Gradio interface
 if __name__ == "__main__":
-    demo.launch(share=True)
+    demo.launch()
 import gradio as gr
 import asyncio
 from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
