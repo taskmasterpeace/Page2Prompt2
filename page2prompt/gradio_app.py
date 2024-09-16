@@ -201,13 +201,18 @@ with gr.Blocks() as demo:
             full_script_input = gr.Textbox(label="Full Script")
             end_parameters_input = gr.Textbox(label="End Parameters")
 
-            camera_settings_input = gr.JSON(label="Camera Settings", value={
-                "shot": "Medium",
-                "move": "Static",
-                "size": "Medium",
-                "framing": "Center",
-                "depth_of_field": "Medium"
-            })
+            with gr.Accordion("📷 Camera Settings", open=False):
+                with gr.Row():
+                    shot = gr.Dropdown(label="Shot", choices=["AI Suggest"] + camera_settings.get('shot', []))
+                    move = gr.Dropdown(label="Move", choices=["AI Suggest"] + camera_settings.get('move', []))
+                    size = gr.Dropdown(label="Size", choices=["AI Suggest"] + camera_settings.get('size', []))
+                with gr.Row():
+                    framing = gr.Dropdown(label="Framing", choices=["AI Suggest"] + camera_settings.get('framing', []))
+                    depth_of_field = gr.Dropdown(label="Depth of Field", choices=["AI Suggest"] + camera_settings.get('depth_of_field', []))
+                    camera_type = gr.Dropdown(label="Camera Type", choices=["AI Suggest"] + camera_settings.get('camera_type', []))
+                with gr.Row():
+                    camera_name = gr.Dropdown(label="Camera Name", choices=["AI Suggest"] + camera_settings.get('camera_name', []))
+                    lens_type = gr.Dropdown(label="Lens Type", choices=["AI Suggest"] + camera_settings.get('lens_type', []))
 
         with gr.Column():
             concise_prompt = gr.Textbox(label="Concise Prompt")
@@ -229,7 +234,16 @@ with gr.Blocks() as demo:
             style_prefix_input,
             style_suffix_input,
             director_style_input,
-            camera_settings_input,
+            gr.JSON({
+                "shot": lambda: shot.value,
+                "move": lambda: move.value,
+                "size": lambda: size.value,
+                "framing": lambda: framing.value,
+                "depth_of_field": lambda: depth_of_field.value,
+                "camera_type": lambda: camera_type.value,
+                "camera_name": lambda: camera_name.value,
+                "lens_type": lambda: lens_type.value
+            }),
             end_parameters_input,
             stick_to_script_input,
             highlighted_text_input,
