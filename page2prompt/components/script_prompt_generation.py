@@ -50,7 +50,17 @@ class ScriptPromptGenerator:
             formatted_prompt = f"{style_prefix or ''}{prompt}{style_suffix or ''}"
             formatted_prompts[prompt_type] = formatted_prompt
 
-        return formatted_prompts
+        # 4. Prepare the output dictionary
+        output = {
+            "concise_prompt": formatted_prompts.get("concise", ""),
+            "normal_prompt": formatted_prompts.get("normal", ""),
+            "detailed_prompt": formatted_prompts.get("detailed", ""),
+            "structured_prompt": formatted_prompts.get("structured", ""),
+            "generation_message": "Prompts generated successfully",
+            "active_subjects_display": ", ".join([subject["Name"] for subject in active_subjects])
+        }
+
+        return output
 import asyncio
 from typing import Dict, List, Optional
 from page2prompt.utils.style_manager import StyleManager

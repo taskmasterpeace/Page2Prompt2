@@ -51,8 +51,19 @@ with gr.Blocks() as demo:
 
     generate_button = gr.Button("Generate Prompts")
 
+    async def generate_prompts_wrapper(*args):
+        result = await script_prompt_generator.generate_prompts(*args)
+        return (
+            result["concise_prompt"],
+            result["normal_prompt"],
+            result["detailed_prompt"],
+            result["structured_prompt"],
+            result["generation_message"],
+            result["active_subjects_display"]
+        )
+
     generate_button.click(
-        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
+        fn=generate_prompts_wrapper,
         inputs=[
             script_input,
             shot_description_input,
