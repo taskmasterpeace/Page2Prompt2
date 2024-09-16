@@ -45,6 +45,14 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         with gr.Column():
+            with gr.Accordion("📝 Shot Details", open=True):
+                shot_description_input = gr.Textbox(label="📸 Shot Description")
+                directors_notes_input = gr.Textbox(label="🎬 Director's Notes")
+                stick_to_script_input = gr.Checkbox(label="📜 Stick to Script")
+                highlighted_text_input = gr.Textbox(label="🖍️ Highlighted Text")
+                full_script_input = gr.Textbox(label="📚 Full Script")
+                generate_button = gr.Button("🚀 Generate Prompts")
+
             with gr.Accordion("👥 Subjects", open=False):
                 with gr.Row():
                     with gr.Column():
@@ -78,14 +86,6 @@ with gr.Blocks() as demo:
                     with gr.Row():
                         camera_name = gr.Dropdown(label="Camera Name", choices=["AI Suggest"] + camera_settings.get('camera_name', []))
                         lens_type = gr.Dropdown(label="Lens Type", choices=["AI Suggest"] + camera_settings.get('lens_type', []))
-
-            with gr.Accordion("📝 Shot Details", open=True):
-                shot_description_input = gr.Textbox(label="📸 Shot Description")
-                directors_notes_input = gr.Textbox(label="🎬 Director's Notes")
-                stick_to_script_input = gr.Checkbox(label="📜 Stick to Script")
-                highlighted_text_input = gr.Textbox(label="🖍️ Highlighted Text")
-                full_script_input = gr.Textbox(label="📚 Full Script")
-                generate_button = gr.Button("🚀 Generate Prompts")
 
         with gr.Column():
             with gr.Accordion("🖼️ Generated Prompts", open=True):
