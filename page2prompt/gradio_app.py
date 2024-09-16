@@ -52,6 +52,7 @@ with gr.Blocks() as demo:
                 framing = gr.Dropdown(label="Framing", choices=camera_settings.get('framing', []))
                 depth_of_field = gr.Dropdown(label="Depth of Field", choices=camera_settings.get('depth_of_field', []))
                 camera_type = gr.Dropdown(label="Camera Type", choices=camera_settings.get('camera_type', []))
+                camera_name = gr.Dropdown(label="Camera Name", choices=camera_settings.get('camera_name', []))
                 lens_type = gr.Dropdown(label="Lens Type", choices=camera_settings.get('lens_type', []))
 
         with gr.Column():
@@ -71,11 +72,12 @@ with gr.Blocks() as demo:
             "framing": args[2],
             "depth_of_field": args[3],
             "camera_type": args[4],
-            "lens_type": args[5]
+            "camera_name": args[5],
+            "lens_type": args[6]
         }
 
     generate_button.click(
-        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args[:8], prepare_camera_settings(*args[8:14]), *args[14:])),
+        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args[:8], prepare_camera_settings(*args[8:15]), *args[15:])),
         inputs=[
             script_input,
             shot_description_input,
@@ -90,6 +92,7 @@ with gr.Blocks() as demo:
             framing,
             depth_of_field,
             camera_type,
+            camera_name,
             lens_type,
             stick_to_script_input,
             highlighted_text_input,
