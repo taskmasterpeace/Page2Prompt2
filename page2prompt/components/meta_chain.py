@@ -40,7 +40,7 @@ class MetaChain:
         3. Only include camera information if it's provided in the input.
         4. Never include style information in the image prompt. That is done in the Style and Style Prefix Only.
         5. Generate three separate paragraphs: concise (about 20 words), normal (about 50 words), and detailed (about 100 words). Separate them by a space. Do not add headings for these.
-        6. Consider the main subject and its placement. Think about depth. Include elements in the foreground, middle ground, and background to create a sense of dimension when the shot requires it; do not force it.
+        6. Consider the main subject and its placement. Think about depth. Include elements in the foreground, middle ground, and background to create a sense of dimension. Incorporate the specified foreground elements into the shot composition when appropriate, using them to frame the subject or add depth. Balance the foreground, middle ground, and background elements to create a cohesive and visually interesting composition.
         7. Adapt character descriptions based on the framing of the shot:
            - For close-ups, focus on facial features, expressions, and upper body details visible in the frame.
            - For medium shots, describe visible clothing, posture, and general body language.
