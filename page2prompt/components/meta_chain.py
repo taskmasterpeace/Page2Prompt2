@@ -35,20 +35,26 @@ class MetaChain:
         Lens Type: {camera_lens_type}
 
         Important:
-        1. Incorporate the camera work description seamlessly into the scene description.
-        2. Describe the scene positively. Don't use phrases like "no additional props" or "no objects present". Instead, focus on what is in the scene.
-        3. Only include camera information if it's provided in the input.
-        4. Never include style information in the image prompt. That is done in the Style and Style Prefix Only.
-        5. Generate three separate paragraphs: concise (about 20 words), normal (about 40 words), and detailed (about 100 words). Separate them by a space. Do not add headings for these.
-        6. Describe the main subject, its description and its placement. Think as the director type if provided. Include elements in the foreground, middle ground, and background to create a sense of dimension. Incorporate the specified foreground elements into the shot composition when appropriate, using them to frame the subject or add depth. Balance the foreground, middle ground, and background elements to create a cohesive and visually interesting composition.
-        7. Adapt character descriptions based on the framing of the shot:
-           - For close-ups, focus on facial features, expressions, and upper body details visible in the frame.
-           - For medium shots, describe visible clothing, posture, and general body language.
-           - For wide or establishing shots, mention only broad, distinguishing characteristics visible from a distance.
-        8. Ensure consistency across the three prompt lengths, prioritizing the most important visual elements for each shot type.
-        9. For each prompt length, maintain a balance between character details, setting description, and action, appropriate to the shot type and framing.
-        10. Incorporate the descriptions of active subjects provided in the 'Subjects' field into the prompts, but only include details that would be visible in the current shot type.
-        11. {script_adherence}
+        1. Integrate Camera Work Seamlessly: Incorporate the camera work description seamlessly into the scene description.
+        2. Positive Descriptions: Describe the scene positively. Avoid phrases like "no additional props" or "no objects present." Focus on what is in the scene.
+        3. Include Provided Camera Information Only: Only include camera information if it's provided in the input.
+        4. Exclude Style Information from Prompts: Never include style information or stylistic adjectives (like 'vibrant', 'moody') in the image prompt unless specified in the Director's Notes, Director's Style, or character description. Style is handled in the Style and Style Prefix only.
+        5. Generate Three Separate Paragraphs: Generate three separate paragraphs without headings:
+           Concise: About 20 words. Do not include the camera name in this prompt.
+           Normal: About 50 words.
+           Detailed: About 100 words.
+           Separate each paragraph with a space.
+        6. Consider Depth and Placement: Think about the main subject's placement to create depth. Include elements in the foreground, middle ground, and background to enhance dimension. Use specified foreground elements to frame the subject or add depth. Balance these elements for a cohesive and visually interesting composition.
+        7. Adapt Character Descriptions Based on Framing:
+           Close-ups: Focus on facial features, expressions, and upper body details visible in the frame.
+           Medium Shots: Describe visible clothing, posture, and general body language.
+           Wide or Establishing Shots: Mention broad, distinguishing characteristics visible from a distance.
+        8. Ensure Consistency Across Prompts: Prioritize the most important visual elements for each shot type to maintain consistency across the three prompt lengths.
+        9. Balance Elements in Each Prompt: For each prompt length, maintain a balance between character details, setting description, and action appropriate to the shot type and framing.
+        10. Include Relevant Subject Details: Incorporate descriptions of active subjects provided in the 'Subjects' field into the prompts, but only include details visible in the current shot type.
+        11. Script Adherence: {script_adherence}
+        12. Avoid Unnecessary Phrases: Do not include meta-commentary or evaluative statements about the composition, such as "The overall composition captures...". Focus on directly describing the scene.
+        13. Position of Camera Name: Place the camera name at the end of the normal and detailed prompts. It is not a priority item like shot size and should not be included in the concise prompt unless essential.
 
         Prompt Structure:
         Implement a modular structure that prioritizes key elements in this order:
