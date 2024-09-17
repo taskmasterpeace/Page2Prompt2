@@ -135,6 +135,20 @@ with gr.Blocks() as demo:
     copy_detailed_btn.click(lambda: copy_to_clipboard(detailed_prompt.value))
     send_prompts_btn.click(send_prompts)
 
+    def create_camera_settings():
+        return {
+            k: v for k, v in {
+                "shot": shot.value,
+                "move": move.value,
+                "size": size.value,
+                "framing": framing.value,
+                "depth_of_field": depth_of_field.value,
+                "camera_type": camera_type.value,
+                "camera_name": camera_name.value,
+                "lens_type": lens_type.value
+            }.items() if v != "AI Suggest"
+        }
+
     generate_button.click(
         fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
         inputs=[
@@ -145,16 +159,7 @@ with gr.Blocks() as demo:
             style_prefix_input,
             style_suffix_input,
             director_style_input,
-            gr.JSON({
-                "shot": lambda: shot.value,
-                "move": lambda: move.value,
-                "size": lambda: size.value,
-                "framing": lambda: framing.value,
-                "depth_of_field": lambda: depth_of_field.value,
-                "camera_type": lambda: camera_type.value,
-                "camera_name": lambda: camera_name.value,
-                "lens_type": lambda: lens_type.value
-            }),
+            gr.JSON(create_camera_settings),
             end_parameters_input,
             stick_to_script_input,
             highlighted_text_input,
