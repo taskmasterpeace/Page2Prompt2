@@ -44,7 +44,13 @@ class MetaChain:
            Normal: About 50 words.
            Detailed: About 100 words.
            Separate each paragraph with a space.
-        6. Consider Depth and Placement: Think about the main subject's placement to create depth. Include elements in the foreground, middle ground, and background to enhance dimension. Use specified foreground elements to frame the subject or add depth. Balance these elements for a cohesive and visually interesting composition.
+        6. Enhance Depth and Setting Details:
+           - Main Subject Placement: Carefully consider the placement of the main subject within the scene to create a sense of depth and focus.
+           - Foreground, Middle Ground, Background: Include elements in the foreground, middle ground, and background to enhance dimensionality. Use these layers to guide the viewer's eye and add complexity to the scene.
+           - Incorporate Specified Elements: If specific foreground or background elements are provided, integrate them thoughtfully to frame the subject or add depth.
+           - Generate Additional Details: When specific setting details are not provided, creatively generate appropriate and relevant elements that align with the overall scene and context. These could include environmental features, objects, or textures that enhance the setting.
+           - Consistency and Relevance: Ensure that all added elements are consistent with the setting, time period, and context. Avoid introducing inconsistencies or elements that might distract from the main subject.
+           - Cohesive Composition: Balance all elements to create a cohesive and visually engaging composition. Consider how each component interacts with others to contribute to the overall scene.
         7. Adapt Subject Descriptions Based on Framing:
            Close-ups:
            - People: Focus on facial features, expressions, and upper body details visible in the frame.
