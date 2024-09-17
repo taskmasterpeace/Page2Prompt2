@@ -84,7 +84,14 @@ class ScriptPromptGenerator:
         style_prefix: Optional[str] = None,
         style_suffix: Optional[str] = None,
         director_style: Optional[str] = None,
-        camera_settings: Optional[Dict[str, str]] = None,
+        shot: Optional[str] = None,
+        move: Optional[str] = None,
+        size: Optional[str] = None,
+        framing: Optional[str] = None,
+        depth_of_field: Optional[str] = None,
+        camera_type: Optional[str] = None,
+        camera_name: Optional[str] = None,
+        lens_type: Optional[str] = None,
         end_parameters: Optional[str] = None,
         stick_to_script: bool = False,
         highlighted_text: Optional[str] = None,
@@ -95,10 +102,21 @@ class ScriptPromptGenerator:
         style_prefix = style_prefix or ""
         style_suffix = style_suffix or ""
         director_style = director_style or ""
-        camera_settings = camera_settings or {}
         end_parameters = end_parameters or ""
         highlighted_text = highlighted_text or ""
         full_script = full_script or ""
+
+        # Create camera_settings dictionary
+        camera_settings = {
+            "shot": shot or "",
+            "move": move or "",
+            "size": size or "",
+            "framing": framing or "",
+            "depth_of_field": depth_of_field or "",
+            "camera_type": camera_type or "",
+            "camera_name": camera_name or "",
+            "lens_type": lens_type or ""
+        }
         # 1. Get active subjects from SubjectManager
         active_subjects = self.subject_manager.get_active_subjects()
 
