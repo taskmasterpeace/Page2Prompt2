@@ -72,6 +72,27 @@ class MetaChain:
         11. Script Adherence: {script_adherence}
         12. Avoid Unnecessary Phrases: Do not include meta-commentary or evaluative statements about the composition, such as "The overall composition captures...". Focus on directly describing the scene.
         13. Position of Camera Name: Place the camera name at the end of the normal and detailed prompts. It is not a priority item like shot size and should not be included in the concise prompt unless essential.
+        14. Describing Multiple Subjects:
+           - Clearly identify each subject in the scene.
+           - For close-ups and medium shots, focus on the interaction between subjects, their expressions, and body language.
+           - For wide shots, emphasize the placement and actions of subjects within the environment.
+           - Ensure that descriptions of multiple subjects are balanced and that the main subject remains the focal point.
+        15. Align with Director's Vision:
+           - Incorporate any thematic elements, motifs, or specific visual styles mentioned in the Director's Notes or Director's Style.
+           - Reflect the intended mood and atmosphere as per the director's guidance while maintaining factual descriptions.
+           - Use any specified terminology or language style preferred by the director.
+        16. Time of Day and Lighting:
+           - If the time of day is specified, include relevant details about lighting, shadows, and atmosphere.
+           - Describe how the lighting conditions affect the appearance of subjects and the setting (e.g., soft morning light, harsh midday sun, warm sunset hues).
+           - Incorporate any specific lighting setups or effects if provided in the input.
+        17. Convey Emotion and Atmosphere:
+           - When specified, integrate emotional tones or atmospheres into the scene description (e.g., tense, joyful, mysterious).
+           - Use factual descriptions to convey emotions through actions, expressions, and environmental details without relying on stylistic adjectives unless specified.
+           - Ensure that the emotional context aligns with the overall scene and director's vision.
+        18. Handling Ambiguity and Missing Information:
+           - If specific details are missing, make logical and contextually appropriate assumptions to enrich the scene.
+           - Ensure that any assumptions made do not conflict with provided information.
+           - Avoid introducing elements that could alter the intended meaning or focus of the scene.
 
         Prompt Structure:
         Implement a modular structure that prioritizes key elements in this order:
