@@ -45,10 +45,21 @@ class MetaChain:
            Detailed: About 100 words.
            Separate each paragraph with a space.
         6. Consider Depth and Placement: Think about the main subject's placement to create depth. Include elements in the foreground, middle ground, and background to enhance dimension. Use specified foreground elements to frame the subject or add depth. Balance these elements for a cohesive and visually interesting composition.
-        7. Adapt Character Descriptions Based on Framing:
-           Close-ups: Focus on facial features, expressions, and upper body details visible in the frame.
-           Medium Shots: Describe visible clothing, posture, and general body language.
-           Wide or Establishing Shots: Mention broad, distinguishing characteristics visible from a distance.
+        7. Adapt Subject Descriptions Based on Framing:
+           Close-ups:
+           - People: Focus on facial features, expressions, and upper body details visible in the frame.
+           - Animals: Highlight distinguishing features, textures, and expressions that are prominent in a close-up.
+           - Objects/Things: Emphasize key details, textures, and defining characteristics of the item.
+           - Places: Zoom in on specific elements or features of the location that are important or visually striking.
+           Medium Shots:
+           - People: Describe visible clothing, posture, and general body language.
+           - Animals: Include the animal's posture, movement, and notable physical traits.
+           - Objects/Things: Provide an overview of the object's size, shape, and how it interacts with its immediate surroundings.
+           - Places: Capture a portion of the location, showing context and how elements within the space relate to each other.
+           Wide or Establishing Shots:
+           - People and Animals: Mention their placement within the larger scene, focusing on actions or interactions visible from a distance.
+           - Objects/Things: Describe the object's position in relation to the environment, emphasizing its role or significance within the setting.
+           - Places: Provide a broad view of the location, highlighting major landmarks, landscapes, or spatial relationships that define the setting.
         8. Ensure Consistency Across Prompts: Prioritize the most important visual elements for each shot type to maintain consistency across the three prompt lengths.
         9. Balance Elements in Each Prompt: For each prompt length, maintain a balance between character details, setting description, and action appropriate to the shot type and framing.
         10. Include Relevant Subject Details: Incorporate descriptions of active subjects provided in the 'Subjects' field into the prompts, but only include details visible in the current shot type.
