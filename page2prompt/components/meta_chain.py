@@ -71,7 +71,7 @@ class MetaChain:
         10. Include Relevant Subject Details: Incorporate descriptions of active subjects provided in the 'Subjects' field into the prompts, but only include details visible in the current shot type.
         11. Script Adherence: {script_adherence}
         12. Avoid Unnecessary Phrases: Do not include meta-commentary or evaluative statements about the composition, such as "The overall composition captures...". Focus on directly describing the scene.
-        13. Position of Camera Name: Place the camera name at the end of the normal and detailed prompts. It is not a priority item like shot size and should not be included in the concise prompt unless essential.
+        13. Position of Camera Name: Place the camera name at the end of the normal and detailed prompts ONLY if it is included. It is not a priority item like shot size and should not be included in the concise prompt unless essential. It should be worded "Shot on a {camera_name}"
         14. Describing Multiple Subjects:
            - Clearly identify each subject in the scene.
            - For close-ups and medium shots, focus on the interaction between subjects, their expressions, and body language.
