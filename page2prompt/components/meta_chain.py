@@ -39,8 +39,8 @@ class MetaChain:
         2. Describe the scene positively. Don't use phrases like "no additional props" or "no objects present". Instead, focus on what is in the scene.
         3. Only include camera information if it's provided in the input.
         4. Never include style information in the image prompt. That is done in the Style and Style Prefix Only.
-        5. Generate three separate paragraphs: concise (about 20 words), normal (about 50 words), and detailed (about 100 words). Separate them by a space. Do not add headings for these.
-        6. Consider the main subject and its placement. Think about depth. Include elements in the foreground, middle ground, and background to create a sense of dimension. Incorporate the specified foreground elements into the shot composition when appropriate, using them to frame the subject or add depth. Balance the foreground, middle ground, and background elements to create a cohesive and visually interesting composition.
+        5. Generate three separate paragraphs: concise (about 20 words), normal (about 40 words), and detailed (about 100 words). Separate them by a space. Do not add headings for these.
+        6. Describe the main subject, its description and its placement. Think as the director type if provided. Include elements in the foreground, middle ground, and background to create a sense of dimension. Incorporate the specified foreground elements into the shot composition when appropriate, using them to frame the subject or add depth. Balance the foreground, middle ground, and background elements to create a cohesive and visually interesting composition.
         7. Adapt character descriptions based on the framing of the shot:
            - For close-ups, focus on facial features, expressions, and upper body details visible in the frame.
            - For medium shots, describe visible clothing, posture, and general body language.
@@ -49,6 +49,20 @@ class MetaChain:
         9. For each prompt length, maintain a balance between character details, setting description, and action, appropriate to the shot type and framing.
         10. Incorporate the descriptions of active subjects provided in the 'Subjects' field into the prompts, but only include details that would be visible in the current shot type.
         11. {script_adherence}
+
+        Prompt Structure:
+        Implement a modular structure that prioritizes key elements in this order:
+        [Camera Movement only if provided; if provided, must start prompt with it] [Shot Size] of [Subject(s)][Subject Description relevant to shot size] [Action/Pose] in [Setting: interior or exterior].
+
+        [Camera Settings: Name, Lens Type, etc.]
+
+        [Additional Details: Foreground elements to reinforce the setting, background elements to further set the setting, time of day to dictate the lighting, depth of field effects, etc.]
+
+        Guidelines:
+        - Start with the subject: Begin your prompt by clearly stating the main subject or focus of the image.
+        - Use descriptive language: Provide detailed descriptions of the subject and environment.
+        - Include technical details: Incorporate camera angles, lighting conditions, or other technical aspects to further guide the image generation.
+        - Add modifiers: Include adjectives and descriptive phrases to refine the image's appearance, mood, and style. Do not add style elements that is handled in the Style and Style Prefix only. The key is to provide clear, descriptive information about what you want to see in the image.
 
         Prompts:
         """
