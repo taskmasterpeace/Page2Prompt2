@@ -40,8 +40,9 @@ director_styles = load_director_styles("director_styles.csv")
 
 # Gradio interface setup
 with gr.Blocks() as demo:
-    # Director Style Dropdown (visible on all tabs)
-    director_style_input = gr.Dropdown(label="🎬 Director Style", choices=[style['name'] for style in director_styles])
+    with gr.Accordion("🎬 Script & Director Style", open=True):
+        director_style_input = gr.Dropdown(label="🎬 Director Style", choices=[style['name'] for style in director_styles])
+        full_script_input = gr.Textbox(label="📚 Full Script", lines=5)
 
     with gr.Row():
         with gr.Column():
@@ -50,7 +51,6 @@ with gr.Blocks() as demo:
                 directors_notes_input = gr.Textbox(label="🎬 Director's Notes")
                 stick_to_script_input = gr.Checkbox(label="📜 Stick to Script")
                 highlighted_text_input = gr.Textbox(label="🖍️ Highlighted Text")
-                full_script_input = gr.Textbox(label="📚 Full Script")
 
             with gr.Accordion("👥 Subjects", open=False):
                 with gr.Row():
