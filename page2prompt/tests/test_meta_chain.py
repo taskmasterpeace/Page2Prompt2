@@ -32,7 +32,9 @@ class TestMetaChain(unittest.TestCase):
                 "depth_of_field": "Shallow"
             },
             "length": "normal",
-            "director_style": "Test Director Style"
+            "director_style": "Test Director Style",
+            "style_prefix": "Prefix ",
+            "style_suffix": " Suffix"
         }
 
         result = await self.meta_chain.generate_prompt(**test_input)
@@ -43,7 +45,43 @@ class TestMetaChain(unittest.TestCase):
         self.assertIn("detailed", result)
         self.assertIn("structured", result)
 
-        # Assert that the prompts are as expected
+        # Assert that the prompts are as expected and have correct spacing
+        self.assertEqual(result["concise"], "Prefix Concise prompt Suffix")
+        self.assertEqual(result["normal"], "Prefix Normal prompt Suffix")
+        self.assertEqual(result["detailed"], "Prefix Detailed prompt Suffix")
+
+    @patch('page2prompt.components.meta_chain.ChatOpenAI')
+    async def test_generate_prompt_without_prefix_suffix(self, mock_chat_openai):
+        # Mock the LLM response
+        mock_generation = MagicMock()
+        mock_generation.generations = [[MagicMock(text="Concise prompt\n\nNormal prompt\n\nDetailed prompt")]]
+        mock_chat_openai.return_value.agenerate.return_value = mock_generation
+
+        # Test input without prefix and suffix
+        test_input = {
+            "style": "Test Style",
+            "highlighted_text": "Test Highlight",
+            "shot_description": "Test Shot",
+            "directors_notes": "Test Notes",
+            "script": "Test Script",
+            "stick_to_script": True,
+            "end_parameters": "Test End",
+            "active_subjects": [{"Name": "Subject1"}, {"Name": "Subject2"}],
+            "full_script": "Full Test Script",
+            "shot_configuration": {
+                "shot": "Close-up",
+                "move": "Static",
+                "size": "Medium",
+                "framing": "Center",
+                "depth_of_field": "Shallow"
+            },
+            "length": "normal",
+            "director_style": "Test Director Style"
+        }
+
+        result = await self.meta_chain.generate_prompt(**test_input)
+
+        # Assert that the prompts are as expected without prefix and suffix
         self.assertEqual(result["concise"], "Concise prompt")
         self.assertEqual(result["normal"], "Normal prompt")
         self.assertEqual(result["detailed"], "Detailed prompt")
