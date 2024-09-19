@@ -44,67 +44,72 @@ with gr.Blocks() as demo:
         director_style_input = gr.Dropdown(label="🎬 Director Style", choices=[style['name'] for style in director_styles])
         full_script_input = gr.Textbox(label="📚 Full Script", lines=5)
 
-    with gr.Row():
-        with gr.Column():
-            with gr.Accordion("📝 Shot Details", open=True):
-                shot_description_input = gr.Textbox(label="📸 Shot Description")
-                directors_notes_input = gr.Textbox(label="🎬 Director's Notes")
-                stick_to_script_input = gr.Checkbox(label="📜 Stick to Script")
-                highlighted_text_input = gr.Textbox(label="🖍️ Highlighted Text")
+    with gr.Tabs():
+        with gr.TabItem("🎥 Shot and Prompt Generation"):
+            with gr.Row():
+                with gr.Column():
+                    with gr.Accordion("📝 Shot Details", open=True):
+                        shot_description_input = gr.Textbox(label="📸 Shot Description")
+                        directors_notes_input = gr.Textbox(label="🎬 Director's Notes")
+                        stick_to_script_input = gr.Checkbox(label="📜 Stick to Script")
+                        highlighted_text_input = gr.Textbox(label="🖍️ Highlighted Text")
 
-            with gr.Accordion("👥 Subjects", open=False):
-                with gr.Row():
-                    with gr.Column():
-                        people_places = gr.CheckboxGroup(label="People & Places", choices=["Person 1", "Person 2", "Place 1", "Place 2"])
-                    with gr.Column():
-                        animals_things = gr.CheckboxGroup(label="Animals & Things", choices=["Animal 1", "Animal 2", "Thing 1", "Thing 2"])
+                    with gr.Accordion("👥 Subjects", open=False):
+                        with gr.Row():
+                            with gr.Column():
+                                people_places = gr.CheckboxGroup(label="People & Places", choices=["Person 1", "Person 2", "Place 1", "Place 2"])
+                            with gr.Column():
+                                animals_things = gr.CheckboxGroup(label="Animals & Things", choices=["Animal 1", "Animal 2", "Thing 1", "Thing 2"])
 
-            with gr.Accordion("🎨 Style", open=False):
-                with gr.Row():
-                    style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles())
-                    style_prefix_input = gr.Textbox(label="Prefix")
-                    style_suffix_input = gr.Textbox(label="Suffix")
-                
-                with gr.Row():
-                    save_style_btn = gr.Button("💾 Save Style")
-                    delete_style_btn = gr.Button("🗑️ Delete Style")
-                    random_style_btn = gr.Button("🎲 Generate Random Style")
-                    generate_style_details_btn = gr.Button("✨ Generate Style Details")
+                    with gr.Accordion("🎨 Style", open=False):
+                        with gr.Row():
+                            style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles())
+                            style_prefix_input = gr.Textbox(label="Prefix")
+                            style_suffix_input = gr.Textbox(label="Suffix")
+                        
+                        with gr.Row():
+                            save_style_btn = gr.Button("💾 Save Style")
+                            delete_style_btn = gr.Button("🗑️ Delete Style")
+                            random_style_btn = gr.Button("🎲 Generate Random Style")
+                            generate_style_details_btn = gr.Button("✨ Generate Style Details")
 
-                end_parameters_input = gr.Textbox(label="🔚 End Parameters")
+                        end_parameters_input = gr.Textbox(label="🔚 End Parameters")
 
-            with gr.Accordion("📷 Camera Settings", open=False):
-                with gr.Row():
-                    shot = gr.Dropdown(label="Shot", choices=["AI Suggest"] + camera_settings.get('shot', []))
-                    move = gr.Dropdown(label="Move", choices=["AI Suggest"] + camera_settings.get('move', []))
-                    size = gr.Dropdown(label="Size", choices=["AI Suggest"] + camera_settings.get('size', []))
-                with gr.Row():
-                    framing = gr.Dropdown(label="Framing", choices=["AI Suggest"] + camera_settings.get('framing', []))
-                    depth_of_field = gr.Dropdown(label="Depth of Field", choices=["AI Suggest"] + camera_settings.get('depth_of_field', []))
-                    camera_type = gr.Dropdown(label="Camera Type", choices=["AI Suggest"] + camera_settings.get('camera_type', []))
-                with gr.Row():
-                    camera_name = gr.Dropdown(label="Camera Name", choices=["AI Suggest"] + camera_settings.get('camera_name', []))
-                    lens_type = gr.Dropdown(label="Lens Type", choices=["AI Suggest"] + camera_settings.get('lens_type', []))
+                    with gr.Accordion("📷 Camera Settings", open=False):
+                        with gr.Row():
+                            shot = gr.Dropdown(label="Shot", choices=["AI Suggest"] + camera_settings.get('shot', []))
+                            move = gr.Dropdown(label="Move", choices=["AI Suggest"] + camera_settings.get('move', []))
+                            size = gr.Dropdown(label="Size", choices=["AI Suggest"] + camera_settings.get('size', []))
+                        with gr.Row():
+                            framing = gr.Dropdown(label="Framing", choices=["AI Suggest"] + camera_settings.get('framing', []))
+                            depth_of_field = gr.Dropdown(label="Depth of Field", choices=["AI Suggest"] + camera_settings.get('depth_of_field', []))
+                            camera_type = gr.Dropdown(label="Camera Type", choices=["AI Suggest"] + camera_settings.get('camera_type', []))
+                        with gr.Row():
+                            camera_name = gr.Dropdown(label="Camera Name", choices=["AI Suggest"] + camera_settings.get('camera_name', []))
+                            lens_type = gr.Dropdown(label="Lens Type", choices=["AI Suggest"] + camera_settings.get('lens_type', []))
 
-            generate_button = gr.Button("🚀 Generate Prompts")
+                    generate_button = gr.Button("🚀 Generate Prompts")
 
-        with gr.Column():
-            with gr.Accordion("🖼️ Generated Prompts", open=True):
-                with gr.Row():
-                    concise_prompt = gr.Textbox(label="Concise")
-                    copy_concise_btn = gr.Button("📋")
-                with gr.Row():
-                    normal_prompt = gr.Textbox(label="Normal")
-                    copy_normal_btn = gr.Button("📋")
-                with gr.Row():
-                    detailed_prompt = gr.Textbox(label="Detailed")
-                    copy_detailed_btn = gr.Button("📋")
-                
-                structured_prompt = gr.Textbox(label="Structured Prompt")
-                generation_message = gr.Textbox(label="Generation Message")
-                active_subjects_display = gr.Textbox(label="Active Subjects")
-                
-                send_prompts_btn = gr.Button("📤 Send Prompts")
+                with gr.Column():
+                    with gr.Accordion("🖼️ Generated Prompts", open=True):
+                        with gr.Row():
+                            concise_prompt = gr.Textbox(label="Concise")
+                            copy_concise_btn = gr.Button("📋")
+                        with gr.Row():
+                            normal_prompt = gr.Textbox(label="Normal")
+                            copy_normal_btn = gr.Button("📋")
+                        with gr.Row():
+                            detailed_prompt = gr.Textbox(label="Detailed")
+                            copy_detailed_btn = gr.Button("📋")
+                        
+                        structured_prompt = gr.Textbox(label="Structured Prompt")
+                        generation_message = gr.Textbox(label="Generation Message")
+                        active_subjects_display = gr.Textbox(label="Active Subjects")
+                        
+                        send_prompts_btn = gr.Button("📤 Send Prompts")
+
+        with gr.TabItem("🎵 Music Lab"):
+            gr.Markdown("Music Lab functionality will be implemented here.")
 
     # Event handlers (placeholder functions for now)
     def save_style():
