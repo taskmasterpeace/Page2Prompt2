@@ -56,7 +56,7 @@ class ScriptPromptGenerator:
             script=script_excerpt if stick_to_script else None,
             stick_to_script=stick_to_script,
             end_parameters=end_parameters,
-            active_subjects=[vars(s) for s in active_subjects],
+            active_subjects=[{"Name": s.name, "Description": s.description, "Alias": s.alias, "Type": s.type, "Prefix": s.prefix, "Suffix": s.suffix, "Active": s.active} for s in active_subjects],
             full_script=full_script if stick_to_script else None,
             shot_configuration=camera_settings,
             director_style=director_style

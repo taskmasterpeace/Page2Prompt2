@@ -135,7 +135,7 @@ class MetaChain:
             "camera_name": shot_config.get("camera_name", ""),
             "camera_lens_type": shot_config.get("lens_type", "")
         }
-        subject_info = ", ".join([f"{s['Name']}: {s['Description']}" for s in (active_subjects or [])])
+        subject_info = ", ".join([f"{s.get('Name', '')}: {s.get('Description', '')}" for s in (active_subjects or [])])
         script_adherence = "Strictly adhere to the script content." if stick_to_script else "You can be creative with the script content while maintaining its essence."
 
         input_dict = {
