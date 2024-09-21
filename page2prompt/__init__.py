@@ -1,1 +1,1 @@
-# This file is intentionally left empty to mark this directory as a Python package.
+from .music_lab import transcribe_audio, search_and_replace_lyrics

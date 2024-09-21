@@ -9,6 +9,7 @@ from page2prompt.utils.style_manager import StyleManager
 from page2prompt.components.meta_chain import MetaChain
 from page2prompt.utils.shot_list_generator import generate_shot_list
 from page2prompt.components.director_assistant import DirectorAssistant
+from page2prompt.music_lab import transcribe_audio, search_and_replace_lyrics
 
 # Initialize components
 style_manager = StyleManager("styles.csv")
@@ -49,10 +50,10 @@ def load_director_styles(csv_file):
 director_styles = load_director_styles("director_styles.csv")
 
 # Transcribe audio function
-def transcribe_audio(audio_file, include_timestamps):
-    # Placeholder function for audio transcription
-    # You should implement the actual transcription logic here
-    return f"Transcribed text from {audio_file.name}" + (" with timestamps" if include_timestamps else "")
+def transcribe_audio_wrapper(audio_file, include_timestamps):
+    if audio_file is None:
+        return "Please upload an MP3 file."
+    return transcribe_audio(audio_file, include_timestamps)
 
 # Gradio interface setup
 with gr.Blocks() as demo:
@@ -154,7 +155,7 @@ with gr.Blocks() as demo:
                     include_timestamps = gr.Checkbox(label="Include Timestamps", value=False)
                     transcribe_button = gr.Button("Transcribe 🎙️")
                 transcribe_button.click(
-                    transcribe_audio,
+                    transcribe_audio_wrapper,
                     inputs=[audio_upload, include_timestamps],
                     outputs=lyrics_textbox
                 )
