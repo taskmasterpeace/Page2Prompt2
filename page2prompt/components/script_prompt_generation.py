@@ -61,11 +61,11 @@ class ScriptPromptGenerator:
             highlighted_text=highlighted_text,
             shot_description=shot_description,
             directors_notes=directors_notes,
-            script=script_excerpt,
+            script=script_excerpt if stick_to_script else None,
             stick_to_script=stick_to_script,
             end_parameters=end_parameters,
             active_subjects=active_subjects,
-            full_script=full_script,
+            full_script=full_script if stick_to_script else None,
             shot_configuration=camera_settings,
             director_style=director_style
         )
