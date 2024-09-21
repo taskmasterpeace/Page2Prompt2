@@ -129,7 +129,82 @@ with gr.Blocks() as demo:
                         send_prompts_btn = gr.Button("📤 Send Prompts")
 
         with gr.TabItem("👥 Subject Management"):
-            gr.Markdown("Subject Management Placeholder")
+            with gr.Row():
+                subject_name = gr.Textbox(label="Name")
+                subject_description = gr.Textbox(label="Description")
+                subject_alias = gr.Textbox(label="Alias")
+                subject_type = gr.Dropdown(label="Type", choices=["person", "place", "prop"])
+                subject_prefix = gr.Textbox(label="Prefix")
+                subject_suffix = gr.Textbox(label="Suffix")
+            
+            with gr.Row():
+                add_subject_btn = gr.Button("Add Subject")
+                update_subject_btn = gr.Button("Update Subject")
+                delete_subject_btn = gr.Button("Delete Subject")
+                import_subjects_btn = gr.Button("Import Subjects")
+                export_subjects_btn = gr.Button("Export Subjects")
+
+            subjects_df = gr.DataFrame(
+                headers=["Name", "Description", "Alias", "Type", "Prefix", "Suffix", "Active"],
+                datatype=["str", "str", "str", "str", "str", "str", "bool"],
+                col_count=(7, "fixed"),
+                interactive=True
+            )
+
+            def add_subject(name, description, alias, type, prefix, suffix):
+                new_subject = Subject(name, description, alias, type, prefix, suffix)
+                subject_manager.add_subject(new_subject)
+                return subject_manager.get_subjects_dataframe()
+
+            def update_subject(name, description, alias, type, prefix, suffix):
+                updated_subject = Subject(name, description, alias, type, prefix, suffix)
+                subject_manager.update_subject(updated_subject)
+                return subject_manager.get_subjects_dataframe()
+
+            def delete_subject(name):
+                subject_manager.delete_subject(name)
+                return subject_manager.get_subjects_dataframe()
+
+            def import_subjects(file):
+                if file is not None:
+                    subject_manager.import_subjects(file.name)
+                return subject_manager.get_subjects_dataframe()
+
+            def export_subjects():
+                subject_manager.export_subjects("exported_subjects.csv")
+                return "Subjects exported to exported_subjects.csv"
+
+            add_subject_btn.click(
+                add_subject,
+                inputs=[subject_name, subject_description, subject_alias, subject_type, subject_prefix, subject_suffix],
+                outputs=[subjects_df]
+            )
+
+            update_subject_btn.click(
+                update_subject,
+                inputs=[subject_name, subject_description, subject_alias, subject_type, subject_prefix, subject_suffix],
+                outputs=[subjects_df]
+            )
+
+            delete_subject_btn.click(
+                delete_subject,
+                inputs=[subject_name],
+                outputs=[subjects_df]
+            )
+
+            import_subjects_btn.click(
+                import_subjects,
+                inputs=[gr.File()],
+                outputs=[subjects_df]
+            )
+
+            export_subjects_btn.click(
+                export_subjects,
+                outputs=[gr.Textbox()]
+            )
+
+            # Load initial subjects
+            subjects_df.value = subject_manager.get_subjects_dataframe()
 
         with gr.TabItem("🎵 Music Lab"):
             # Project Context

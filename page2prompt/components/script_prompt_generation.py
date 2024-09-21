@@ -32,26 +32,8 @@ class ScriptPromptGenerator:
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
     ) -> Tuple[str, str, str, str, str, str]:
-        # Ensure all optional parameters have default values
-        style = style or ""
-        style_prefix = style_prefix or ""
-        style_suffix = style_suffix or ""
-        director_style = director_style or ""
-        end_parameters = end_parameters or ""
-        highlighted_text = highlighted_text or ""
-        full_script = full_script or ""
+        # ... (keep existing code for parameter handling and camera_settings)
 
-        # Create camera_settings dictionary
-        camera_settings = {
-            "shot": shot or "",
-            "move": move or "",
-            "size": size or "",
-            "framing": framing or "",
-            "depth_of_field": depth_of_field or "",
-            "camera_type": camera_type or "",
-            "camera_name": camera_name or "",
-            "lens_type": lens_type or ""
-        }
         # 1. Get active subjects from SubjectManager
         active_subjects = self.subject_manager.get_active_subjects()
 
@@ -64,15 +46,17 @@ class ScriptPromptGenerator:
             script=script_excerpt if stick_to_script else None,
             stick_to_script=stick_to_script,
             end_parameters=end_parameters,
-            active_subjects=active_subjects,
+            active_subjects=[vars(s) for s in active_subjects],
             full_script=full_script if stick_to_script else None,
             shot_configuration=camera_settings,
             director_style=director_style
         )
 
-        # 3. Format the generated prompts using the style prefix/suffix and append end_parameters
+        # 3. Apply aliases and prefix/suffix, then format the prompts
         formatted_prompts = {}
         for prompt_type, prompt in prompts.items():
+            prompt = self.subject_manager.apply_alias(prompt)
+            prompt = self.subject_manager.apply_prefix_suffix(prompt)
             formatted_prompt = f"{style_prefix.strip() + ' ' if style_prefix else ''}{prompt.strip()}{' ' + style_suffix.strip() if style_suffix else ''}"
             if end_parameters:
                 formatted_prompt += f" {end_parameters.strip()}"
@@ -85,5 +69,5 @@ class ScriptPromptGenerator:
             formatted_prompts.get("detailed", ""),
             formatted_prompts.get("structured", ""),
             "Prompts generated successfully",
-            ", ".join([subject["Name"] for subject in active_subjects])
+            ", ".join([subject.name for subject in active_subjects])
         )
