@@ -4,7 +4,7 @@ import csv
 import os
 import pandas as pd
 from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
-from page2prompt.utils.subject_manager import SubjectManager
+from page2prompt.utils.subject_manager import SubjectManager, Subject
 from page2prompt.utils.style_manager import StyleManager
 from page2prompt.components.meta_chain import MetaChain
 from page2prompt.utils.shot_list_generator import generate_shot_list

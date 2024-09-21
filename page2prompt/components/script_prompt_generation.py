@@ -32,7 +32,17 @@ class ScriptPromptGenerator:
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
     ) -> Tuple[str, str, str, str, str, str]:
-        # ... (keep existing code for parameter handling and camera_settings)
+        # Create camera_settings dictionary
+        camera_settings = {
+            "shot": shot or "",
+            "move": move or "",
+            "size": size or "",
+            "framing": framing or "",
+            "depth_of_field": depth_of_field or "",
+            "camera_type": camera_type or "",
+            "camera_name": camera_name or "",
+            "lens_type": lens_type or ""
+        }
 
         # 1. Get active subjects from SubjectManager
         active_subjects = self.subject_manager.get_active_subjects()
