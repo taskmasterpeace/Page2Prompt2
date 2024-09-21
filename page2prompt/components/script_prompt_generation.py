@@ -24,7 +24,7 @@ class ScriptPromptGenerator:
         stick_to_script: bool = False,
         highlighted_text: Optional[str] = None,
         full_script: Optional[str] = None,
-    ) -> Dict[str, str]:
+    ) -> Tuple[str, str, str, str, str, str]:
         # 1. Get active subjects from SubjectManager
         active_subjects = self.subject_manager.get_active_subjects()
 
@@ -34,35 +34,32 @@ class ScriptPromptGenerator:
             highlighted_text=highlighted_text,
             shot_description=shot_description,
             directors_notes=directors_notes,
-            script=script_excerpt,
+            script=script_excerpt if stick_to_script else None,
             stick_to_script=stick_to_script,
             end_parameters=end_parameters,
             active_subjects=active_subjects,
-            full_script=full_script,
+            full_script=full_script if stick_to_script else None,
             shot_configuration=camera_settings,
-            length="detailed",
             director_style=director_style
         )
 
         # 3. Format the generated prompts using the style prefix/suffix and append end_parameters
         formatted_prompts = {}
         for prompt_type, prompt in prompts.items():
-            formatted_prompt = f"{style_prefix + ' ' if style_prefix else ''}{prompt}{' ' + style_suffix if style_suffix else ''}"
+            formatted_prompt = f"{style_prefix.strip() + ' ' if style_prefix else ''}{prompt.strip()}{' ' + style_suffix.strip() if style_suffix else ''}"
             if end_parameters:
-                formatted_prompt += f" {end_parameters}"
+                formatted_prompt += f" {end_parameters.strip()}"
             formatted_prompts[prompt_type] = formatted_prompt
 
-        # 4. Prepare the output dictionary
-        output = {
-            "concise_prompt": formatted_prompts.get("concise", ""),
-            "normal_prompt": formatted_prompts.get("normal", ""),
-            "detailed_prompt": formatted_prompts.get("detailed", ""),
-            "structured_prompt": formatted_prompts.get("structured", ""),
-            "generation_message": "Prompts generated successfully",
-            "active_subjects_display": ", ".join([subject["Name"] for subject in active_subjects])
-        }
-
-        return output
+        # 4. Prepare the output tuple
+        return (
+            formatted_prompts.get("concise", ""),
+            formatted_prompts.get("normal", ""),
+            formatted_prompts.get("detailed", ""),
+            formatted_prompts.get("structured", ""),
+            "Prompts generated successfully",
+            ", ".join([subject["Name"] for subject in active_subjects])
+        )
 import asyncio
 from typing import Dict, List, Optional, Tuple
 from page2prompt.utils.style_manager import StyleManager
