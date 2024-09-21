@@ -1,6 +1,6 @@
 import os
 from typing import Dict, Any, List, Optional
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_community.callbacks.manager import get_openai_callback
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence

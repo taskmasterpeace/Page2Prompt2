@@ -40,6 +40,12 @@ def load_director_styles(csv_file):
 
 director_styles = load_director_styles("director_styles.csv")
 
+# Transcribe audio function
+def transcribe_audio(audio_file, include_timestamps):
+    # Placeholder function for audio transcription
+    # You should implement the actual transcription logic here
+    return f"Transcribed text from {audio_file.name}" + (" with timestamps" if include_timestamps else "")
+
 # Gradio interface setup
 with gr.Blocks() as demo:
     with gr.Accordion("🎬 Script & Director Style", open=True):
@@ -148,6 +154,9 @@ with gr.Blocks() as demo:
                     find_text = gr.Textbox(label="Find", scale=2)
                     replace_text = gr.Textbox(label="Replace", scale=2)
                     replace_button = gr.Button("Replace")
+                def search_and_replace_lyrics(lyrics, find, replace):
+                    return lyrics.replace(find, replace)
+
                 replace_button.click(
                     search_and_replace_lyrics,
                     inputs=[lyrics_textbox, find_text, replace_text],
