@@ -111,7 +111,133 @@ with gr.Blocks() as demo:
                         send_prompts_btn = gr.Button("📤 Send Prompts")
 
         with gr.TabItem("🎵 Music Lab"):
-            gr.Markdown("Music Lab functionality will be implemented here.")
+            # Project Context
+            with gr.Accordion("Project Context 🎭", open=True):
+                concept_input = gr.Textbox(
+                    label="Concept",
+                    placeholder="Describe your initial idea or concept for the music video...",
+                    lines=5
+                )
+                genre_input = gr.Textbox(
+                    label="Genre",
+                    placeholder="Enter the genre of the music...",
+                    info="Examples: Rock, Pop, Hip Hop, Electronic, Jazz, Metal, Indie Rock, Synth Pop, Alternative Hip Hop"
+                )
+                descriptors_input = gr.Textbox(
+                    label="Descriptors",
+                    placeholder="Enter descriptors for the music...",
+                    info="Examples: Energetic, Melancholic, Political, Love, Falsetto, Guitar-driven, Synthesizer, Lo-fi, Catchy"
+                )
+            # Lyrics and Transcription
+            with gr.Accordion("Lyrics Input 📝", open=True):
+                lyrics_textbox = gr.Textbox(
+                    label="Lyrics",
+                    placeholder="Enter lyrics here or transcribe from an MP3 file...",
+                    lines=10
+                )
+                with gr.Row():
+                    audio_upload = gr.File(label="Upload MP3", file_types=[".mp3"])
+                    include_timestamps = gr.Checkbox(label="Include Timestamps", value=False)
+                    transcribe_button = gr.Button("Transcribe 🎙️")
+                transcribe_button.click(
+                    transcribe_audio,
+                    inputs=[audio_upload, include_timestamps],
+                    outputs=lyrics_textbox
+                )
+                with gr.Row():
+                    find_text = gr.Textbox(label="Find", scale=2)
+                    replace_text = gr.Textbox(label="Replace", scale=2)
+                    replace_button = gr.Button("Replace")
+                replace_button.click(
+                    search_and_replace_lyrics,
+                    inputs=[lyrics_textbox, find_text, replace_text],
+                    outputs=lyrics_textbox
+                )
+
+            # Director's Assistant Chat Interface
+            with gr.Accordion("Director's Assistant 🎬", open=False):
+                chatbot = gr.Chatbot()
+                chat_history = gr.State([])
+                user_input = gr.Textbox(label="Your Message", placeholder="Type your message here...")
+                send_button = gr.Button("Send")
+
+                # Handle send button click
+                async def on_send(user_input, concept, genre, descriptors, lyrics, chat_history):
+                    if user_input.strip() == "":
+                        return chat_history, chat_history, gr.update(value="")
+                
+                    updated_history, new_state = await handle_conversation(
+                        user_input, concept, genre, descriptors, lyrics, chat_history
+                    )
+                    return updated_history, new_state, gr.update(value="")
+
+                send_button.click(
+                    on_send,
+                    inputs=[user_input, concept_input, genre_input, descriptors_input, lyrics_textbox, chat_history],
+                    outputs=[chatbot, chat_history, user_input],
+                )
+
+            # Video Treatment Generation
+            with gr.Accordion("Video Treatment Generation 📽️", open=False):
+                generate_treatment_button = gr.Button("Generate Video Treatment")
+                video_treatment_output = gr.Textbox(label="Generated Video Treatment", lines=10)
+
+                async def generate_treatment(concept, genre, descriptors, lyrics, chat_history):
+                    project_context = {
+                        "concept": concept,
+                        "genre": genre,
+                        "descriptors": descriptors,
+                        "lyrics": lyrics
+                    }
+                    chat_history_str = "\n".join([f"{speaker}: {message}" for speaker, message in chat_history])
+                    treatment = await director_assistant.generate_video_treatment(chat_history_str, project_context)
+                    return treatment
+
+                generate_treatment_button.click(
+                    lambda *args: asyncio.run(generate_treatment(*args)),
+                    inputs=[concept_input, genre_input, descriptors_input, lyrics_textbox, chat_history],
+                    outputs=video_treatment_output
+                )
+
+            # Shot List Generation
+            with gr.Accordion("Shot List Generation 🎥", open=False):
+                generate_shot_list_button = gr.Button("Generate Shot List")
+                shot_list_output = gr.Dataframe(
+                    headers=["Scene", "Shot", "Description", "Notes"],
+                    datatype=["str", "str", "str", "str"],
+                    row_count=10,
+                    col_count=(4, "fixed"),
+                )
+
+                # Character Management
+                with gr.Row():
+                    character_name = gr.Textbox(label="Character Name")
+                    character_description = gr.Textbox(label="Character Description")
+                    add_character_button = gr.Button("Add Character")
+
+                characters_df = gr.Dataframe(
+                    headers=["Name", "Description"],
+                    datatype=["str", "str"],
+                    row_count=5,
+                    col_count=(2, "fixed"),
+                )
+
+                def add_character(name, description, current_df):
+                    new_row = pd.DataFrame([[name, description]], columns=["Name", "Description"])
+                    updated_df = pd.concat([current_df, new_row], ignore_index=True)
+                    return updated_df
+
+                add_character_button.click(
+                    add_character,
+                    inputs=[character_name, character_description, characters_df],
+                    outputs=[characters_df]
+                )
+
+                generate_shot_list_button.click(
+                    lambda *args: asyncio.run(generate_shot_list(*args)),
+                    inputs=[concept_input, genre_input, descriptors_input, lyrics_textbox, chat_history, video_treatment_output, characters_df],
+                    outputs=shot_list_output
+                )
 
     # Event handlers (placeholder functions for now)
     def save_style():
