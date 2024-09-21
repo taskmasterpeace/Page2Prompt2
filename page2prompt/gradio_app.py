@@ -33,7 +33,10 @@ def load_camera_settings(csv_file):
         for row in reader:
             if row['type'] not in settings:
                 settings[row['type']] = []
-            settings[row['type']].append(row['display'])
+            settings[row['type']].append({
+                'display': row['display'],
+                'description': row.get('description', '')  # Add description if available
+            })
     return settings
 
 camera_settings = load_camera_settings("camera_settings.csv")
@@ -321,96 +324,6 @@ with gr.Blocks() as demo:
             camera_type,
             camera_name,
             lens_type,
-            end_parameters_input,
-            stick_to_script_input,
-            highlighted_text_input,
-            full_script_input,
-        ],
-        outputs=[
-            concise_prompt,
-            normal_prompt,
-            detailed_prompt,
-            structured_prompt,
-            generation_message,
-            active_subjects_display
-        ]
-    )
-
-# Launch the Gradio interface
-if __name__ == "__main__":
-    demo.launch()
-import gradio as gr
-import asyncio
-from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
-from page2prompt.utils.subject_manager import SubjectManager
-from page2prompt.utils.style_manager import StyleManager
-from page2prompt.components.meta_chain import MetaChain
-
-# Initialize components
-style_manager = StyleManager("styles.csv")
-subject_manager = SubjectManager("subjects.csv")
-meta_chain = MetaChain()
-script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
-
-# Gradio interface setup
-with gr.Blocks() as demo:
-    with gr.Row():
-        with gr.Column():
-            script_input = gr.Textbox(label="Script Excerpt")
-            shot_description_input = gr.Textbox(label="Shot Description")
-            directors_notes_input = gr.Textbox(label="Director's Notes")
-            style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles())
-            style_prefix_input = gr.Textbox(label="Style Prefix")
-            style_suffix_input = gr.Textbox(label="Style Suffix")
-            director_style_input = gr.Textbox(label="Director's Style")
-            stick_to_script_input = gr.Checkbox(label="Stick to Script")
-            highlighted_text_input = gr.Textbox(label="Highlighted Text")
-            full_script_input = gr.Textbox(label="Full Script")
-            end_parameters_input = gr.Textbox(label="End Parameters")
-
-            with gr.Accordion("📷 Camera Settings", open=False):
-                with gr.Row():
-                    shot = gr.Dropdown(label="Shot", choices=["AI Suggest"] + camera_settings.get('shot', []))
-                    move = gr.Dropdown(label="Move", choices=["AI Suggest"] + camera_settings.get('move', []))
-                    size = gr.Dropdown(label="Size", choices=["AI Suggest"] + camera_settings.get('size', []))
-                with gr.Row():
-                    framing = gr.Dropdown(label="Framing", choices=["AI Suggest"] + camera_settings.get('framing', []))
-                    depth_of_field = gr.Dropdown(label="Depth of Field", choices=["AI Suggest"] + camera_settings.get('depth_of_field', []))
-                    camera_type = gr.Dropdown(label="Camera Type", choices=["AI Suggest"] + camera_settings.get('camera_type', []))
-                with gr.Row():
-                    camera_name = gr.Dropdown(label="Camera Name", choices=["AI Suggest"] + camera_settings.get('camera_name', []))
-                    lens_type = gr.Dropdown(label="Lens Type", choices=["AI Suggest"] + camera_settings.get('lens_type', []))
-
-        with gr.Column():
-            concise_prompt = gr.Textbox(label="Concise Prompt")
-            normal_prompt = gr.Textbox(label="Normal Prompt")
-            detailed_prompt = gr.Textbox(label="Detailed Prompt")
-            structured_prompt = gr.Textbox(label="Structured Prompt")
-            generation_message = gr.Textbox(label="Generation Message")
-            active_subjects_display = gr.Textbox(label="Active Subjects")
-
-    generate_button = gr.Button("Generate Prompts")
-
-    generate_button.click(
-        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
-        inputs=[
-            script_input,
-            shot_description_input,
-            directors_notes_input,
-            style_input,
-            style_prefix_input,
-            style_suffix_input,
-            director_style_input,
-            gr.JSON({
-                "shot": lambda: shot.value,
-                "move": lambda: move.value,
-                "size": lambda: size.value,
-                "framing": lambda: framing.value,
-                "depth_of_field": lambda: depth_of_field.value,
-                "camera_type": lambda: camera_type.value,
-                "camera_name": lambda: camera_name.value,
-                "lens_type": lambda: lens_type.value
-            }),
             end_parameters_input,
             stick_to_script_input,
             highlighted_text_input,
