@@ -125,6 +125,9 @@ with gr.Blocks() as demo:
                         
                         send_prompts_btn = gr.Button("📤 Send Prompts")
 
+        with gr.TabItem("👥 Subject Management"):
+            gr.Markdown("Subject Management Placeholder")
+
         with gr.TabItem("🎵 Music Lab"):
             # Project Context
             with gr.Accordion("Project Context 🎭", open=True):
