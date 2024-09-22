@@ -77,9 +77,11 @@ with gr.Blocks() as demo:
                     with gr.Accordion("👥 Subjects", open=False):
                         with gr.Row():
                             with gr.Column():
-                                people_places = gr.CheckboxGroup(label="People & Places", choices=["Person 1", "Person 2", "Place 1", "Place 2"])
+                                people = gr.CheckboxGroup(label="People", choices=subject_manager.get_people)
                             with gr.Column():
-                                animals_things = gr.CheckboxGroup(label="Animals & Things", choices=["Animal 1", "Animal 2", "Thing 1", "Thing 2"])
+                                places = gr.CheckboxGroup(label="Places", choices=subject_manager.get_places)
+                            with gr.Column():
+                                props = gr.CheckboxGroup(label="Props", choices=subject_manager.get_props)
 
                     with gr.Accordion("🎨 Style", open=False):
                         with gr.Row():
@@ -403,6 +405,9 @@ with gr.Blocks() as demo:
             stick_to_script_input,
             highlighted_text_input,
             full_script_input,
+            people,
+            places,
+            props
         ],
         outputs=[
             concise_prompt,
@@ -413,6 +418,61 @@ with gr.Blocks() as demo:
             active_subjects_display
         ]
     )
+
+    def update_subject_checkboxes():
+        return {
+            people: gr.CheckboxGroup(choices=subject_manager.get_people()),
+            places: gr.CheckboxGroup(choices=subject_manager.get_places()),
+            props: gr.CheckboxGroup(choices=subject_manager.get_props())
+        }
+
+    # Add this to your existing event handlers
+    add_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
+    update_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
+    delete_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
+
+# Add this before the demo.launch() call
+subject_details_js = gr.Javascript("""
+function showSubjectDetails(subjectName) {
+    fetch(`/api/subject_details?name=${encodeURIComponent(subjectName)}`)
+        .then(response => response.json())
+        .then(data => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'subject-tooltip';
+            tooltip.innerHTML = `
+                <strong>${data.name}</strong><br>
+                Description: ${data.description}<br>
+                Alias: ${data.alias}<br>
+                Type: ${data.type}<br>
+                Prefix: ${data.prefix}<br>
+                Suffix: ${data.suffix}
+            `;
+            document.body.appendChild(tooltip);
+
+            const updateTooltipPosition = (e) => {
+                tooltip.style.left = e.pageX + 10 + 'px';
+                tooltip.style.top = e.pageY + 10 + 'px';
+            };
+
+            document.addEventListener('mousemove', updateTooltipPosition);
+
+            return tooltip;
+        });
+}
+
+document.querySelectorAll('.subject-checkbox label').forEach(label => {
+    let tooltip;
+    label.addEventListener('mouseover', (e) => {
+        tooltip = showSubjectDetails(e.target.textContent.trim());
+    });
+    label.addEventListener('mouseout', () => {
+        if (tooltip) {
+            tooltip.remove();
+            document.removeEventListener('mousemove', updateTooltipPosition);
+        }
+    });
+});
+""")
 
 # Launch the Gradio interface
 if __name__ == "__main__":

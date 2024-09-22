@@ -46,6 +46,25 @@ class SubjectManager:
         """Returns a list of active subjects."""
         return [s for s in self.subjects if s.active]
 
+    def get_people(self) -> List[str]:
+        """Returns a list of names of subjects with type 'person'."""
+        return [s.name for s in self.subjects if s.type.lower() == 'person']
+
+    def get_places(self) -> List[str]:
+        """Returns a list of names of subjects with type 'place'."""
+        return [s.name for s in self.subjects if s.type.lower() == 'place']
+
+    def get_props(self) -> List[str]:
+        """Returns a list of names of subjects with type 'prop'."""
+        return [s.name for s in self.subjects if s.type.lower() == 'prop']
+
+    def get_subject_details(self, name: str) -> Dict:
+        """Returns the details of a subject by name."""
+        for subject in self.subjects:
+            if subject.name == name:
+                return vars(subject)
+        return {}
+
     def add_subject(self, subject: Subject) -> None:
         """Adds a new subject to the list and saves to the CSV file."""
         if not any(s.name == subject.name for s in self.subjects):
