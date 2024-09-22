@@ -1,5 +1,6 @@
 import csv
 from typing import Dict, List
+from langchain.prompts import PromptTemplate
 
 class StyleManager:
     def __init__(self, styles_file: str = "styles.csv"):
