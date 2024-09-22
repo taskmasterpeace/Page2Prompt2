@@ -431,49 +431,6 @@ with gr.Blocks() as demo:
     update_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
     delete_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
 
-# Add this before the demo.launch() call
-subject_details_js = gr.Javascript("""
-function showSubjectDetails(subjectName) {
-    fetch(`/api/subject_details?name=${encodeURIComponent(subjectName)}`)
-        .then(response => response.json())
-        .then(data => {
-            const tooltip = document.createElement('div');
-            tooltip.className = 'subject-tooltip';
-            tooltip.innerHTML = `
-                <strong>${data.name}</strong><br>
-                Description: ${data.description}<br>
-                Alias: ${data.alias}<br>
-                Type: ${data.type}<br>
-                Prefix: ${data.prefix}<br>
-                Suffix: ${data.suffix}
-            `;
-            document.body.appendChild(tooltip);
-
-            const updateTooltipPosition = (e) => {
-                tooltip.style.left = e.pageX + 10 + 'px';
-                tooltip.style.top = e.pageY + 10 + 'px';
-            };
-
-            document.addEventListener('mousemove', updateTooltipPosition);
-
-            return tooltip;
-        });
-}
-
-document.querySelectorAll('.subject-checkbox label').forEach(label => {
-    let tooltip;
-    label.addEventListener('mouseover', (e) => {
-        tooltip = showSubjectDetails(e.target.textContent.trim());
-    });
-    label.addEventListener('mouseout', () => {
-        if (tooltip) {
-            tooltip.remove();
-            document.removeEventListener('mousemove', updateTooltipPosition);
-        }
-    });
-});
-""")
-
 # Launch the Gradio interface
 if __name__ == "__main__":
     demo.launch()
