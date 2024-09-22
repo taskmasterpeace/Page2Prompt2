@@ -344,8 +344,45 @@ with gr.Blocks() as demo:
     def delete_style():
         return "Style deleted"
 
+    import random
+
+    def create_random_style():
+        adjectives = ["Vibrant", "Moody", "Retro", "Futuristic", "Ethereal", "Gritty", "Surreal", "Minimalist"]
+        nouns = ["Watercolor", "Neon", "Cyberpunk", "Impressionist", "Abstract", "Pop Art", "Noir", "Steampunk"]
+    
+        style_name = f"{random.choice(adjectives)} {random.choice(nouns)}"
+    
+        prefix_templates = ["A {style} image of", "In the style of {style}:", "Reimagined as {style}:"]
+        prefix = random.choice(prefix_templates).format(style=style_name)
+    
+        characteristics = ["high contrast", "soft focus", "vivid colors", "dramatic lighting", "muted tones", "sharp details", "dreamy atmosphere", "bold outlines"]
+        suffix = "; ".join(random.sample(characteristics, random.randint(2, 4)))
+    
+        genres = ["Fantasy", "Sci-Fi", "Romance", "Horror", "Documentary", "Action", "Drama", "Comedy"]
+        genre = random.choice(genres)
+    
+        descriptor_categories = {
+            "Color": ["saturated", "monochromatic", "pastel", "neon", "earthy"],
+            "Texture": ["smooth", "grainy", "glossy", "rough", "metallic"],
+            "Mood": ["serene", "intense", "whimsical", "melancholic", "energetic"],
+            "Technique": ["brush strokes", "digital art", "photorealistic", "collage", "vector graphics"]
+        }
+    
+        descriptors = [random.choice(category) for category in descriptor_categories.values()]
+        descriptors_str = "; ".join(descriptors)
+    
+        return {
+            "Style Name": style_name,
+            "Prefix": prefix,
+            "Suffix": suffix,
+            "Genre": genre,
+            "Descriptors": descriptors_str
+        }
+
     def generate_random_style():
-        return "Random style generated"
+        new_style = create_random_style()
+        style_manager.add_style(new_style)
+        return f"Generated new style: {new_style['Style Name']}", gr.update(choices=style_manager.get_styles())
 
     def generate_style_details():
         return "Style details generated"
