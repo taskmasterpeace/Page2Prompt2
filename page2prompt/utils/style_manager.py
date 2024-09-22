@@ -43,6 +43,16 @@ class StyleManager:
         style = self.get_style(style_name)
         return style.get("Suffix", "")
 
+    def get_style_prefix(self, style_name: str) -> str:
+        """Returns the prefix for the given style name."""
+        style = self.get_style(style_name)
+        return style.get("Prefix", "")
+
+    def get_style_suffix(self, style_name: str) -> str:
+        """Returns the suffix for the given style name."""
+        style = self.get_style(style_name)
+        return style.get("Suffix", "")
+
     def add_style(self, style_data: Dict) -> None:
         """Adds a new style to the list and saves to the CSV file."""
         self.styles.append(style_data)

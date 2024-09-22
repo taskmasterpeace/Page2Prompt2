@@ -94,6 +94,16 @@ with gr.Blocks() as demo:
 
                         end_parameters_input = gr.Textbox(label="🔚 End Parameters")
 
+                        def update_style_fields(style_name):
+                            style = style_manager.get_style(style_name)
+                            return style.get("Prefix", ""), style.get("Suffix", "")
+
+                        style_input.change(
+                            update_style_fields,
+                            inputs=[style_input],
+                            outputs=[style_prefix_input, style_suffix_input]
+                        )
+
                     with gr.Accordion("📷 Camera Settings", open=False):
                         with gr.Row():
                             shot = gr.Dropdown(label="Shot", choices=["AI Suggest"] + camera_settings.get('shot', []))
