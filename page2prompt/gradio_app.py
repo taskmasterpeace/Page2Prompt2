@@ -77,11 +77,11 @@ with gr.Blocks() as demo:
                     with gr.Accordion("👥 Subjects", open=False):
                         with gr.Row():
                             with gr.Column():
-                                people = gr.CheckboxGroup(label="People", choices=subject_manager.get_people)
+                                people = gr.CheckboxGroup(label="People", choices=subject_manager.get_people())
                             with gr.Column():
-                                places = gr.CheckboxGroup(label="Places", choices=subject_manager.get_places)
+                                places = gr.CheckboxGroup(label="Places", choices=subject_manager.get_places())
                             with gr.Column():
-                                props = gr.CheckboxGroup(label="Props", choices=subject_manager.get_props)
+                                props = gr.CheckboxGroup(label="Props", choices=subject_manager.get_props())
 
                     with gr.Accordion("🎨 Style", open=False):
                         with gr.Row():
@@ -421,9 +421,9 @@ with gr.Blocks() as demo:
 
     def update_subject_checkboxes():
         return {
-            people: gr.CheckboxGroup(choices=subject_manager.get_people()),
-            places: gr.CheckboxGroup(choices=subject_manager.get_places()),
-            props: gr.CheckboxGroup(choices=subject_manager.get_props())
+            people: gr.update(choices=subject_manager.get_people()),
+            places: gr.update(choices=subject_manager.get_places()),
+            props: gr.update(choices=subject_manager.get_props())
         }
 
     # Add this to your existing event handlers
