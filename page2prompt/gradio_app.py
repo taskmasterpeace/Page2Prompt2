@@ -383,8 +383,11 @@ with gr.Blocks() as demo:
             }.items() if v != "AI Suggest"
         }
 
+    async def generate_prompts_wrapper(*args):
+        return await script_prompt_generator.generate_prompts(*args)
+
     generate_button.click(
-        fn=lambda *args: asyncio.run(script_prompt_generator.generate_prompts(*args)),
+        fn=generate_prompts_wrapper,
         inputs=[
             full_script_input,
             shot_description_input,
