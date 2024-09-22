@@ -33,10 +33,7 @@ def load_camera_settings(csv_file):
         for row in reader:
             if row['type'] not in settings:
                 settings[row['type']] = []
-            settings[row['type']].append({
-                'display': row['display'],
-                'description': row.get('description', '')  # Add description if available
-            })
+            settings[row['type']].append(row['display'])
     return settings
 
 camera_settings = load_camera_settings("camera_settings.csv")
