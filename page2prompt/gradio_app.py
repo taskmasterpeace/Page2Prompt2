@@ -383,13 +383,39 @@ with gr.Blocks() as demo:
             }.items() if v != "AI Suggest"
         }
 
-    async def generate_prompts_wrapper(*args):
-        return await script_prompt_generator.generate_prompts(*args)
+    async def generate_prompts_wrapper(
+        shot_description, directors_notes, style, style_prefix, style_suffix,
+        director_style, shot, move, size, framing, depth_of_field, camera_type,
+        camera_name, lens_type, end_parameters, stick_to_script, highlighted_text,
+        full_script, people, places, props
+    ):
+        active_subjects = people + places + props
+        return await script_prompt_generator.generate_prompts(
+            script_excerpt=full_script,
+            shot_description=shot_description,
+            directors_notes=directors_notes,
+            style=style,
+            style_prefix=style_prefix,
+            style_suffix=style_suffix,
+            director_style=director_style,
+            shot=shot,
+            move=move,
+            size=size,
+            framing=framing,
+            depth_of_field=depth_of_field,
+            camera_type=camera_type,
+            camera_name=camera_name,
+            lens_type=lens_type,
+            end_parameters=end_parameters,
+            stick_to_script=stick_to_script,
+            highlighted_text=highlighted_text,
+            full_script=full_script,
+            active_subjects=active_subjects
+        )
 
     generate_button.click(
         fn=generate_prompts_wrapper,
         inputs=[
-            full_script_input,
             shot_description_input,
             directors_notes_input,
             style_input,
