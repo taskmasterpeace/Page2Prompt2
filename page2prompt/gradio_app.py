@@ -406,9 +406,11 @@ with gr.Blocks() as demo:
                     col_count=(3, "fixed"),
                     label="Proposed Subjects",
                     interactive=True,
-                    column_resizable=True
+                    column_resizable=True,
+                    row_select="single"
                 )
                 extract_subjects_btn = gr.Button("🔍 Extract Subjects")
+                execute_extraction_btn = gr.Button("▶️ Execute Extraction")
                 
                 with gr.Row():
                     subject_name_input = gr.Textbox(label="Subject Name")
@@ -421,6 +423,7 @@ with gr.Blocks() as demo:
                     delete_subject_btn = gr.Button("🗑️ Delete Subject")
                 
                 send_to_subject_management_btn = gr.Button("📤 Send to Subject Management")
+                export_proposed_subjects_btn = gr.Button("💾 Export Proposed Subjects")
 
             def update_shot_list_view(df, view_option):
                 if df is None or df.empty:
@@ -530,18 +533,31 @@ with gr.Blocks() as demo:
         return script_manager.get_proposed_subjects()
 
     def send_to_subject_management():
-        # This function will be implemented later to send the proposed subjects to the main subject management
+        script_manager.send_to_subject_management()
         return "Proposed subjects sent to Subject Management"
+
+    def populate_subject_fields(selected_rows, df):
+        if len(selected_rows) > 0:
+            index = selected_rows[0]
+            row = df.iloc[index]
+            return row['Name'], row['Description'], row['Type']
+        return "", "", ""
 
     generate_shot_list_btn.click(generate_proposed_shot_list, inputs=[full_script_input, column_view], outputs=[shot_list_df, shot_list_feedback])
     save_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
     export_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
 
     extract_subjects_btn.click(extract_proposed_subjects, inputs=[full_script_input], outputs=[proposed_subjects_df])
+    execute_extraction_btn.click(lambda: script_manager.execute_extraction(), outputs=[proposed_subjects_df])
+    proposed_subjects_df.select(populate_subject_fields, inputs=[proposed_subjects_df], outputs=[subject_name_input, subject_description_input, subject_type_input])
     add_subject_btn.click(add_proposed_subject, inputs=[subject_name_input, subject_description_input, subject_type_input], outputs=[proposed_subjects_df])
     update_subject_btn.click(update_proposed_subject, inputs=[proposed_subjects_df.select, subject_name_input, subject_description_input, subject_type_input], outputs=[proposed_subjects_df])
     delete_subject_btn.click(delete_proposed_subject, inputs=[proposed_subjects_df.select], outputs=[proposed_subjects_df])
     send_to_subject_management_btn.click(send_to_subject_management, outputs=[shot_list_feedback])
+    export_proposed_subjects_btn.click(
+        lambda: script_manager.export_proposed_subjects("proposed_subjects.csv"),
+        outputs=[shot_list_feedback]
+    )
 
     def create_camera_settings():
         return {

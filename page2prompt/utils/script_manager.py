@@ -46,3 +46,15 @@ class ScriptManager:
 
     def get_proposed_subjects(self) -> pd.DataFrame:
         return self.proposed_subjects
+
+    def send_to_subject_management(self):
+        # This method will overwrite the subject management dataframe with the proposed subjects
+        self.subject_manager.set_subjects(self.proposed_subjects)
+
+    def execute_extraction(self):
+        # This method will trigger the actual extraction process
+        # For now, it's just a placeholder
+        return self.proposed_subjects
+
+    def export_proposed_subjects(self, file_path: str):
+        self.proposed_subjects.to_csv(file_path, index=False)
