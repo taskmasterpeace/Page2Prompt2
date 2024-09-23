@@ -212,3 +212,39 @@ class MetaChain:
             error_message = f"Error generating proposed shot list: {str(e)}"
             print(error_message)
             return error_message
+
+    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> str:
+        prompt = f"""
+        Given the following script and proposed shot list, extract and generate a list of proposed subjects.
+        Focus on identifying characters, locations, and key props mentioned in the script or shot list.
+        For each subject, provide:
+        1. Name
+        2. A brief description (including physical appearance and wardrobe for characters)
+        3. Type (person, place, or prop)
+
+        Script:
+        {script}
+
+        Proposed Shot List:
+        {shot_list.to_string()}
+
+        Provide the proposed subjects in a format that can be easily converted to a CSV, with each field separated by a pipe (|) character.
+        Example:
+        John Doe|Tall man with brown hair, wearing a blue suit|person
+        Central Park|Large urban park with trees and a lake|place
+        Magic Wand|Ornate wooden stick with intricate carvings|prop
+        """
+        
+        try:
+            with get_openai_callback() as cb:
+                chain = RunnableSequence(
+                    PromptTemplate(template=prompt, input_variables=[]),
+                    self.llm
+                )
+                result = await chain.ainvoke({})
+            
+            return result.content
+        except Exception as e:
+            error_message = f"Error extracting proposed subjects: {str(e)}"
+            print(error_message)
+            return error_message

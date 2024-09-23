@@ -399,6 +399,29 @@ with gr.Blocks() as demo:
                 shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
                 shot_list_feedback = gr.Textbox(label="Feedback", placeholder="System feedback will appear here", interactive=False)
 
+            with gr.Accordion("👥 Proposed Subjects", open=True):
+                proposed_subjects_df = gr.DataFrame(
+                    headers=["Name", "Description", "Type"],
+                    datatype=["str", "str", "str"],
+                    col_count=(3, "fixed"),
+                    label="Proposed Subjects",
+                    interactive=True,
+                    column_resizable=True
+                )
+                extract_subjects_btn = gr.Button("🔍 Extract Subjects")
+                
+                with gr.Row():
+                    subject_name_input = gr.Textbox(label="Subject Name")
+                    subject_description_input = gr.Textbox(label="Subject Description")
+                    subject_type_input = gr.Dropdown(label="Subject Type", choices=["person", "place", "prop"])
+                
+                with gr.Row():
+                    add_subject_btn = gr.Button("➕ Add Subject")
+                    update_subject_btn = gr.Button("🔄 Update Subject")
+                    delete_subject_btn = gr.Button("🗑️ Delete Subject")
+                
+                send_to_subject_management_btn = gr.Button("📤 Send to Subject Management")
+
             def update_shot_list_view(df, view_option):
                 if df is None or df.empty:
                     return None
@@ -487,9 +510,38 @@ with gr.Blocks() as demo:
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
         return "Proposed shot list saved to proposed_shot_list.csv"
 
+    async def extract_proposed_subjects(full_script):
+        return await script_manager.extract_proposed_subjects(full_script)
+
+    def add_proposed_subject(name, description, subject_type):
+        script_manager.add_proposed_subject(name, description, subject_type)
+        return script_manager.get_proposed_subjects()
+
+    def update_proposed_subject(selected_rows, name, description, subject_type):
+        if len(selected_rows) > 0:
+            index = selected_rows[0]
+            script_manager.update_proposed_subject(index, name, description, subject_type)
+        return script_manager.get_proposed_subjects()
+
+    def delete_proposed_subject(selected_rows):
+        if len(selected_rows) > 0:
+            index = selected_rows[0]
+            script_manager.delete_proposed_subject(index)
+        return script_manager.get_proposed_subjects()
+
+    def send_to_subject_management():
+        # This function will be implemented later to send the proposed subjects to the main subject management
+        return "Proposed subjects sent to Subject Management"
+
     generate_shot_list_btn.click(generate_proposed_shot_list, inputs=[full_script_input, column_view], outputs=[shot_list_df, shot_list_feedback])
     save_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
     export_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
+
+    extract_subjects_btn.click(extract_proposed_subjects, inputs=[full_script_input], outputs=[proposed_subjects_df])
+    add_subject_btn.click(add_proposed_subject, inputs=[subject_name_input, subject_description_input, subject_type_input], outputs=[proposed_subjects_df])
+    update_subject_btn.click(update_proposed_subject, inputs=[proposed_subjects_df.select, subject_name_input, subject_description_input, subject_type_input], outputs=[proposed_subjects_df])
+    delete_subject_btn.click(delete_proposed_subject, inputs=[proposed_subjects_df.select], outputs=[proposed_subjects_df])
+    send_to_subject_management_btn.click(send_to_subject_management, outputs=[shot_list_feedback])
 
     def create_camera_settings():
         return {

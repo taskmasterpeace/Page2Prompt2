@@ -6,6 +6,7 @@ class ScriptManager:
     def __init__(self, meta_chain: MetaChain):
         self.meta_chain = meta_chain
         self.shot_list = pd.DataFrame(columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
+        self.proposed_subjects = pd.DataFrame(columns=["Name", "Description", "Type"])
 
     async def generate_proposed_shot_list(self, full_script: str, view_option: str) -> pd.DataFrame:
         response = await self.meta_chain.generate_proposed_shot_list(full_script)
@@ -23,3 +24,25 @@ class ScriptManager:
     def save_proposed_shot_list(self, file_path: str):
         # Always save the full shot list, regardless of the current view
         self.proposed_shot_list.to_csv(file_path, index=False)
+
+    async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
+        response = await self.meta_chain.extract_proposed_subjects(full_script, self.proposed_shot_list)
+        
+        # Process the response and convert it to a DataFrame
+        subjects = [subject.split('|') for subject in response.split('\n') if subject.strip()]
+        self.proposed_subjects = pd.DataFrame(subjects, columns=["Name", "Description", "Type"])
+        return self.proposed_subjects
+
+    def update_proposed_subject(self, index: int, name: str, description: str, subject_type: str):
+        if index < len(self.proposed_subjects):
+            self.proposed_subjects.loc[index] = [name, description, subject_type]
+
+    def add_proposed_subject(self, name: str, description: str, subject_type: str):
+        new_subject = pd.DataFrame([[name, description, subject_type]], columns=["Name", "Description", "Type"])
+        self.proposed_subjects = pd.concat([self.proposed_subjects, new_subject], ignore_index=True)
+
+    def delete_proposed_subject(self, index: int):
+        self.proposed_subjects = self.proposed_subjects.drop(index).reset_index(drop=True)
+
+    def get_proposed_subjects(self) -> pd.DataFrame:
+        return self.proposed_subjects
