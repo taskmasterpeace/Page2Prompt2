@@ -534,7 +534,7 @@ with gr.Blocks() as demo:
         df["Shot"] = df.index + 1  # Assuming each row is a separate shot
 
         feedback = "Shot list generated successfully."
-        return update_shot_list_view(df, view_option), feedback
+        return df, update_shot_list_view(df, view_option), feedback
 
     def save_proposed_shot_list():
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
