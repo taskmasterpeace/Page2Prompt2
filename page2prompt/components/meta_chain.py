@@ -197,7 +197,7 @@ class MetaChain:
         Important instructions:
         - Do not include any headers, labels, or titles in the output.
         - Each line should contain only the four pieces of information listed above, in that order.
-        - Separate each piece of information with a comma (,) not a pipe character.
+        - Separate each piece of information with a comma (,).
         - Do not use quotation marks or any other special characters.
         - Start each new line with the scene number.
 
