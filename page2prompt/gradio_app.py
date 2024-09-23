@@ -548,8 +548,11 @@ with gr.Blocks() as demo:
     execute_extraction_btn.click(lambda: script_manager.execute_extraction(), outputs=[proposed_subjects_df])
     proposed_subjects_df.select(populate_subject_fields, inputs=[proposed_subjects_df], outputs=[subject_name_input, subject_description_input, subject_type_input])
     add_subject_btn.click(add_proposed_subject, inputs=[subject_name_input, subject_description_input, subject_type_input], outputs=[proposed_subjects_df])
+    def update_proposed_subject_wrapper(selected_rows, name, description, subject_type):
+        return script_manager.update_proposed_subject(selected_rows, name, description, subject_type)
+
     update_subject_btn.click(
-        script_manager.update_proposed_subject,
+        update_proposed_subject_wrapper,
         inputs=[
             proposed_subjects_df.select,
             subject_name_input,
