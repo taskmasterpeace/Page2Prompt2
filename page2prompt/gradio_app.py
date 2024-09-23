@@ -90,7 +90,7 @@ with gr.Blocks() as demo:
         with gr.Accordion("📜 Full Script", open=False):
             with gr.Row():
                 full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
-                copy_full_script_btn = gr.Button("📋", scale=0.05)
+                copy_full_script_btn = gr.Button("📋", scale=1)
 
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
@@ -154,13 +154,13 @@ with gr.Blocks() as demo:
                     with gr.Accordion("🖼️ Generated Prompts", open=True):
                         with gr.Row():
                             concise_prompt = gr.Textbox(label="Concise")
-                            copy_concise_btn = gr.Button("📋", scale=0.05)
+                            copy_concise_btn = gr.Button("📋", scale=1)
                         with gr.Row():
                             normal_prompt = gr.Textbox(label="Normal")
-                            copy_normal_btn = gr.Button("📋", scale=0.05)
+                            copy_normal_btn = gr.Button("📋", scale=1)
                         with gr.Row():
                             detailed_prompt = gr.Textbox(label="Detailed")
-                            copy_detailed_btn = gr.Button("📋", scale=0.05)
+                            copy_detailed_btn = gr.Button("📋", scale=1)
                         
                         structured_prompt = gr.Textbox(label="Structured Prompt")
                         generation_message = gr.Textbox(label="Generation Message")
@@ -387,7 +387,6 @@ with gr.Blocks() as demo:
                 )
                 shot_list_df = gr.DataFrame(
                     headers=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"],
-                    visible_columns=["Scene", "Shot Description", "Shot Size", "People"],
                     label="Proposed Shot List",
                     interactive=True
                 )
@@ -567,10 +566,10 @@ with gr.Blocks() as demo:
             if col not in df.columns:
                 df[col] = ""
 
-        return gr.DataFrame.update(
-            value=df,
-            visible_columns=visible_columns
-        )
+        # Filter the DataFrame based on the selected view
+        filtered_df = df[visible_columns]
+
+        return gr.DataFrame.update(value=filtered_df)
 
     generate_shot_list_btn.click(
         generate_proposed_shot_list,

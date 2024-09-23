@@ -36,6 +36,9 @@ class ScriptManager:
         # Ensure "Shot" column is filled
         df["Shot"] = df.index + 1  # Assuming each row is a separate shot
         
+        # Convert all columns to strings to ensure compatibility with gr.DataFrame
+        df = df.astype(str)
+        
         return df
 
     def save_proposed_shot_list(self, file_path: str):
