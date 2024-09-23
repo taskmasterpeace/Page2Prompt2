@@ -12,17 +12,22 @@ class ScriptManager:
     async def generate_proposed_shot_list(self, full_script: str) -> pd.DataFrame:
         response = await self.meta_chain.generate_proposed_shot_list(full_script)
         
-        # Process the response and convert it to a DataFrame
-        shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
-        df = pd.DataFrame(shots, columns=["Scene", "Shot Description", "Shot Size", "People"])
+        if isinstance(response, pd.DataFrame):
+            df = response
+        else:
+            # Process the response and convert it to a DataFrame
+            shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
+            df = pd.DataFrame(shots, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
         
-        # Add empty columns for the detailed view
-        for col in ["Timestamp", "Shot", "Script Reference", "Places"]:
+        # Ensure all required columns exist
+        required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
+        for col in required_columns:
             if col not in df.columns:
                 df[col] = ""
         
         # Ensure "Shot" column is filled
-        df["Shot"] = df.index + 1  # Assuming each row is a separate shot
+        if df["Shot"].isnull().any():
+            df["Shot"] = df.index + 1  # Assuming each row is a separate shot
         
         return df
 
