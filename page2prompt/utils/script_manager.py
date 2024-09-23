@@ -9,23 +9,9 @@ class ScriptManager:
         self.shot_list = pd.DataFrame(columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
         self.proposed_subjects = pd.DataFrame(columns=["Name", "Description", "Type"])
 
-    async def generate_proposed_shot_list(self, full_script: str, view_option: str) -> pd.DataFrame:
+    async def generate_proposed_shot_list(self, full_script: str) -> str:
         response = await self.meta_chain.generate_proposed_shot_list(full_script)
-        
-        # Process the response and convert it to a DataFrame
-        shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
-        self.proposed_shot_list = pd.DataFrame(shots, columns=["Scene", "Shot Description", "Shot Size", "People"])
-        
-        # Apply the view option
-        if view_option == "Simple View":
-            return self.proposed_shot_list[["Scene", "Shot Description", "Shot Size", "People"]]
-        else:  # Detailed View
-            # Add empty columns for the detailed view
-            self.proposed_shot_list["Timestamp"] = ""
-            self.proposed_shot_list["Shot"] = ""
-            self.proposed_shot_list["Script Reference"] = ""
-            self.proposed_shot_list["Places"] = ""
-            return self.proposed_shot_list[["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]]
+        return response
 
     def save_proposed_shot_list(self, file_path: str):
         # Always save the full shot list, regardless of the current view
