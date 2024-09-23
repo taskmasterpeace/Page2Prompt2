@@ -3,6 +3,7 @@ import asyncio
 import csv
 import os
 import pandas as pd
+import json
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
 from .utils.style_manager import StyleManager
@@ -399,26 +400,25 @@ with gr.Blocks() as demo:
                 shot_list_feedback = gr.Textbox(label="Feedback", placeholder="System feedback will appear here", interactive=False)
 
             with gr.Accordion("👥 Proposed Subjects", open=True):
-                proposed_subjects_df = gr.DataFrame(
-                    headers=["Name", "Description", "Type", "selected"],
-                    datatype=["str", "str", "str", "bool"],
-                    col_count=(4, "fixed"),
+                subjects_df = gr.DataFrame(
+                    headers=["name", "description", "type"],
+                    datatype=["str", "str", "str"],
+                    col_count=(3, "fixed"),
                     label="Proposed Subjects",
-                    interactive=True
+                    interactive=False
                 )
                 extract_subjects_btn = gr.Button("🔍 Extract Subjects")
-                execute_extraction_btn = gr.Button("▶️ Execute Extraction")
-                
+            
                 with gr.Row():
                     subject_name_input = gr.Textbox(label="Subject Name")
                     subject_description_input = gr.Textbox(label="Subject Description")
                     subject_type_input = gr.Dropdown(label="Subject Type", choices=["person", "place", "prop"])
-                
+            
                 with gr.Row():
                     add_subject_btn = gr.Button("➕ Add Subject")
                     update_subject_btn = gr.Button("🔄 Update Subject")
                     delete_subject_btn = gr.Button("🗑️ Delete Subject")
-                
+            
                 send_to_subject_management_btn = gr.Button("📤 Send to Subject Management")
                 export_proposed_subjects_btn = gr.Button("💾 Export Proposed Subjects")
 
@@ -519,55 +519,97 @@ with gr.Blocks() as demo:
         script_manager.add_proposed_subject(name, description, subject_type)
         return script_manager.get_proposed_subjects()
 
-    def update_proposed_subject(selected_rows, name, description, subject_type):
-        if len(selected_rows) > 0:
-            index = selected_rows[0]
-            script_manager.update_proposed_subject(index, name, description, subject_type)
-        return script_manager.get_proposed_subjects()
+    async def extract_proposed_subjects(full_script):
+        try:
+            subjects_df = await script_manager.extract_proposed_subjects(full_script)
+            feedback = "Subjects extracted successfully."
+            return subjects_df, feedback
+        except Exception as e:
+            error_message = f"Error extracting subjects: {str(e)}"
+            print(error_message)
+            return None, error_message
 
-    def delete_proposed_subject(df: pd.DataFrame):
-        selected_indices = df.index[df['selected'] == True].tolist()
-        if selected_indices:
-            for index in selected_indices:
-                script_manager.delete_proposed_subject(index)
-        return script_manager.get_proposed_subjects()
+    def update_shot_list_view(df, view_option):
+        if df is None or df.empty:
+            return None
+        if view_option == "Simple View":
+            return df[["scene_number", "shot_description", "shot_size", "people_in_shot"]]
+        else:  # Detailed View
+            return df
 
-    def send_to_subject_management():
-        script_manager.send_to_subject_management()
-        return "Proposed subjects sent to Subject Management"
+    generate_shot_list_btn.click(
+        generate_proposed_shot_list,
+        inputs=[full_script_input, column_view],
+        outputs=[shot_list_df, shot_list_feedback]
+    )
+
+    extract_subjects_btn.click(
+        extract_proposed_subjects,
+        inputs=[full_script_input],
+        outputs=[subjects_df, shot_list_feedback]
+    )
+
+    column_view.change(
+        update_shot_list_view,
+        inputs=[shot_list_df, column_view],
+        outputs=[shot_list_df]
+    )
+
+    # Add these event handlers for subject management
+    def add_subject(name, description, subject_type):
+        new_subject = pd.DataFrame([[name, description, subject_type]], columns=["name", "description", "type"])
+        updated_df = pd.concat([subjects_df.value, new_subject], ignore_index=True)
+        return updated_df
+
+    def update_subject(df, name, description, subject_type):
+        selected_index = df.index[df['name'] == name].tolist()
+        if selected_index:
+            index = selected_index[0]
+            df.loc[index] = [name, description, subject_type]
+        return df
+
+    def delete_subject(df, name):
+        return df[df['name'] != name].reset_index(drop=True)
+
+    add_subject_btn.click(
+        add_subject,
+        inputs=[subject_name_input, subject_description_input, subject_type_input],
+        outputs=[subjects_df]
+    )
+
+    update_subject_btn.click(
+        update_subject,
+        inputs=[subjects_df, subject_name_input, subject_description_input, subject_type_input],
+        outputs=[subjects_df]
+    )
+
+    delete_subject_btn.click(
+        delete_subject,
+        inputs=[subjects_df, subject_name_input],
+        outputs=[subjects_df]
+    )
 
     def populate_subject_fields(evt: gr.SelectData, df):
         if evt.index is not None:
             row = df.iloc[evt.index[0]]
-            return row['Name'], row['Description'], row['Type']
+            return row['name'], row['description'], row['type']
         return "", "", ""
 
-    generate_shot_list_btn.click(generate_proposed_shot_list, inputs=[full_script_input, column_view], outputs=[shot_list_df, shot_list_feedback])
-    save_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
-    export_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
-
-    extract_subjects_btn.click(extract_proposed_subjects, inputs=[full_script_input], outputs=[proposed_subjects_df])
-    proposed_subjects_df.select(populate_subject_fields, inputs=[proposed_subjects_df], outputs=[subject_name_input, subject_description_input, subject_type_input])
-    execute_extraction_btn.click(lambda: script_manager.execute_extraction(), outputs=[proposed_subjects_df])
-    proposed_subjects_df.select(populate_subject_fields, inputs=[proposed_subjects_df], outputs=[subject_name_input, subject_description_input, subject_type_input])
-    add_subject_btn.click(add_proposed_subject, inputs=[subject_name_input, subject_description_input, subject_type_input], outputs=[proposed_subjects_df])
-    def update_proposed_subject_wrapper(selected_rows, name, description, subject_type):
-        return script_manager.update_proposed_subject(selected_rows, name, description, subject_type)
-
-    update_subject_btn.click(
-        fn=script_manager.update_proposed_subject,
-        inputs=[
-            proposed_subjects_df,
-            subject_name_input,
-            subject_description_input,
-            subject_type_input
-        ],
-        outputs=[proposed_subjects_df]
+    subjects_df.select(
+        populate_subject_fields,
+        inputs=[subjects_df],
+        outputs=[subject_name_input, subject_description_input, subject_type_input]
     )
-    delete_subject_btn.click(delete_proposed_subject, inputs=[proposed_subjects_df], outputs=[proposed_subjects_df])
-    send_to_subject_management_btn.click(send_to_subject_management, outputs=[shot_list_feedback])
+
+    send_to_subject_management_btn.click(
+        lambda df: script_manager.send_to_subject_management(df),
+        inputs=[subjects_df],
+        outputs=[shot_list_feedback]
+    )
+
     export_proposed_subjects_btn.click(
-        lambda: script_manager.export_proposed_subjects("proposed_subjects.csv"),
+        lambda df: script_manager.export_proposed_subjects(df, "proposed_subjects.csv"),
+        inputs=[subjects_df],
         outputs=[shot_list_feedback]
     )
 

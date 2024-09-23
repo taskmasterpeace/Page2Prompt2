@@ -216,24 +216,23 @@ class MetaChain:
 
     async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> str:
         prompt = f"""
-        Given the following script and proposed shot list, extract and generate a list of proposed subjects.
-        Focus on identifying characters, locations, and key props mentioned in the script or shot list.
-        For each subject, provide:
-        1. Name
-        2. A brief description (including physical appearance and wardrobe for characters)
-        3. Type (person, place, or prop)
+        Extract and generate a list of proposed subjects from the following script and shot list. Provide the output in JSON format with the following structure:
+        {{
+            "subjects": [
+                {{
+                    "name": "Subject name",
+                    "description": "Brief description",
+                    "type": "person/place/prop"
+                }}
+            ]
+        }}
+        Do not include any explanatory text or additional formatting.
 
         Script:
         {script}
 
-        Proposed Shot List:
-        {shot_list.to_string()}
-
-        Provide the proposed subjects in a format that can be easily converted to a CSV, with each field separated by a pipe (|) character.
-        Example:
-        John Doe|Tall man with brown hair, wearing a blue suit|person
-        Central Park|Large urban park with trees and a lake|place
-        Magic Wand|Ornate wooden stick with intricate carvings|prop
+        Shot List:
+        {shot_list.to_json(orient='records')}
         """
         
         try:

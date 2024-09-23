@@ -28,10 +28,14 @@ class ScriptManager:
     async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
         response = await self.meta_chain.extract_proposed_subjects(full_script, self.proposed_shot_list)
         
-        # Process the response and convert it to a DataFrame
-        subjects = [subject.split('|') for subject in response.split('\n') if subject.strip()]
-        self.proposed_subjects = pd.DataFrame(subjects, columns=["Name", "Description", "Type"])
-        return self.proposed_subjects
+        try:
+            data = json.loads(response)
+            df = pd.DataFrame(data['subjects'])
+            self.proposed_subjects = df
+            return df
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON response")
+            return pd.DataFrame()
 
     def update_proposed_subject(self, df: pd.DataFrame, name: str, description: str, subject_type: str):
         selected_index = df.index[df['Name'] == name].tolist()
@@ -65,3 +69,11 @@ class ScriptManager:
 
     def export_proposed_subjects(self, file_path: str):
         self.proposed_subjects.to_csv(file_path, index=False)
+    def send_to_subject_management(self, df: pd.DataFrame):
+        # This method will overwrite the subject management dataframe with the proposed subjects
+        self.subject_manager.set_subjects(df)
+        return "Proposed subjects sent to Subject Management"
+
+    def export_proposed_subjects(self, df: pd.DataFrame, file_path: str):
+        df.to_csv(file_path, index=False)
+        return f"Proposed subjects exported to {file_path}"
