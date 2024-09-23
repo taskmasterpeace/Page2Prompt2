@@ -180,31 +180,32 @@ class MetaChain:
                 "structured": error_message
             }
 
-    async def generate_proposed_shot_list(self, script: str) -> str:
+    async def generate_proposed_shot_list(self, script: str) -> pd.DataFrame:
         prompt = f"""
         Given the following script, generate a proposed detailed shot list. 
         This is not the final shot list, but a starting point for discussion.
-        Each line of the shot list should contain the following information, in order, without labels or titles:
-
-        1. Scene
-        2. Shot Description
-        3. Shot Size (e.g., Close-up, Medium Shot, Wide Shot)
-        4. People
+        Include the following information for each shot, separated by pipe characters (|):
+        1. Timestamp
+        2. Scene
+        3. Shot
+        4. Script Reference
+        5. Shot Description
+        6. Shot Size
+        7. People
+        8. Places
 
         Script:
         {script}
 
         Important instructions:
         - Do not include any headers, labels, or titles in the output.
-        - Each line should contain only the four pieces of information listed above, in that order.
-        - Separate each piece of information with a pipe character (|).
-        - Do not use quotation marks or any other special characters.
-        - Start each new line with the scene number.
+        - Start each new line with the timestamp.
+        - Use N/A for any fields that are not applicable or cannot be determined from the script.
 
-        Example format (but use the actual content from the script):
-        1|Character A walks into the room|Wide Shot|Character A
-        1|Character A sits down|Medium Shot|Character A
-        2|Character B enters looking worried|Close-up|Character B
+        Example format:
+        00:00|1|1|INT. ROOM - DAY|Character A walks into the room|Wide Shot|Character A|Living Room
+        00:30|1|2|INT. ROOM - DAY|Character A sits down|Medium Shot|Character A|Living Room
+        01:00|2|1|INT. HALLWAY - DAY|Character B enters looking worried|Close-up|Character B|Hallway
         """
 
         try:
@@ -215,11 +216,15 @@ class MetaChain:
                 )
                 result = await chain.ainvoke({})
         
-            return result.content
+            content = result.content
+            df = pd.DataFrame([row.split('|') for row in content.strip().split('\n')],
+                              columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
+            
+            return df
         except Exception as e:
             error_message = f"Error generating proposed shot list: {str(e)}"
             print(error_message)
-            return error_message
+            return pd.DataFrame()
 
     async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> str:
         prompt = f"""
