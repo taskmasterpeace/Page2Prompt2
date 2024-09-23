@@ -386,9 +386,8 @@ with gr.Blocks() as demo:
                     label="Shot List View"
                 )
                 shot_list_df = gr.DataFrame(
-                    headers=["Scene", "Shot Description", "Shot Size", "People"],
-                    datatype=["str", "str", "str", "str"],
-                    col_count=(4, "fixed"),
+                    headers=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"],
+                    visible_columns=["Scene", "Shot Description", "Shot Size", "People"],
                     label="Proposed Shot List",
                     interactive=True
                 )
@@ -521,21 +520,19 @@ with gr.Blocks() as demo:
         else:
             # Process the response and convert it to a DataFrame
             shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
-            df = pd.DataFrame(shots, columns=["Scene", "Shot Description", "Shot Size", "People"])
-    
+            df = pd.DataFrame(shots, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
+
         # Ensure all necessary columns exist
         required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
         for col in required_columns:
             if col not in df.columns:
                 df[col] = ""
-    
+
         # Ensure "Shot" column is filled
         df["Shot"] = df.index + 1  # Assuming each row is a separate shot
-    
-        # Apply the view option
-        df = update_shot_list_view(df, view_option)
+
         feedback = "Shot list generated successfully."
-        return df, feedback
+        return update_shot_list_view(df, view_option), feedback
 
     def save_proposed_shot_list():
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
@@ -561,20 +558,19 @@ with gr.Blocks() as demo:
     def update_shot_list_view(df, view_option):
         if df is None or df.empty:
             return None
-        if view_option == "Simple View":
-            columns = ["Scene", "Shot Description", "Shot Size", "People"]
-        else:  # Detailed View
-            columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
-    
-        # Only include columns that exist in the DataFrame
-        existing_columns = [col for col in columns if col in df.columns]
-    
-        # If any required columns are missing, add them with empty values
-        for col in columns:
+        all_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
+        simple_columns = ["Scene", "Shot Description", "Shot Size", "People"]
+        visible_columns = simple_columns if view_option == "Simple View" else all_columns
+
+        # Ensure all columns exist in the DataFrame
+        for col in all_columns:
             if col not in df.columns:
                 df[col] = ""
-    
-        return df[columns]
+
+        return gr.DataFrame.update(
+            value=df,
+            visible_columns=visible_columns
+        )
 
     generate_shot_list_btn.click(
         generate_proposed_shot_list,

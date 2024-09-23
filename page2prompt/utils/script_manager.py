@@ -24,11 +24,17 @@ class ScriptManager:
         else:
             raise ValueError("Unexpected response type from MetaChain")
         
-        # Ensure all required columns exist
+        # Ensure all required columns exist and are in the correct order
         required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
         for col in required_columns:
             if col not in df.columns:
                 df[col] = ""
+        
+        # Reorder columns to match the required order
+        df = df[required_columns]
+        
+        # Ensure "Shot" column is filled
+        df["Shot"] = df.index + 1  # Assuming each row is a separate shot
         
         return df
 
