@@ -653,29 +653,25 @@ with gr.Blocks() as demo:
     copy_full_script_btn.click(
         copy_to_clipboard,
         inputs=[full_script_input],
-        outputs=[gr.Textbox(visible=False)],
-        _js="(text) => navigator.clipboard.writeText(text)"
+        outputs=[gr.Textbox(visible=False)]
     )
 
     copy_concise_btn.click(
         copy_to_clipboard,
         inputs=[concise_prompt],
-        outputs=[gr.Textbox(visible=False)],
-        _js="(text) => navigator.clipboard.writeText(text)"
+        outputs=[gr.Textbox(visible=False)]
     )
 
     copy_normal_btn.click(
         copy_to_clipboard,
         inputs=[normal_prompt],
-        outputs=[gr.Textbox(visible=False)],
-        _js="(text) => navigator.clipboard.writeText(text)"
+        outputs=[gr.Textbox(visible=False)]
     )
 
     copy_detailed_btn.click(
         copy_to_clipboard,
         inputs=[detailed_prompt],
-        outputs=[gr.Textbox(visible=False)],
-        _js="(text) => navigator.clipboard.writeText(text)"
+        outputs=[gr.Textbox(visible=False)]
     )
 
     def create_camera_settings():
