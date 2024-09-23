@@ -533,10 +533,9 @@ with gr.Blocks() as demo:
         script_manager.send_to_subject_management()
         return "Proposed subjects sent to Subject Management"
 
-    def populate_subject_fields(selected_rows, df):
-        if len(selected_rows) > 0:
-            index = selected_rows[0]
-            row = df.iloc[index]
+    def populate_subject_fields(evt: gr.SelectData, df):
+        if evt.index is not None:
+            row = df.iloc[evt.index[0]]
             return row['Name'], row['Description'], row['Type']
         return "", "", ""
 
@@ -545,6 +544,7 @@ with gr.Blocks() as demo:
     export_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
 
     extract_subjects_btn.click(extract_proposed_subjects, inputs=[full_script_input], outputs=[proposed_subjects_df])
+    proposed_subjects_df.select(populate_subject_fields, inputs=[proposed_subjects_df], outputs=[subject_name_input, subject_description_input, subject_type_input])
     execute_extraction_btn.click(lambda: script_manager.execute_extraction(), outputs=[proposed_subjects_df])
     proposed_subjects_df.select(populate_subject_fields, inputs=[proposed_subjects_df], outputs=[subject_name_input, subject_description_input, subject_type_input])
     add_subject_btn.click(add_proposed_subject, inputs=[subject_name_input, subject_description_input, subject_type_input], outputs=[proposed_subjects_df])
