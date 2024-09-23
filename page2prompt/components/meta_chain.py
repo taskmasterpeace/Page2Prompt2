@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from typing import Dict, Any, List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_community.callbacks.manager import get_openai_callback
