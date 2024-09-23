@@ -31,16 +31,31 @@ class ScriptManager:
         self.proposed_shot_list.to_csv(file_path, index=False)
 
     async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
-        response = await self.meta_chain.extract_proposed_subjects(full_script, self.proposed_shot_list)
+        response = await self.meta_chain.extract_proposed_subjects(full_script, self.shot_list)
         
         try:
             data = json.loads(response)
             df = pd.DataFrame(data['subjects'])
+            df['Description'] = df['Description'].apply(lambda x: x[:200] if len(x) > 200 else x)  # Limit description to ~2-3 sentences
             self.proposed_subjects = df
             return df
         except json.JSONDecodeError:
             print("Error: Invalid JSON response")
             return pd.DataFrame()
+
+    def approve_proposed_subjects(self):
+        # Add all subjects from the shot list to the proposed subjects
+        for _, row in self.shot_list.iterrows():
+            people = row['People'].split(',')
+            for person in people:
+                person = person.strip()
+                if person and person not in self.proposed_subjects['Name'].values:
+                    self.proposed_subjects = self.proposed_subjects.append({
+                        'Name': person,
+                        'Description': 'Description pending based on script analysis.',
+                        'Type': 'person'
+                    }, ignore_index=True)
+        return self.proposed_subjects
 
     def update_proposed_subject(self, df: pd.DataFrame, name: str, description: str, subject_type: str):
         selected_index = df.index[df['Name'] == name].tolist()

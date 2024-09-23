@@ -228,11 +228,19 @@ class MetaChain:
             "subjects": [
                 {{
                     "name": "Subject name",
-                    "description": "Brief description",
+                    "description": "Detailed description (2-3 sentences)",
                     "type": "person/place/prop"
                 }}
             ]
         }}
+        
+        For each subject, especially people:
+        1. Provide a physical description including body type, unique accessories, and clothing.
+        2. The description should be 2-3 sentences long.
+        3. Focus on visual details that would be important for creating an image or scene.
+        4. Include any recurring or significant props associated with the character.
+
+        Base your descriptions on both the script and the shot list.
         Do not include any explanatory text or additional formatting.
 
         Script:
