@@ -17,10 +17,12 @@ class ScriptManager:
         df = pd.DataFrame(shots, columns=["Scene", "Shot Description", "Shot Size", "People"])
         
         # Add empty columns for the detailed view
-        df["Timestamp"] = ""
-        df["Shot"] = ""
-        df["Script Reference"] = ""
-        df["Places"] = ""
+        for col in ["Timestamp", "Shot", "Script Reference", "Places"]:
+            if col not in df.columns:
+                df[col] = ""
+        
+        # Ensure "Shot" column is filled
+        df["Shot"] = df.index + 1  # Assuming each row is a separate shot
         
         return df
 
