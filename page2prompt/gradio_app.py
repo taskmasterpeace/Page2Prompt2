@@ -376,21 +376,42 @@ with gr.Blocks() as demo:
 
         with gr.TabItem("📜 Script Management"):
             with gr.Accordion("🎬 Proposed Shot List", open=True):
+                column_view = gr.Radio(
+                    choices=["Simple View", "Detailed View"],
+                    value="Simple View",
+                    label="Shot List View"
+                )
                 shot_list_df = gr.DataFrame(
-                    headers=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"],
-                    datatype=["str", "str", "str", "str", "str", "str", "str", "str"],
-                    col_count=(8, "fixed"),
-                    label="Proposed Shot List"
+                    headers=["Scene", "Shot Description", "Shot Size", "People"],
+                    datatype=["str", "str", "str", "str"],
+                    col_count=(4, "fixed"),
+                    label="Proposed Shot List",
+                    interactive=True,
+                    column_resizable=True
                 )
                 generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
 
             with gr.Row():
                 save_shot_list_btn = gr.Button("💾 Save Shot List")
                 export_shot_list_btn = gr.Button("📤 Export Shot List")
-            
+        
             with gr.Row():
                 shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
                 shot_list_feedback = gr.Textbox(label="Feedback", placeholder="System feedback will appear here", interactive=False)
+
+            def update_shot_list_view(df, view_option):
+                if df is None or df.empty:
+                    return None
+                if view_option == "Simple View":
+                    return df[["Scene", "Shot Description", "Shot Size", "People"]]
+                else:  # Detailed View
+                    return df[["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]]
+
+            column_view.change(
+                update_shot_list_view,
+                inputs=[shot_list_df, column_view],
+                outputs=[shot_list_df]
+            )
 
     # Event handlers (placeholder functions for now)
     def save_style():
