@@ -178,3 +178,37 @@ class MetaChain:
                 "detailed": error_message,
                 "structured": error_message
             }
+
+    async def generate_proposed_shot_list(self, script: str) -> str:
+        prompt = f"""
+        Given the following script, generate a proposed detailed shot list. 
+        This is not the final shot list, but a starting point for discussion.
+        Each shot should include:
+        1. Timestamp (use placeholder values like 00:00:00 for now)
+        2. Scene number
+        3. Shot number
+        4. A brief script reference
+        5. A detailed shot description
+        6. Shot size (e.g., Close-up, Medium Shot, Wide Shot)
+        7. People in the shot
+        8. Places or locations in the shot
+
+        Script:
+        {script}
+
+        Provide the proposed shot list in a format that can be easily converted to a CSV, with each field separated by a pipe (|) character.
+        """
+        
+        try:
+            with get_openai_callback() as cb:
+                chain = RunnableSequence(
+                    PromptTemplate(template=prompt, input_variables=[]),
+                    self.llm
+                )
+                result = await chain.ainvoke({})
+            
+            return result.content
+        except Exception as e:
+            error_message = f"Error generating proposed shot list: {str(e)}"
+            print(error_message)
+            return error_message
