@@ -1,5 +1,6 @@
 from typing import List, Dict
 import pandas as pd
+import json
 from ..components.meta_chain import MetaChain
 
 class ScriptManager:
