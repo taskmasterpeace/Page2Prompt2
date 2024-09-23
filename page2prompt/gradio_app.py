@@ -552,9 +552,9 @@ with gr.Blocks() as demo:
         if df is None or df.empty:
             return None
         if view_option == "Simple View":
-            return df[["scene_number", "shot_description", "shot_size", "people_in_shot"]]
+            return df[["Scene", "Shot Description", "Shot Size", "People"]]
         else:  # Detailed View
-            return df
+            return df[["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]]
 
     generate_shot_list_btn.click(
         generate_proposed_shot_list,

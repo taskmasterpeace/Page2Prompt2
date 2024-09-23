@@ -186,10 +186,10 @@ class MetaChain:
         This is not the final shot list, but a starting point for discussion.
         Each line of the shot list should contain the following information, in order, without labels or titles:
 
-        1. Scene number
-        2. Shot description
-        3. Shot size (e.g., Close-up, Medium Shot, Wide Shot)
-        4. People in the shot
+        1. Scene
+        2. Shot Description
+        3. Shot Size (e.g., Close-up, Medium Shot, Wide Shot)
+        4. People
 
         Script:
         {script}
@@ -206,7 +206,7 @@ class MetaChain:
         1|Character A sits down|Medium Shot|Character A
         2|Character B enters looking worried|Close-up|Character B
         """
-    
+
         try:
             with get_openai_callback() as cb:
                 chain = RunnableSequence(
