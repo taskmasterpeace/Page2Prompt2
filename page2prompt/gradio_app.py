@@ -426,10 +426,15 @@ with gr.Blocks() as demo:
             def update_shot_list_view(df, view_option):
                 if df is None or df.empty:
                     return None
+                # Ensure all necessary columns exist
+                required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
+                for col in required_columns:
+                    if col not in df.columns:
+                        df[col] = ""
                 if view_option == "Simple View":
                     return df[["Scene", "Shot Description", "Shot Size", "People"]]
                 else:  # Detailed View
-                    return df[["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]]
+                    return df[required_columns]
 
             column_view.change(
                 update_shot_list_view,
@@ -506,24 +511,24 @@ with gr.Blocks() as demo:
     # Script Management event handlers
     async def generate_proposed_shot_list(full_script, view_option):
         response = await script_manager.generate_proposed_shot_list(full_script)
-
         if isinstance(response, pd.DataFrame):
             df = response
         else:
             # Process the response and convert it to a DataFrame
             shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
             df = pd.DataFrame(shots, columns=["Scene", "Shot Description", "Shot Size", "People"])
-
+    
+        # Ensure all necessary columns exist
+        required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
+        for col in required_columns:
+            if col not in df.columns:
+                df[col] = ""
+    
+        # Ensure "Shot" column is filled
+        df["Shot"] = df.index + 1  # Assuming each row is a separate shot
+    
         # Apply the view option
-        if view_option == "Simple View":
-            df = df[["Scene", "Shot Description", "Shot Size", "People"]]
-        else:  # Detailed View
-            # Add empty columns for the detailed view if they don't exist
-            for col in ["Timestamp", "Shot", "Script Reference", "Places"]:
-                if col not in df.columns:
-                    df[col] = ""
-            df = df[["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]]
-
+        df = update_shot_list_view(df, view_option)
         feedback = "Shot list generated successfully."
         return df, feedback
 
