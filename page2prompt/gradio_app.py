@@ -400,9 +400,9 @@ with gr.Blocks() as demo:
 
             with gr.Accordion("👥 Proposed Subjects", open=True):
                 proposed_subjects_df = gr.DataFrame(
-                    headers=["Name", "Description", "Type"],
-                    datatype=["str", "str", "str"],
-                    col_count=(3, "fixed"),
+                    headers=["Name", "Description", "Type", "selected"],
+                    datatype=["str", "str", "str", "bool"],
+                    col_count=(4, "fixed"),
                     label="Proposed Subjects",
                     interactive=True
                 )
@@ -523,10 +523,11 @@ with gr.Blocks() as demo:
             script_manager.update_proposed_subject(index, name, description, subject_type)
         return script_manager.get_proposed_subjects()
 
-    def delete_proposed_subject(selected_rows):
-        if len(selected_rows) > 0:
-            index = selected_rows[0]
-            script_manager.delete_proposed_subject(index)
+    def delete_proposed_subject(df: pd.DataFrame):
+        selected_indices = df.index[df['selected'] == True].tolist()
+        if selected_indices:
+            for index in selected_indices:
+                script_manager.delete_proposed_subject(index)
         return script_manager.get_proposed_subjects()
 
     def send_to_subject_management():
@@ -561,7 +562,7 @@ with gr.Blocks() as demo:
         ],
         outputs=[proposed_subjects_df]
     )
-    delete_subject_btn.click(delete_proposed_subject, inputs=[proposed_subjects_df.select], outputs=[proposed_subjects_df])
+    delete_subject_btn.click(delete_proposed_subject, inputs=[proposed_subjects_df], outputs=[proposed_subjects_df])
     send_to_subject_management_btn.click(send_to_subject_management, outputs=[shot_list_feedback])
     export_proposed_subjects_btn.click(
         lambda: script_manager.export_proposed_subjects("proposed_subjects.csv"),
