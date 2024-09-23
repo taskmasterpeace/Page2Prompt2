@@ -380,6 +380,9 @@ with gr.Blocks() as demo:
 
         with gr.TabItem("📜 Script Management"):
             with gr.Accordion("🎬 Proposed Shot List", open=True):
+                # State to store the full DataFrame
+                full_df = gr.State()
+
                 column_view = gr.Radio(
                     choices=["Simple View", "Detailed View"],
                     value="Simple View",
@@ -388,7 +391,7 @@ with gr.Blocks() as demo:
                 shot_list_df = gr.DataFrame(
                     headers=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"],
                     label="Proposed Shot List",
-                    interactive=True
+                    interactive=False  # Set to True if you want it editable
                 )
                 generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
 
@@ -554,22 +557,19 @@ with gr.Blocks() as demo:
             print(error_message)
             return None, error_message
 
-    def update_shot_list_view(df, view_option):
+    def update_view(df, view_option):
         if df is None or df.empty:
             return None
+    
         all_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
         simple_columns = ["Scene", "Shot Description", "Shot Size", "People"]
+    
         visible_columns = simple_columns if view_option == "Simple View" else all_columns
-
-        # Ensure all columns exist in the DataFrame
-        for col in all_columns:
-            if col not in df.columns:
-                df[col] = ""
-
-        # Filter the DataFrame based on the selected view
-        filtered_df = df[visible_columns]
-
-        return gr.DataFrame.update(value=filtered_df)
+    
+        # Create a list of booleans indicating which columns should be visible
+        column_visibility = [col in visible_columns for col in all_columns]
+    
+        return gr.DataFrame.update(value=df, visible=column_visibility)
 
     generate_shot_list_btn.click(
         generate_proposed_shot_list,
