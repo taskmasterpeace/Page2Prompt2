@@ -387,6 +387,10 @@ with gr.Blocks() as demo:
             with gr.Row():
                 save_shot_list_btn = gr.Button("💾 Save Shot List")
                 export_shot_list_btn = gr.Button("📤 Export Shot List")
+            
+            with gr.Row():
+                shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
+                shot_list_feedback = gr.Textbox(label="Feedback", placeholder="System feedback will appear here", interactive=False)
 
     # Event handlers (placeholder functions for now)
     def save_style():
@@ -462,9 +466,9 @@ with gr.Blocks() as demo:
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
         return "Proposed shot list saved to proposed_shot_list.csv"
 
-    generate_shot_list_btn.click(generate_proposed_shot_list, inputs=[full_script_input], outputs=[shot_list_df])
-    save_shot_list_btn.click(save_proposed_shot_list, outputs=[gr.Textbox()])
-    export_shot_list_btn.click(save_proposed_shot_list, outputs=[gr.Textbox()])
+    generate_shot_list_btn.click(generate_proposed_shot_list, inputs=[full_script_input], outputs=[shot_list_df, shot_list_feedback])
+    save_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
+    export_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
 
     def create_camera_settings():
         return {
