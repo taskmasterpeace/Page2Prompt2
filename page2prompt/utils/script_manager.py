@@ -1,6 +1,6 @@
 from typing import List, Dict
 import pandas as pd
-from .meta_chain import MetaChain
+from ..components.meta_chain import MetaChain
 
 class ScriptManager:
     def __init__(self, meta_chain: MetaChain):
