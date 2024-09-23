@@ -557,9 +557,19 @@ with gr.Blocks() as demo:
         if df is None or df.empty:
             return None
         if view_option == "Simple View":
-            return df[["Scene", "Shot Description", "Shot Size", "People"]]
+            columns = ["Scene", "Shot Description", "Shot Size", "People"]
         else:  # Detailed View
-            return df[["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]]
+            columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
+    
+        # Only include columns that exist in the DataFrame
+        existing_columns = [col for col in columns if col in df.columns]
+    
+        # If any required columns are missing, add them with empty values
+        for col in columns:
+            if col not in df.columns:
+                df[col] = ""
+    
+        return df[columns]
 
     generate_shot_list_btn.click(
         generate_proposed_shot_list,
