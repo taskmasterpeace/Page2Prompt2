@@ -11,12 +11,24 @@ from .utils.shot_list_generator import generate_shot_list
 from .components.director_assistant import DirectorAssistant
 from .music_lab import transcribe_audio, search_and_replace_lyrics
 
-# Define data directory
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+# Add debug print statements
+print("Current working directory:", os.getcwd())
+print("Files in current directory:", os.listdir())
 
-# Initialize components
-style_manager = StyleManager(os.path.join(DATA_DIR, "styles.csv"))
-subject_manager = SubjectManager(os.path.join(DATA_DIR, "subjects.csv"))
+# Define data directory
+DATA_DIR = os.path.dirname(__file__)
+
+# Initialize components with error handling
+try:
+    style_manager = StyleManager(os.path.join(DATA_DIR, "styles.csv"))
+    print(f"Available styles: {style_manager.get_styles()}")
+except Exception as e:
+    print(f"Error loading styles: {str(e)}")
+
+try:
+    subject_manager = SubjectManager(os.path.join(DATA_DIR, "subjects.csv"))
+except Exception as e:
+    print(f"Error loading subjects: {str(e)}")
 meta_chain = MetaChain()
 script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
 director_assistant = DirectorAssistant(meta_chain)
@@ -31,12 +43,17 @@ async def handle_conversation(user_input, concept, genre, descriptors, lyrics, c
 def load_camera_settings(csv_file):
     settings = {}
     file_path = os.path.join(DATA_DIR, csv_file)
-    with open(file_path, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['type'] not in settings:
-                settings[row['type']] = []
-            settings[row['type']].append(row['display'])
+    print(f"Attempting to load camera settings from: {file_path}")
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['type'] not in settings:
+                    settings[row['type']] = []
+                settings[row['type']].append(row['display'])
+        print(f"Successfully loaded camera settings")
+    except Exception as e:
+        print(f"Error loading camera settings: {str(e)}")
     return settings
 
 camera_settings = load_camera_settings("camera_settings.csv")
@@ -45,9 +62,14 @@ camera_settings = load_camera_settings("camera_settings.csv")
 def load_director_styles(csv_file):
     styles = []
     file_path = os.path.join(DATA_DIR, csv_file)
-    with open(file_path, 'r') as file:
-        reader = csv.DictReader(file)
-        styles = list(reader)
+    print(f"Attempting to load director styles from: {file_path}")
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            styles = list(reader)
+        print(f"Successfully loaded director styles")
+    except Exception as e:
+        print(f"Error loading director styles: {str(e)}")
     return styles
 
 director_styles = load_director_styles("director_styles.csv")
