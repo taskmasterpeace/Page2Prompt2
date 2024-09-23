@@ -398,33 +398,35 @@ with gr.Blocks() as demo:
             with gr.Row():
                 save_shot_list_btn = gr.Button("💾 Save Shot List")
                 export_shot_list_btn = gr.Button("📤 Export Shot List")
-        
+    
             with gr.Row():
                 shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
-                shot_list_feedback = gr.Textbox(label="Feedback", placeholder="System feedback will appear here", interactive=False)
 
             with gr.Accordion("👥 Proposed Subjects", open=True):
                 subjects_df = gr.DataFrame(
-                    headers=["name", "description", "type"],
+                    headers=["Name", "Description", "Type"],
                     datatype=["str", "str", "str"],
                     col_count=(3, "fixed"),
                     label="Proposed Subjects",
-                    interactive=False
+                    interactive=True
                 )
                 extract_subjects_btn = gr.Button("🔍 Extract Subjects")
-            
+    
                 with gr.Row():
                     subject_name_input = gr.Textbox(label="Subject Name")
                     subject_description_input = gr.Textbox(label="Subject Description")
                     subject_type_input = gr.Dropdown(label="Subject Type", choices=["person", "place", "prop"])
-            
+    
                 with gr.Row():
                     add_subject_btn = gr.Button("➕ Add Subject")
                     update_subject_btn = gr.Button("🔄 Update Subject")
                     delete_subject_btn = gr.Button("🗑️ Delete Subject")
-            
-                send_to_subject_management_btn = gr.Button("📤 Send to Subject Management")
+    
+                send_to_subject_management_btn = gr.Button("📤 Send All to Subject Management")
                 export_proposed_subjects_btn = gr.Button("💾 Export Proposed Subjects")
+
+        with gr.Accordion("System Feedback", open=False):
+            feedback_box = gr.Textbox(label="Feedback", interactive=False, lines=3)
 
             def update_shot_list_view(df, view_option):
                 if df is None or df.empty:
@@ -764,6 +766,20 @@ with gr.Blocks() as demo:
     add_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
     update_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
     delete_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
+
+    def receive_proposed_subjects(proposed_subjects_df):
+        # Merge the proposed subjects with the existing subjects in the Subject Management tab
+        updated_df = subject_manager.merge_subjects(subject_manager.get_subjects_dataframe(), proposed_subjects_df)
+        subject_manager.set_subjects(updated_df)
+        return updated_df, "Subjects received and merged successfully."
+
+    # Add this in the Subject Management tab section
+    receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
+    receive_proposed_subjects_btn.click(
+        receive_proposed_subjects,
+        inputs=[],
+        outputs=[subjects_df, feedback_box]
+    )
 
 # Launch the Gradio interface
 if __name__ == "__main__":
