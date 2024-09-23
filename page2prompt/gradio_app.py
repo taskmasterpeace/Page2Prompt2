@@ -504,9 +504,14 @@ with gr.Blocks() as demo:
 
     # Script Management event handlers
     async def generate_proposed_shot_list(full_script, view_option):
-        shot_list_df = await script_manager.generate_proposed_shot_list(full_script, view_option)
+        response = await script_manager.generate_proposed_shot_list(full_script, view_option)
+    
+        # Process the response and convert it to a DataFrame
+        shots = [shot.split(',') for shot in response.split('\n') if shot.strip()]
+        df = pd.DataFrame(shots, columns=["Scene", "Shot Description", "Shot Size", "People"])
+    
         feedback = "Shot list generated successfully."
-        return shot_list_df, feedback
+        return df, feedback
 
     def save_proposed_shot_list():
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")

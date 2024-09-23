@@ -184,22 +184,29 @@ class MetaChain:
         prompt = f"""
         Given the following script, generate a proposed detailed shot list. 
         This is not the final shot list, but a starting point for discussion.
-        Each shot should include:
-        1. Timestamp (use placeholder values like 00:00:00 for now)
-        2. Scene number
-        3. Shot number
-        4. A brief script reference
-        5. A detailed shot description
-        6. Shot size (e.g., Close-up, Medium Shot, Wide Shot)
-        7. People in the shot
-        8. Places or locations in the shot
+        Each line of the shot list should contain the following information, in order, without labels or titles:
+
+        1. Scene number
+        2. Shot description
+        3. Shot size (e.g., Close-up, Medium Shot, Wide Shot)
+        4. People in the shot
 
         Script:
         {script}
 
-        Provide the proposed shot list in a format that can be easily converted to a CSV, with each field separated by a pipe (|) character.
+        Important instructions:
+        - Do not include any headers, labels, or titles in the output.
+        - Each line should contain only the four pieces of information listed above, in that order.
+        - Separate each piece of information with a comma (,) not a pipe character.
+        - Do not use quotation marks or any other special characters.
+        - Start each new line with the scene number.
+
+        Example format (but use the actual content from the script):
+        1,Character A walks into the room,Wide Shot,Character A
+        1,Character A sits down,Medium Shot,Character A
+        2,Character B enters looking worried,Close-up,Character B
         """
-        
+    
         try:
             with get_openai_callback() as cb:
                 chain = RunnableSequence(
@@ -207,7 +214,7 @@ class MetaChain:
                     self.llm
                 )
                 result = await chain.ainvoke({})
-            
+        
             return result.content
         except Exception as e:
             error_message = f"Error generating proposed shot list: {str(e)}"
