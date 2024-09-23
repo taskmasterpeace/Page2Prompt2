@@ -19,7 +19,7 @@ class ScriptManager:
         if view_option == "Simple View":
             return self.proposed_shot_list[["Scene", "Shot Description", "Shot Size", "People"]]
         else:  # Detailed View
-            return self.proposed_shot_list
+            return self.proposed_shot_list[["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]]
 
     def save_proposed_shot_list(self, file_path: str):
         # Always save the full shot list, regardless of the current view
