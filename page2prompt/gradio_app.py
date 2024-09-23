@@ -87,7 +87,8 @@ def transcribe_audio_wrapper(audio_file, include_timestamps):
 with gr.Blocks() as demo:
     with gr.Accordion("🎬 Script & Director Style", open=True):
         director_style_input = gr.Dropdown(label="🎬 Director Style", choices=[style['name'] for style in director_styles])
-        full_script_input = gr.Textbox(label="📚 Full Script", lines=5)
+        with gr.Accordion("📜 Full Script", open=False):
+            full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
 
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
