@@ -386,8 +386,7 @@ with gr.Blocks() as demo:
                     datatype=["str", "str", "str", "str"],
                     col_count=(4, "fixed"),
                     label="Proposed Shot List",
-                    interactive=True,
-                    column_resizable=True
+                    interactive=True
                 )
                 generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
 
