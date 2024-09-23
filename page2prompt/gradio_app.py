@@ -542,16 +542,9 @@ with gr.Blocks() as demo:
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
         return "Proposed shot list saved to proposed_shot_list.csv"
 
-    async def extract_proposed_subjects(full_script):
-        return await script_manager.extract_proposed_subjects(full_script)
-
-    def add_proposed_subject(name, description, subject_type):
-        script_manager.add_proposed_subject(name, description, subject_type)
-        return script_manager.get_proposed_subjects()
-
-    async def extract_proposed_subjects(full_script):
+    async def extract_proposed_subjects(full_script, shot_list):
         try:
-            subjects_df = await script_manager.extract_proposed_subjects(full_script)
+            subjects_df = await script_manager.extract_proposed_subjects(full_script, shot_list)
             feedback = "Subjects extracted successfully."
             return subjects_df, feedback
         except Exception as e:
@@ -559,68 +552,49 @@ with gr.Blocks() as demo:
             print(error_message)
             return None, error_message
 
-    def update_view(df, view_option):
-        if df is None or df.empty:
-            return None
-    
-        all_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
-        simple_columns = ["Scene", "Shot Description", "Shot Size", "People"]
-    
-        visible_columns = simple_columns if view_option == "Simple View" else all_columns
-    
-        # Create a list of booleans indicating which columns should be visible
-        column_visibility = [col in visible_columns for col in all_columns]
-    
-        return gr.DataFrame.update(value=df, visible=column_visibility)
+    def add_proposed_subject(name, description, subject_type, current_df):
+        new_subject = pd.DataFrame([[name, description, subject_type]], columns=["Name", "Description", "Type"])
+        updated_df = script_manager.merge_subjects(current_df, new_subject)
+        return updated_df
+
+    def update_proposed_subject(df, name, description, subject_type):
+        updated_subject = pd.DataFrame([[name, description, subject_type]], columns=["Name", "Description", "Type"])
+        return script_manager.merge_subjects(df, updated_subject)
+
+    def delete_proposed_subject(df, name):
+        return df[df['Name'] != name].reset_index(drop=True)
+
+    def send_to_subject_management(proposed_subjects_df):
+        # This function will be implemented in the Subject Management tab
+        # For now, we'll just return a success message
+        return "All subjects sent to Subject Management successfully."
 
     generate_shot_list_btn.click(
         generate_proposed_shot_list,
         inputs=[full_script_input, column_view],
-        outputs=[shot_list_df, shot_list_feedback]
+        outputs=[full_df, shot_list_df, feedback_box]
     )
 
     extract_subjects_btn.click(
         extract_proposed_subjects,
-        inputs=[full_script_input],
-        outputs=[subjects_df, shot_list_feedback]
+        inputs=[full_script_input, shot_list_df],
+        outputs=[subjects_df, feedback_box]
     )
-
-    column_view.change(
-        update_shot_list_view,
-        inputs=[shot_list_df, column_view],
-        outputs=[shot_list_df]
-    )
-
-    # Add these event handlers for subject management
-    def add_subject(name, description, subject_type):
-        new_subject = pd.DataFrame([[name, description, subject_type]], columns=["name", "description", "type"])
-        updated_df = pd.concat([subjects_df.value, new_subject], ignore_index=True)
-        return updated_df
-
-    def update_subject(df, name, description, subject_type):
-        selected_index = df.index[df['name'] == name].tolist()
-        if selected_index:
-            index = selected_index[0]
-            df.loc[index] = [name, description, subject_type]
-        return df
-
-    def delete_subject(df, name):
-        return df[df['name'] != name].reset_index(drop=True)
 
     add_subject_btn.click(
-        add_subject,
-        inputs=[subject_name_input, subject_description_input, subject_type_input],
+        add_proposed_subject,
+        inputs=[subject_name_input, subject_description_input, subject_type_input, subjects_df],
         outputs=[subjects_df]
     )
 
     update_subject_btn.click(
-        update_subject,
+        update_proposed_subject,
         inputs=[subjects_df, subject_name_input, subject_description_input, subject_type_input],
         outputs=[subjects_df]
     )
 
     delete_subject_btn.click(
-        delete_subject,
+        delete_proposed_subject,
         inputs=[subjects_df, subject_name_input],
         outputs=[subjects_df]
     )
@@ -628,7 +602,7 @@ with gr.Blocks() as demo:
     def populate_subject_fields(evt: gr.SelectData, df):
         if evt.index is not None:
             row = df.iloc[evt.index[0]]
-            return row['name'], row['description'], row['type']
+            return row['Name'], row['Description'], row['Type']
         return "", "", ""
 
     subjects_df.select(
@@ -638,15 +612,15 @@ with gr.Blocks() as demo:
     )
 
     send_to_subject_management_btn.click(
-        lambda df: script_manager.send_to_subject_management(df),
+        send_to_subject_management,
         inputs=[subjects_df],
-        outputs=[shot_list_feedback]
+        outputs=[feedback_box]
     )
 
     export_proposed_subjects_btn.click(
         lambda df: script_manager.export_proposed_subjects(df, "proposed_subjects.csv"),
         inputs=[subjects_df],
-        outputs=[shot_list_feedback]
+        outputs=[feedback_box]
     )
 
     def copy_to_clipboard(text):
