@@ -552,9 +552,9 @@ with gr.Blocks() as demo:
         return script_manager.update_proposed_subject(selected_rows, name, description, subject_type)
 
     update_subject_btn.click(
-        update_proposed_subject_wrapper,
+        fn=script_manager.update_proposed_subject,
         inputs=[
-            proposed_subjects_df.select,
+            proposed_subjects_df,
             subject_name_input,
             subject_description_input,
             subject_type_input
