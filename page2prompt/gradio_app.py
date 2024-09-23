@@ -480,14 +480,14 @@ with gr.Blocks() as demo:
     send_prompts_btn.click(send_prompts)
 
     # Script Management event handlers
-    async def generate_proposed_shot_list(full_script):
-        return await script_manager.generate_proposed_shot_list(full_script)
+    async def generate_proposed_shot_list(full_script, view_option):
+        return await script_manager.generate_proposed_shot_list(full_script, view_option)
 
     def save_proposed_shot_list():
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
         return "Proposed shot list saved to proposed_shot_list.csv"
 
-    generate_shot_list_btn.click(generate_proposed_shot_list, inputs=[full_script_input], outputs=[shot_list_df, shot_list_feedback])
+    generate_shot_list_btn.click(generate_proposed_shot_list, inputs=[full_script_input, column_view], outputs=[shot_list_df, shot_list_feedback])
     save_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
     export_shot_list_btn.click(save_proposed_shot_list, outputs=[shot_list_feedback])
 
