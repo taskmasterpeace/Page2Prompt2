@@ -1,4 +1,5 @@
 import csv
+import os
 import pandas as pd
 from typing import Dict, List, Optional
 
@@ -13,7 +14,7 @@ class Subject:
         self.active = active
 
 class SubjectManager:
-    def __init__(self, subjects_file: str = "subjects.csv"):
+    def __init__(self, subjects_file: str):
         self.subjects_file = subjects_file
         self.subjects: List[Subject] = self._load_subjects()
 
@@ -34,8 +35,11 @@ class SubjectManager:
                         active=row.get('Active', 'True').lower() == 'true'
                     ))
         except FileNotFoundError:
-            # File doesn't exist, return an empty list
-            pass
+            # Create the file if it doesn't exist
+            os.makedirs(os.path.dirname(self.subjects_file), exist_ok=True)
+            with open(self.subjects_file, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=["Name", "Description", "Alias", "Type", "Prefix", "Suffix", "Active"])
+                writer.writeheader()
         return subjects
 
     def get_subjects(self) -> List[Subject]:

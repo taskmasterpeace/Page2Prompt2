@@ -3,17 +3,20 @@ import asyncio
 import csv
 import os
 import pandas as pd
-from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
-from page2prompt.utils.subject_manager import SubjectManager, Subject
-from page2prompt.utils.style_manager import StyleManager
-from page2prompt.components.meta_chain import MetaChain
-from page2prompt.utils.shot_list_generator import generate_shot_list
-from page2prompt.components.director_assistant import DirectorAssistant
-from page2prompt.music_lab import transcribe_audio, search_and_replace_lyrics
+from .components.script_prompt_generation import ScriptPromptGenerator
+from .utils.subject_manager import SubjectManager, Subject
+from .utils.style_manager import StyleManager
+from .components.meta_chain import MetaChain
+from .utils.shot_list_generator import generate_shot_list
+from .components.director_assistant import DirectorAssistant
+from .music_lab import transcribe_audio, search_and_replace_lyrics
+
+# Define data directory
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
 # Initialize components
-style_manager = StyleManager("styles.csv")
-subject_manager = SubjectManager("subjects.csv")
+style_manager = StyleManager(os.path.join(DATA_DIR, "styles.csv"))
+subject_manager = SubjectManager(os.path.join(DATA_DIR, "subjects.csv"))
 meta_chain = MetaChain()
 script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
 director_assistant = DirectorAssistant(meta_chain)
@@ -27,7 +30,7 @@ async def handle_conversation(user_input, concept, genre, descriptors, lyrics, c
 # Load camera settings from CSV
 def load_camera_settings(csv_file):
     settings = {}
-    file_path = os.path.join(os.path.dirname(__file__), csv_file)
+    file_path = os.path.join(DATA_DIR, csv_file)
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
@@ -41,7 +44,7 @@ camera_settings = load_camera_settings("camera_settings.csv")
 # Load director styles from CSV
 def load_director_styles(csv_file):
     styles = []
-    file_path = os.path.join(os.path.dirname(__file__), csv_file)
+    file_path = os.path.join(DATA_DIR, csv_file)
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
         styles = list(reader)

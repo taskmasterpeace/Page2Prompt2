@@ -1,9 +1,10 @@
 import csv
+import os
 from typing import Dict, List
 from langchain.prompts import PromptTemplate
 
 class StyleManager:
-    def __init__(self, styles_file: str = "styles.csv"):
+    def __init__(self, styles_file: str):
         self.styles_file = styles_file
         self.styles = self._load_styles()
 
@@ -17,6 +18,7 @@ class StyleManager:
                     styles.append(row)
         except FileNotFoundError:
             # Create the file if it doesn't exist
+            os.makedirs(os.path.dirname(self.styles_file), exist_ok=True)
             with open(self.styles_file, 'w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=["Style Name", "Prefix", "Suffix", "Genre", "Descriptors"])
                 writer.writeheader()
