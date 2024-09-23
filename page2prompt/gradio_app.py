@@ -426,11 +426,14 @@ with gr.Blocks() as demo:
             def update_shot_list_view(df, view_option):
                 if df is None or df.empty:
                     return None
-                # Ensure all necessary columns exist
+    
                 required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
+    
+                # Ensure all required columns exist
                 for col in required_columns:
                     if col not in df.columns:
                         df[col] = ""
+    
                 if view_option == "Simple View":
                     return df[["Scene", "Shot Description", "Shot Size", "People"]]
                 else:  # Detailed View
