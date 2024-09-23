@@ -405,7 +405,6 @@ with gr.Blocks() as demo:
                     col_count=(3, "fixed"),
                     label="Proposed Subjects",
                     interactive=True,
-                    column_resizable=True,
                     row_select="single"
                 )
                 extract_subjects_btn = gr.Button("🔍 Extract Subjects")
