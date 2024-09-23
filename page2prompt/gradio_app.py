@@ -504,7 +504,9 @@ with gr.Blocks() as demo:
 
     # Script Management event handlers
     async def generate_proposed_shot_list(full_script, view_option):
-        return await script_manager.generate_proposed_shot_list(full_script, view_option)
+        shot_list_df = await script_manager.generate_proposed_shot_list(full_script, view_option)
+        feedback = "Shot list generated successfully."
+        return shot_list_df, feedback
 
     def save_proposed_shot_list():
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
