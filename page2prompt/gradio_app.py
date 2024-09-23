@@ -10,6 +10,7 @@ from .components.meta_chain import MetaChain
 from .utils.shot_list_generator import generate_shot_list
 from .components.director_assistant import DirectorAssistant
 from .music_lab import transcribe_audio, search_and_replace_lyrics
+from .utils.script_manager import ScriptManager
 
 # Add debug print statements
 print("Current working directory:", os.getcwd())
@@ -32,6 +33,7 @@ except Exception as e:
 meta_chain = MetaChain()
 script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
 director_assistant = DirectorAssistant(meta_chain)
+script_manager = ScriptManager(meta_chain)
 
 async def handle_conversation(user_input, concept, genre, descriptors, lyrics, chat_history):
     # Placeholder function for handling conversation
@@ -372,6 +374,20 @@ with gr.Blocks() as demo:
                     outputs=shot_list_output
                 )
 
+        with gr.TabItem("📜 Script Management"):
+            with gr.Accordion("🎬 Proposed Shot List", open=True):
+                shot_list_df = gr.DataFrame(
+                    headers=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"],
+                    datatype=["str", "str", "str", "str", "str", "str", "str", "str"],
+                    col_count=(8, "fixed"),
+                    label="Proposed Shot List"
+                )
+                generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
+
+            with gr.Row():
+                save_shot_list_btn = gr.Button("💾 Save Shot List")
+                export_shot_list_btn = gr.Button("📤 Export Shot List")
+
     # Event handlers (placeholder functions for now)
     def save_style():
         return "Style saved"
@@ -437,6 +453,18 @@ with gr.Blocks() as demo:
     copy_normal_btn.click(lambda: copy_to_clipboard(normal_prompt.value))
     copy_detailed_btn.click(lambda: copy_to_clipboard(detailed_prompt.value))
     send_prompts_btn.click(send_prompts)
+
+    # Script Management event handlers
+    async def generate_shot_list(full_script):
+        return await script_manager.generate_shot_list(full_script)
+
+    def save_shot_list():
+        script_manager.save_shot_list("proposed_shot_list.csv")
+        return "Shot list saved to proposed_shot_list.csv"
+
+    generate_shot_list_btn.click(generate_shot_list, inputs=[full_script_input], outputs=[shot_list_df])
+    save_shot_list_btn.click(save_shot_list, outputs=[gr.Textbox()])
+    export_shot_list_btn.click(save_shot_list, outputs=[gr.Textbox()])
 
     def create_camera_settings():
         return {
