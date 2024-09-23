@@ -88,7 +88,9 @@ with gr.Blocks() as demo:
     with gr.Accordion("🎬 Script & Director Style", open=True):
         director_style_input = gr.Dropdown(label="🎬 Director Style", choices=[style['name'] for style in director_styles])
         with gr.Accordion("📜 Full Script", open=False):
-            full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
+            with gr.Row():
+                full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
+                copy_full_script_btn = gr.Button("📋", scale=0.05)
 
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
@@ -152,13 +154,13 @@ with gr.Blocks() as demo:
                     with gr.Accordion("🖼️ Generated Prompts", open=True):
                         with gr.Row():
                             concise_prompt = gr.Textbox(label="Concise")
-                            copy_concise_btn = gr.Button("📋")
+                            copy_concise_btn = gr.Button("📋", scale=0.05)
                         with gr.Row():
                             normal_prompt = gr.Textbox(label="Normal")
-                            copy_normal_btn = gr.Button("📋")
+                            copy_normal_btn = gr.Button("📋", scale=0.05)
                         with gr.Row():
                             detailed_prompt = gr.Textbox(label="Detailed")
-                            copy_detailed_btn = gr.Button("📋")
+                            copy_detailed_btn = gr.Button("📋", scale=0.05)
                         
                         structured_prompt = gr.Textbox(label="Structured Prompt")
                         generation_message = gr.Textbox(label="Generation Message")
@@ -648,6 +650,37 @@ with gr.Blocks() as demo:
         lambda df: script_manager.export_proposed_subjects(df, "proposed_subjects.csv"),
         inputs=[subjects_df],
         outputs=[shot_list_feedback]
+    )
+
+    def copy_to_clipboard(text):
+        return text
+
+    copy_full_script_btn.click(
+        copy_to_clipboard,
+        inputs=[full_script_input],
+        outputs=[gr.Textbox(visible=False)],
+        _js="(text) => navigator.clipboard.writeText(text)"
+    )
+
+    copy_concise_btn.click(
+        copy_to_clipboard,
+        inputs=[concise_prompt],
+        outputs=[gr.Textbox(visible=False)],
+        _js="(text) => navigator.clipboard.writeText(text)"
+    )
+
+    copy_normal_btn.click(
+        copy_to_clipboard,
+        inputs=[normal_prompt],
+        outputs=[gr.Textbox(visible=False)],
+        _js="(text) => navigator.clipboard.writeText(text)"
+    )
+
+    copy_detailed_btn.click(
+        copy_to_clipboard,
+        inputs=[detailed_prompt],
+        outputs=[gr.Textbox(visible=False)],
+        _js="(text) => navigator.clipboard.writeText(text)"
     )
 
     def create_camera_settings():
