@@ -52,15 +52,15 @@ class SubjectManager:
 
     def get_people(self) -> List[str]:
         """Returns a list of names of subjects with type 'person'."""
-        return [s.name for s in self.subjects if s.type.lower() == 'person']
+        return [s.name for s in self.subjects if s.type and s.type.lower() == 'person']
 
     def get_places(self) -> List[str]:
         """Returns a list of names of subjects with type 'place'."""
-        return [s.name for s in self.subjects if s.type.lower() == 'place']
+        return [s.name for s in self.subjects if s.type and s.type.lower() == 'place']
 
     def get_props(self) -> List[str]:
         """Returns a list of names of subjects with type 'prop'."""
-        return [s.name for s in self.subjects if s.type.lower() == 'prop']
+        return [s.name for s in self.subjects if s.type and s.type.lower() == 'prop']
 
     def get_subject_details(self, name: str) -> Dict:
         """Returns the details of a subject by name."""
