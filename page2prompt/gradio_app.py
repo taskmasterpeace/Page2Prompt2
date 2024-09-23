@@ -404,8 +404,7 @@ with gr.Blocks() as demo:
                     datatype=["str", "str", "str"],
                     col_count=(3, "fixed"),
                     label="Proposed Subjects",
-                    interactive=True,
-                    row_select="single"
+                    interactive=True
                 )
                 extract_subjects_btn = gr.Button("🔍 Extract Subjects")
                 execute_extraction_btn = gr.Button("▶️ Execute Extraction")
