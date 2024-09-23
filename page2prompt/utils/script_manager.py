@@ -33,9 +33,11 @@ class ScriptManager:
         self.proposed_subjects = pd.DataFrame(subjects, columns=["Name", "Description", "Type"])
         return self.proposed_subjects
 
-    def update_proposed_subject(self, index: int, name: str, description: str, subject_type: str):
-        if index < len(self.proposed_subjects):
+    def update_proposed_subject(self, selected_rows, name: str, description: str, subject_type: str):
+        if len(selected_rows) > 0:
+            index = selected_rows[0]
             self.proposed_subjects.loc[index] = [name, description, subject_type]
+        return self.proposed_subjects
 
     def add_proposed_subject(self, name: str, description: str, subject_type: str):
         new_subject = pd.DataFrame([[name, description, subject_type]], columns=["Name", "Description", "Type"])
