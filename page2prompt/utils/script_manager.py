@@ -9,25 +9,26 @@ class ScriptManager:
         self.shot_list = pd.DataFrame(columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
         self.proposed_subjects = pd.DataFrame(columns=["Name", "Description", "Type"])
 
+    def parse_llm_output(self, llm_output: str) -> pd.DataFrame:
+        rows = [row.split('|') for row in llm_output.strip().split('\n')]
+        df = pd.DataFrame(rows, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
+        return df
+
     async def generate_proposed_shot_list(self, full_script: str) -> pd.DataFrame:
         response = await self.meta_chain.generate_proposed_shot_list(full_script)
         
-        if isinstance(response, pd.DataFrame):
+        if isinstance(response, str):
+            df = self.parse_llm_output(response)
+        elif isinstance(response, pd.DataFrame):
             df = response
         else:
-            # Process the response and convert it to a DataFrame
-            shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
-            df = pd.DataFrame(shots, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
+            raise ValueError("Unexpected response type from MetaChain")
         
         # Ensure all required columns exist
         required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
         for col in required_columns:
             if col not in df.columns:
                 df[col] = ""
-        
-        # Ensure "Shot" column is filled
-        if df["Shot"].isnull().any():
-            df["Shot"] = df.index + 1  # Assuming each row is a separate shot
         
         return df
 
