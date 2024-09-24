@@ -33,7 +33,7 @@ except Exception as e:
     print(f"Error loading subjects: {str(e)}")
 meta_chain = MetaChain()
 script_prompt_generator = ScriptPromptGenerator(style_manager, subject_manager, meta_chain)
-director_assistant = DirectorAssistant(meta_chain)
+director_assistant = DirectorAssistant(os.path.join(DATA_DIR, "director_styles.csv"))
 script_manager = ScriptManager(meta_chain)
 
 async def handle_conversation(user_input, concept, genre, descriptors, lyrics, chat_history):
