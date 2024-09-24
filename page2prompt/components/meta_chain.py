@@ -301,23 +301,38 @@ class MetaChain:
 
             try:
                 response = await self.llm.ainvoke(prompt)
-                descriptions = response.content.strip().split('\n')
+                content = response.content.strip()
                 
-                for desc in descriptions:
-                    try:
-                        subject_data = json.loads(desc)
-                        for subject in subjects:
-                            if subject['name'].lower() == subject_data['name'].lower():
-                                subject.update(subject_data)
-                                break
-                    except json.JSONDecodeError:
-                        logger.warning(f"Failed to parse JSON: {desc}")
+                # Try to parse the entire response as a JSON array
+                try:
+                    descriptions = json.loads(content)
+                    if isinstance(descriptions, list):
+                        for subject_data in descriptions:
+                            for subject in subjects:
+                                if subject['name'].lower() == subject_data['name'].lower():
+                                    subject.update(subject_data)
+                                    break
+                    else:
+                        logger.warning("LLM response is not a JSON array")
+                except json.JSONDecodeError:
+                    # If parsing as an array fails, try individual JSON objects
+                    descriptions = content.split('\n')
+                    for desc in descriptions:
+                        try:
+                            subject_data = json.loads(desc)
+                            for subject in subjects:
+                                if subject['name'].lower() == subject_data['name'].lower():
+                                    subject.update(subject_data)
+                                    break
+                        except json.JSONDecodeError:
+                            logger.warning(f"Failed to parse JSON: {desc}")
             except Exception as e:
                 logger.error(f"Error generating descriptions: {str(e)}")
-                # If there's an error, we'll use a default description
-                for subject in subjects:
-                    if 'description' not in subject:
-                        subject['description'] = f"A {subject['type']} from the script"
+            
+            # Ensure all subjects have a description
+            for subject in subjects:
+                if 'description' not in subject:
+                    subject['description'] = f"A {subject['type']} from the script"
 
         logger.info(f"Completed subject extraction process with {len(subjects)} subjects")
         return {"subjects": subjects}

@@ -107,6 +107,12 @@ class ScriptManager:
             
             subjects_df = pd.DataFrame(subjects_dict['subjects'])
             logger.info(f"Successfully created subjects DataFrame with {len(subjects_df)} entries")
+            
+            # Ensure all required columns exist
+            for col in ["name", "description", "type"]:
+                if col not in subjects_df.columns:
+                    subjects_df[col] = ""
+            
             return subjects_df[['name', 'description', 'type']]  # Ensure correct column order
         except Exception as e:
             logger.exception(f"Error extracting subjects: {str(e)}")
