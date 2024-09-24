@@ -234,8 +234,7 @@ class MetaChain:
             print(error_message)
             return pd.DataFrame()
 
-    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> dict:
-        # Prepare a combined input that includes both the script and relevant shot list information
+    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame, unique_names: List[str]) -> dict:
         combined_input = f"""
         Script:
         {script}
@@ -243,7 +242,13 @@ class MetaChain:
         Shot List:
         {shot_list.to_string(index=False)}
 
-        Based on both the script and the shot list, extract subjects, their descriptions, and types.
+        Unique Names from Shot List:
+        {', '.join(unique_names)}
+
+        Based on the script, shot list, and unique names provided, extract subjects, their descriptions, and types. Pay special attention to the names listed in the "People" column of the shot list, ensuring all of these are included as subjects of type "person". For each subject:
+        1. Provide a name
+        2. Write a brief description based on their role or actions in the script
+        3. Specify the type (person, place, or prop)
         """
 
         try:
