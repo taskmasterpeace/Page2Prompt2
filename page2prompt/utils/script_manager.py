@@ -1,7 +1,11 @@
 from typing import List, Dict
 import pandas as pd
 import json
+import logging
 from ..components.meta_chain import MetaChain
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class ScriptManager:
     def __init__(self, meta_chain: MetaChain):
@@ -58,16 +62,27 @@ class ScriptManager:
         self.proposed_shot_list.to_csv(file_path, index=False)
 
     async def extract_proposed_subjects(self, full_script: str, shot_list: pd.DataFrame) -> pd.DataFrame:
-        response = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
-        
         try:
+            logger.info(f"Extracting subjects from script and shot list with {len(shot_list)} shots")
+            response = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
+            
+            # Parse the JSON response
             data = json.loads(response)
+            
+            # Convert to DataFrame
             df = pd.DataFrame(data['subjects'])
-            df['Description'] = df['Description'].apply(lambda x: x[:300] if len(x) > 300 else x)  # Limit description to ~2-3 sentences
+            
+            # Ensure description length
+            df['Description'] = df['Description'].apply(lambda x: x[:300] if len(x) > 300 else x)
+            
             self.proposed_subjects = df
             return df
-        except json.JSONDecodeError:
-            print("Error: Invalid JSON response")
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON Decode Error: {str(e)}")
+            logger.debug(f"Raw response: {response}")
+            return pd.DataFrame()
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
             return pd.DataFrame()
 
     def approve_proposed_subjects(self):

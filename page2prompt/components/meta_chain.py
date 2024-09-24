@@ -1,10 +1,14 @@
 import os
 import pandas as pd
+import logging
 from typing import Dict, Any, List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_community.callbacks.manager import get_openai_callback
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableSequence
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class MetaChain:
     def __init__(self):
@@ -232,7 +236,8 @@ class MetaChain:
 
     async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> str:
         prompt = f"""
-        Extract and generate a list of proposed subjects from the following script and shot list. Provide the output in JSON format with the following structure:
+        Extract and generate a list of proposed subjects from the following script and shot list. 
+        Provide the output in JSON format with the following structure:
         {{
             "subjects": [
                 {{
@@ -242,7 +247,7 @@ class MetaChain:
                 }}
             ]
         }}
-        
+
         For each subject, especially people:
         1. Provide a physical description including body type, unique accessories, and clothing.
         2. The description should be 2-3 sentences long, with a maximum of 300 characters.
@@ -253,6 +258,7 @@ class MetaChain:
         Important:
         - Include all unique people mentioned in the 'People' column of the shot list.
         - For subjects not explicitly described in the script, provide plausible physical descriptions including race, gender, age range, body type, hairstyle, clothing colors, and any accessories (e.g., hats, glasses, jewelry) based on their role and context. Ensure these descriptions are diverse and avoid stereotypes.
+        - Include important places and props mentioned in the 'Places' column or the script.
         - Do not include any explanatory text or additional formatting.
 
         Script:
@@ -260,9 +266,12 @@ class MetaChain:
 
         Shot List:
         {shot_list.to_json(orient='records')}
+
+        Respond only with the JSON output.
         """
-        print("Subject Extraction Prompt:")
-        print(prompt)
+        
+        logger.info("Extracting subjects from script and shot list")
+        logger.debug(f"Prompt: {prompt}")
         
         try:
             with get_openai_callback() as cb:
@@ -272,8 +281,9 @@ class MetaChain:
                 )
                 result = await chain.ainvoke({})
             
+            logger.debug(f"Raw response: {result.content}")
             return result.content
         except Exception as e:
             error_message = f"Error extracting proposed subjects: {str(e)}"
-            print(error_message)
+            logger.error(error_message)
             return error_message
