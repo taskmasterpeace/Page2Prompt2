@@ -201,11 +201,15 @@ class MetaChain:
         - Do not include any headers, labels, or titles in the output.
         - Start each new line with the timestamp.
         - Use N/A for any fields that are not applicable or cannot be determined from the script.
+        - For the Script Reference, include the exact line or brief excerpt from the script that the shot is based on.
+        - Scene numbers should change when the script indicates a new scene (e.g., INT. ROOM - DAY).
+        - Shot numbers should restart at 1 for each new scene.
+        - Ensure that the Shot Description provides more detail than just repeating the Script Reference.
 
         Example format:
-        00:00|1|1|INT. ROOM - DAY|Character A walks into the room|Wide Shot|Character A|Living Room
-        00:30|1|2|INT. ROOM - DAY|Character A sits down|Medium Shot|Character A|Living Room
-        01:00|2|1|INT. HALLWAY - DAY|Character B enters looking worried|Close-up|Character B|Hallway
+        00:00|1|1|INT. ROOM - DAY|Character A walks into the room, looking around cautiously|Wide Shot|Character A|Living Room
+        00:30|1|2|Character A sits down slowly|Character A lowers themselves into a chair, sighing heavily|Medium Shot|Character A|Living Room
+        01:00|2|1|INT. HALLWAY - DAY. Character B enters|Character B rushes in, their face etched with worry|Close-up|Character B|Hallway
         """
 
         try:
