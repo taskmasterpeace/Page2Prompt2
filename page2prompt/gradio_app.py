@@ -961,7 +961,7 @@ async def generate_prompts_wrapper(
 # Add event handlers for project management buttons
 save_project_btn.click(
     save_project,
-    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, gr.State(generated_prompts),
+    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, gr.State(lambda: generated_prompts),
             director_style_input, style_input, style_prefix_input, style_suffix_input],
     outputs=[feedback_box, projects_df]
 )
@@ -982,9 +982,53 @@ delete_project_btn.click(
 
 export_prompts_btn.click(
     export_prompts,
-    inputs=[gr.State(generated_prompts), project_name_input],
+    inputs=[gr.State(lambda: generated_prompts), project_name_input],
     outputs=[feedback_box]
 )
 
 # Add this to initialize the projects list when the app starts
 demo.load(list_projects, outputs=[projects_df])
+
+# Update the generate_prompts_wrapper function to store prompts globally
+def generate_prompts_wrapper(*args, **kwargs):
+    global generated_prompts
+    result = asyncio.run(script_prompt_generator.generate_prompts(*args, **kwargs))
+    generated_prompts.extend([result["concise"], result["normal"], result["detailed"]])
+    return (result["concise"], result["normal"], result["detailed"], 
+            result["structured"], "Prompts generated and saved.", ", ".join(kwargs.get('active_subjects', [])))
+
+# Connect the generate_prompts_wrapper to the generate_button
+generate_button.click(
+    fn=generate_prompts_wrapper,
+    inputs=[
+        shot_description_input,
+        directors_notes_input,
+        style_input,
+        style_prefix_input,
+        style_suffix_input,
+        director_style_input,
+        shot,
+        move,
+        size,
+        framing,
+        depth_of_field,
+        camera_type,
+        camera_name,
+        lens_type,
+        end_parameters_input,
+        stick_to_script_input,
+        highlighted_text_input,
+        full_script_input,
+        people,
+        places,
+        props
+    ],
+    outputs=[
+        concise_prompt,
+        normal_prompt,
+        detailed_prompt,
+        structured_prompt,
+        generation_message,
+        active_subjects_display
+    ]
+)
