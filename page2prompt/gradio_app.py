@@ -389,7 +389,7 @@ with gr.Blocks() as demo:
                     label="Shot List View"
                 )
                 shot_list_df = gr.DataFrame(
-                    headers=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"],
+                    headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
                     label="Proposed Shot List",
                     interactive=False  # Set to True if you want it editable
                 )
@@ -527,7 +527,7 @@ with gr.Blocks() as demo:
             df = pd.DataFrame(shots, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
 
         # Ensure all necessary columns exist
-        required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
+        required_columns = ["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"]
         for col in required_columns:
             if col not in df.columns:
                 df[col] = ""

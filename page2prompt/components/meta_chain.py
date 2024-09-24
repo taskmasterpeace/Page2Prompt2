@@ -188,7 +188,7 @@ class MetaChain:
         1. Timestamp
         2. Scene
         3. Shot
-        4. Script Reference
+        4. Reference
         5. Shot Description
         6. Shot Size
         7. People
