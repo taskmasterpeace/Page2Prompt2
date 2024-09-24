@@ -1,4 +1,5 @@
 import os
+import json
 import pandas as pd
 import logging
 from typing import Dict, Any, List, Optional
@@ -252,34 +253,24 @@ class MetaChain:
         1. Provide a name
         2. Write a brief description based on their role or actions in the script
         3. Specify the type (person, place, or prop)
+
+        Return the results in the following JSON format:
+        {{
+            "subjects": [
+                {{
+                    "name": "Subject Name",
+                    "description": "Brief description",
+                    "type": "person/place/prop"
+                }},
+                ...
+            ]
+        }}
         """
 
         try:
-            response = await self.llm.apredict(
-                combined_input,
-                response_format={
-                    "type": "json_object",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "subjects": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {"type": "string"},
-                                        "description": {"type": "string"},
-                                        "type": {"type": "string", "enum": ["person", "place", "prop"]}
-                                    },
-                                    "required": ["name", "description", "type"]
-                                }
-                            }
-                        },
-                        "required": ["subjects"]
-                    }
-                }
-            )
-            return response
+            response = await self.llm.ainvoke(combined_input)
+            subjects_data = json.loads(response.content)
+            return subjects_data
         except Exception as e:
             logger.error(f"Error extracting subjects: {str(e)}")
             return {"subjects": []}
