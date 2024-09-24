@@ -281,14 +281,19 @@ class MetaChain:
                 descriptions = response.content.strip().split('\n')
                 
                 for desc in descriptions:
-                    name, description = desc.split(':', 1)
-                    name = name.strip()
-                    description = description.strip()
-                    for subject in subjects:
-                        if subject['name'].lower() == name.lower():
-                            subject['description'] = description
-                            break
+                    parts = desc.split(':', 1)
+                    if len(parts) == 2:
+                        name, description = parts
+                        name = name.strip()
+                        description = description.strip()
+                        for subject in subjects:
+                            if subject['name'].lower() == name.lower():
+                                subject['description'] = description
+                                break
+                    else:
+                        logger.warning(f"Unexpected description format: {desc}")
             except Exception as e:
                 logger.error(f"Error generating descriptions: {str(e)}")
+                # If there's an error, we'll keep the default descriptions
 
         return {"subjects": subjects}
