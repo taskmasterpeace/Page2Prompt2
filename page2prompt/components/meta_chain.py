@@ -235,24 +235,26 @@ class MetaChain:
             print(error_message)
             return pd.DataFrame()
 
-    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame, unique_names: List[str], unique_places: List[str]) -> dict:
+    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> dict:
         subjects = []
 
+        # Extract unique people and places from the shot list
+        unique_people = set(shot_list['People'].str.split(',').explode().str.strip().unique())
+        unique_places = set(shot_list['Places'].str.split(',').explode().str.strip().unique())
+
         # Process people
-        for name in unique_names:
-            if name and name.strip():
+        for name in unique_people:
+            if name and name != 'N/A':
                 subjects.append({
-                    "name": name.strip(),
-                    "description": "Character from the script",
+                    "name": name,
                     "type": "person"
                 })
 
         # Process places
         for place in unique_places:
-            if place and place.strip():
+            if place and place != 'N/A':
                 subjects.append({
-                    "name": place.strip(),
-                    "description": "Location from the script",
+                    "name": place,
                     "type": "place"
                 })
 
@@ -262,7 +264,7 @@ class MetaChain:
             prompt = f"""
             Given the following list of subjects extracted from a script and shot list, provide a brief description for each.
             For people, focus on their physical appearance, clothing, accessories, and hairstyle.
-            For locations, describe how they appear at that point in the story.
+            For locations, describe their general appearance and atmosphere.
             Do not include information about their role in the story or personality traits.
 
             Script:
@@ -296,6 +298,9 @@ class MetaChain:
                         logger.warning(f"Unexpected description format: {desc}")
             except Exception as e:
                 logger.error(f"Error generating descriptions: {str(e)}")
-                # If there's an error, we'll keep the default descriptions
+                # If there's an error, we'll use a default description
+                for subject in subjects:
+                    if 'description' not in subject:
+                        subject['description'] = f"A {subject['type']} from the script"
 
         return {"subjects": subjects}

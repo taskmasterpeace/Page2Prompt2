@@ -29,7 +29,7 @@ class ScriptManager:
             raise ValueError("Unexpected response type from MetaChain")
         
         # Ensure all required columns exist and are in the correct order
-        required_columns = ["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"]
+        required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
         for col in required_columns:
             if col not in df.columns:
                 df[col] = ""
@@ -38,7 +38,7 @@ class ScriptManager:
         df = df[required_columns]
         
         # Reset shot numbers for each scene
-        def reset_shot_numbers(df):
+        if not df.empty:
             shot_number = 1
             current_scene = df.iloc[0]["Scene"]
             for i, row in df.iterrows():
@@ -47,11 +47,7 @@ class ScriptManager:
                     current_scene = row["Scene"]
                 df.at[i, "Shot"] = shot_number
                 shot_number += 1
-            return df
-
-        # Apply the reset_shot_numbers function
-        df = reset_shot_numbers(df)
-    
+        
         # Convert all columns to strings to ensure compatibility with gr.DataFrame
         df = df.astype(str)
     
@@ -96,22 +92,12 @@ class ScriptManager:
         try:
             if shot_list is None:
                 shot_list = await self.generate_proposed_shot_list(full_script)
-            unique_names = self.extract_unique_names(shot_list)
-            unique_places = self.extract_unique_places(shot_list)
-            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list, unique_names, unique_places)
+            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
             subjects_df = pd.DataFrame(subjects_dict['subjects'])
             return subjects_df
         except Exception as e:
             logger.error(f"Error extracting subjects: {str(e)}")
             return pd.DataFrame(columns=["Name", "Description", "Type"])
-
-    def extract_unique_names(self, shot_list: pd.DataFrame) -> List[str]:
-        people = shot_list['People'].dropna().str.split(',').explode().str.strip()
-        return list(set(people))
-
-    def extract_unique_places(self, shot_list: pd.DataFrame) -> List[str]:
-        places = shot_list['Places'].dropna().str.split(',').explode().str.strip()
-        return list(set(places))
 
     def approve_proposed_subjects(self):
         # Create a set of all unique people from the shot list
