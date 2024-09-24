@@ -45,8 +45,8 @@ class ScriptManager:
         # Always save the full shot list, regardless of the current view
         self.proposed_shot_list.to_csv(file_path, index=False)
 
-    async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
-        response = await self.meta_chain.extract_proposed_subjects(full_script, self.shot_list)
+    async def extract_proposed_subjects(self, full_script: str, shot_list: pd.DataFrame) -> pd.DataFrame:
+        response = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
         
         try:
             data = json.loads(response)
