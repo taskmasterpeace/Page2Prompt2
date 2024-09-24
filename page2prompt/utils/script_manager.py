@@ -105,11 +105,14 @@ class ScriptManager:
             
             subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
             
-            if 'subjects' not in subjects_dict or not subjects_dict['subjects']:
-                logger.warning("No subjects found or empty subjects list returned")
+            if isinstance(subjects_dict, list):
+                subjects_df = pd.DataFrame(subjects_dict)
+            elif isinstance(subjects_dict, dict) and 'subjects' in subjects_dict:
+                subjects_df = pd.DataFrame(subjects_dict['subjects'])
+            else:
+                logger.warning("Unexpected format of subjects_dict")
                 return pd.DataFrame(columns=["name", "description", "type"])
             
-            subjects_df = pd.DataFrame(subjects_dict['subjects'])
             logger.info(f"Successfully created subjects DataFrame with {len(subjects_df)} entries")
             
             # Ensure all required columns exist

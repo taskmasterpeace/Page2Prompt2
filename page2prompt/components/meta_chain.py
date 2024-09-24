@@ -236,7 +236,7 @@ class MetaChain:
             print(error_message)
             return pd.DataFrame()
 
-    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> dict:
+    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> List[Dict[str, str]]:
         logger.info("Starting subject extraction process")
         subjects = []
 
@@ -328,4 +328,4 @@ class MetaChain:
                     subject['description'] = f"A {subject['type']} from the script"
 
         logger.info(f"Completed subject extraction process with {len(subjects)} subjects")
-        return {"subjects": subjects}
+        return subjects
