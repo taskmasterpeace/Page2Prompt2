@@ -234,34 +234,44 @@ class MetaChain:
             print(error_message)
             return pd.DataFrame()
 
-    async def extract_proposed_subjects(self, script: str) -> dict:
-        response = await self.client.chat.completions.create(
-            model="gpt-4-1106-preview",  # Use the latest model that supports structured outputs
-            messages=[
-                {"role": "system", "content": "Extract subjects, their descriptions, and types from the given script."},
-                {"role": "user", "content": script}
-            ],
-            response_format={
-                "type": "json_object",
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "subjects": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"},
-                                    "description": {"type": "string"},
-                                    "type": {"type": "string", "enum": ["person", "place", "prop"]}
-                                },
-                                "required": ["name", "description", "type"]
+    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> dict:
+        # Prepare a combined input that includes both the script and relevant shot list information
+        combined_input = f"""
+        Script:
+        {script}
+
+        Shot List:
+        {shot_list.to_string(index=False)}
+
+        Based on both the script and the shot list, extract subjects, their descriptions, and types.
+        """
+
+        try:
+            response = await self.llm.apredict(
+                combined_input,
+                response_format={
+                    "type": "json_object",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "subjects": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string"},
+                                        "description": {"type": "string"},
+                                        "type": {"type": "string", "enum": ["person", "place", "prop"]}
+                                    },
+                                    "required": ["name", "description", "type"]
+                                }
                             }
-                        }
-                    },
-                    "required": ["subjects"]
+                        },
+                        "required": ["subjects"]
+                    }
                 }
-            },
-            temperature=0
-        )
-        return response.choices[0].message.content
+            )
+            return response
+        except Exception as e:
+            logger.error(f"Error extracting subjects: {str(e)}")
+            return {"subjects": []}

@@ -63,12 +63,12 @@ class ScriptManager:
 
     async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
         try:
-            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script)
-            subjects_json = json.loads(subjects_dict)
-            subjects_df = pd.DataFrame(subjects_json['subjects'])
+            shot_list = await self.generate_proposed_shot_list(full_script)
+            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
+            subjects_df = pd.DataFrame(subjects_dict['subjects'])
             return subjects_df
         except Exception as e:
-            print(f"Error extracting subjects: {str(e)}")
+            logger.error(f"Error extracting subjects: {str(e)}")
             return pd.DataFrame(columns=["name", "description", "type"])
 
     def approve_proposed_subjects(self):
