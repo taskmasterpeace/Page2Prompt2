@@ -4,6 +4,8 @@ import csv
 import os
 import pandas as pd
 import json
+from datetime import datetime
+import json
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
 from .utils.style_manager import StyleManager
@@ -788,3 +790,147 @@ with gr.Blocks() as demo:
 # Launch the Gradio interface
 if __name__ == "__main__":
     demo.launch()
+
+# Add these imports at the top of the file
+import json
+import os
+from datetime import datetime
+
+# Add or update these functions at the end of the file
+
+def save_project(project_name, full_script, shot_list, subjects, prompts, director_style, style, style_prefix, style_suffix):
+    if not project_name:
+        return "Please enter a project name.", None
+
+    project_data = {
+        "name": project_name,
+        "full_script": full_script,
+        "shot_list": shot_list.to_dict(),
+        "subjects": subjects.to_dict(),
+        "prompts": prompts,
+        "director_style": director_style,
+        "style": style,
+        "style_prefix": style_prefix,
+        "style_suffix": style_suffix,
+        "last_modified": datetime.now().isoformat()
+    }
+    
+    with open(f"{project_name}.json", "w") as f:
+        json.dump(project_data, f)
+    
+    return f"Project '{project_name}' saved successfully.", list_projects()
+
+def load_project(project_name):
+    try:
+        with open(f"{project_name}.json", "r") as f:
+            project_data = json.load(f)
+        
+        full_script = project_data["full_script"]
+        shot_list = pd.DataFrame.from_dict(project_data["shot_list"])
+        subjects = pd.DataFrame.from_dict(project_data["subjects"])
+        prompts = project_data["prompts"]
+        director_style = project_data.get("director_style", "")
+        style = project_data.get("style", "")
+        style_prefix = project_data.get("style_prefix", "")
+        style_suffix = project_data.get("style_suffix", "")
+        
+        return full_script, shot_list, subjects, prompts, director_style, style, style_prefix, style_suffix, project_data, f"Project '{project_name}' loaded successfully."
+    except FileNotFoundError:
+        return None, None, None, None, None, None, None, None, None, f"Project '{project_name}' not found."
+
+def delete_project(project_name):
+    try:
+        os.remove(f"{project_name}.json")
+        return f"Project '{project_name}' deleted successfully.", list_projects()
+    except FileNotFoundError:
+        return f"Project '{project_name}' not found.", list_projects()
+
+def list_projects():
+    projects = []
+    for file in os.listdir():
+        if file.endswith(".json"):
+            with open(file, "r") as f:
+                project_data = json.load(f)
+                projects.append({
+                    "Project Name": project_data["name"],
+                    "Last Modified": project_data["last_modified"]
+                })
+    return pd.DataFrame(projects)
+
+def export_prompts(prompts, project_name):
+    if not project_name:
+        return "Please enter a project name."
+    with open(f"{project_name}_prompts.txt", "w") as f:
+        for prompt in prompts:
+            f.write(f"{prompt}\n\n")
+    return f"Prompts exported to '{project_name}_prompts.txt'"
+
+# Global variable to store generated prompts
+generated_prompts = []
+
+# Modify the generate_prompts_wrapper function to append prompts
+async def generate_prompts_wrapper(
+    shot_description, directors_notes, style, style_prefix, style_suffix,
+    director_style, shot, move, size, framing, depth_of_field, camera_type,
+    camera_name, lens_type, end_parameters, stick_to_script, highlighted_text,
+    full_script, people, places, props
+):
+    active_subjects = people + places + props
+    result = await script_prompt_generator.generate_prompts(
+        script_excerpt=full_script,
+        shot_description=shot_description,
+        directors_notes=directors_notes,
+        style=style,
+        style_prefix=style_prefix,
+        style_suffix=style_suffix,
+        director_style=director_style,
+        shot=shot,
+        move=move,
+        size=size,
+        framing=framing,
+        depth_of_field=depth_of_field,
+        camera_type=camera_type,
+        camera_name=camera_name,
+        lens_type=lens_type,
+        end_parameters=end_parameters,
+        stick_to_script=stick_to_script,
+        highlighted_text=highlighted_text,
+        full_script=full_script,
+        active_subjects=active_subjects
+    )
+    
+    # Append generated prompts to the global list
+    generated_prompts.extend([result["concise"], result["normal"], result["detailed"]])
+    
+    return result["concise"], result["normal"], result["detailed"], result["structured"], "Prompts generated and saved.", ", ".join(active_subjects)
+
+# Add event handlers for project management buttons
+save_project_btn.click(
+    save_project,
+    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, gr.State(generated_prompts),
+            director_style_input, style_input, style_prefix_input, style_suffix_input],
+    outputs=[feedback_box, projects_df]
+)
+
+load_project_btn.click(
+    load_project,
+    inputs=[project_name_input],
+    outputs=[full_script_input, shot_list_df, subjects_df, prompts_display, 
+             director_style_input, style_input, style_prefix_input, style_suffix_input,
+             project_info, feedback_box]
+)
+
+delete_project_btn.click(
+    delete_project,
+    inputs=[project_name_input],
+    outputs=[feedback_box, projects_df]
+)
+
+export_prompts_btn.click(
+    export_prompts,
+    inputs=[gr.State(generated_prompts), project_name_input],
+    outputs=[feedback_box]
+)
+
+# Add this to initialize the projects list when the app starts
+demo.load(list_projects, outputs=[projects_df])
