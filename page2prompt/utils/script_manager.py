@@ -61,15 +61,34 @@ class ScriptManager:
         # Always save the full shot list, regardless of the current view
         self.proposed_shot_list.to_csv(file_path, index=False)
 
+    def extract_unique_names(self, shot_list: pd.DataFrame) -> List[str]:
+        people = shot_list['People'].dropna().str.split(',').explode().str.strip()
+        return list(set(people))
+
+    def ensure_all_names_included(self, subjects_df: pd.DataFrame, unique_names: List[str]) -> pd.DataFrame:
+        existing_names = set(subjects_df[subjects_df['Type'] == 'person']['Name'])
+        missing_names = set(unique_names) - existing_names
+        
+        for name in missing_names:
+            subjects_df = pd.concat([subjects_df, pd.DataFrame({
+                'Name': [name],
+                'Description': ['Character mentioned in the shot list'],
+                'Type': ['person']
+            })], ignore_index=True)
+        
+        return subjects_df
+
     async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
         try:
             shot_list = await self.generate_proposed_shot_list(full_script)
-            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
+            unique_names = self.extract_unique_names(shot_list)
+            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list, unique_names)
             subjects_df = pd.DataFrame(subjects_dict['subjects'])
+            subjects_df = self.ensure_all_names_included(subjects_df, unique_names)
             return subjects_df
         except Exception as e:
             logger.error(f"Error extracting subjects: {str(e)}")
-            return pd.DataFrame(columns=["name", "description", "type"])
+            return pd.DataFrame(columns=["Name", "Description", "Type"])
 
     def approve_proposed_subjects(self):
         # Create a set of all unique people from the shot list
