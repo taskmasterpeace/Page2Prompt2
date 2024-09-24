@@ -172,6 +172,18 @@ class ScriptManager:
 
     def export_proposed_subjects(self, file_path: str):
         self.proposed_subjects.to_csv(file_path, index=False)
+
+    def merge_subjects(self, existing_df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
+        # Combine existing and new dataframes
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        
+        # Remove duplicates based on 'Name' and keep the last occurrence
+        combined_df = combined_df.drop_duplicates(subset='Name', keep='last')
+        
+        # Reset the index
+        combined_df = combined_df.reset_index(drop=True)
+        
+        return combined_df
     def send_to_subject_management(self, df: pd.DataFrame):
         # This method will overwrite the subject management dataframe with the proposed subjects
         self.subject_manager.set_subjects(df)
