@@ -252,7 +252,7 @@ class MetaChain:
 
         Important:
         - Include all unique people mentioned in the 'People' column of the shot list.
-        - For subjects not explicitly described in the script, provide a plausible description based on their role and context.
+        - For subjects not explicitly described in the script, provide plausible physical descriptions including race, gender, age range, body type, hairstyle, clothing colors, and any accessories (e.g., hats, glasses, jewelry) based on their role and context. Ensure these descriptions are diverse and avoid stereotypes.
         - Do not include any explanatory text or additional formatting.
 
         Script:
