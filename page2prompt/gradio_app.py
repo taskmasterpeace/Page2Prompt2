@@ -86,7 +86,7 @@ def transcribe_audio_wrapper(audio_file, include_timestamps):
 # Gradio interface setup
 with gr.Blocks() as demo:
     with gr.Accordion("🎬 Script & Director Style", open=True):
-        director_style_input = gr.Dropdown(label="🎬 Director Style", choices=[style['name'] for style in director_styles])
+        director_style_input = gr.Dropdown(label="🎬 Director Style", choices=["No Director"] + [style['name'] for style in director_styles])
         with gr.Accordion("📜 Full Script", open=False):
             with gr.Row():
                 full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
