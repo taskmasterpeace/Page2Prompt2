@@ -303,7 +303,9 @@ class MetaChain:
                 response = await self.llm.ainvoke(prompt)
                 content = response.content.strip()
                 
-                # Try to parse the entire response as a JSON array
+                # Remove the ```json and ``` markers if present
+                content = content.replace("```json", "").replace("```", "").strip()
+                
                 try:
                     descriptions = json.loads(content)
                     if isinstance(descriptions, list):
@@ -314,18 +316,9 @@ class MetaChain:
                                     break
                     else:
                         logger.warning("LLM response is not a JSON array")
-                except json.JSONDecodeError:
-                    # If parsing as an array fails, try individual JSON objects
-                    descriptions = content.split('\n')
-                    for desc in descriptions:
-                        try:
-                            subject_data = json.loads(desc)
-                            for subject in subjects:
-                                if subject['name'].lower() == subject_data['name'].lower():
-                                    subject.update(subject_data)
-                                    break
-                        except json.JSONDecodeError:
-                            logger.warning(f"Failed to parse JSON: {desc}")
+                except json.JSONDecodeError as json_error:
+                    logger.warning(f"Failed to parse JSON: {json_error}")
+                    logger.warning(f"Content: {content}")
             except Exception as e:
                 logger.error(f"Error generating descriptions: {str(e)}")
             

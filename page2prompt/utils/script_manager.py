@@ -96,8 +96,12 @@ class ScriptManager:
             
             # Validate shot_list DataFrame
             required_columns = ['People', 'Places']
-            if not all(col in shot_list.columns for col in required_columns):
-                raise ValueError(f"Shot list is missing required columns: {required_columns}")
+            missing_columns = [col for col in required_columns if col not in shot_list.columns]
+            
+            if missing_columns:
+                logger.warning(f"Shot list is missing columns: {missing_columns}. Adding empty columns.")
+                for col in missing_columns:
+                    shot_list[col] = ""
             
             subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
             
