@@ -284,9 +284,8 @@ class MetaChain:
                 descriptions = response.content.strip().split('\n')
                 
                 for desc in descriptions:
-                    parts = desc.split(':', 1)
-                    if len(parts) == 2:
-                        name, description = parts
+                    if ':' in desc:
+                        name, description = desc.split(':', 1)
                         name = name.strip()
                         description = description.strip()
                         for subject in subjects:

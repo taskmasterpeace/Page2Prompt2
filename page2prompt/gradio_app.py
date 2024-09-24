@@ -581,13 +581,14 @@ with gr.Blocks() as demo:
 
     async def extract_proposed_subjects(full_script, shot_list):
         try:
-            subjects_df = await script_manager.extract_proposed_subjects(full_script, shot_list)
+            subjects_dict = await script_manager.extract_proposed_subjects(full_script, shot_list)
+            subjects_df = pd.DataFrame(subjects_dict['subjects'])
             feedback = "Subjects extracted successfully."
             return subjects_df, feedback
         except Exception as e:
             error_message = f"Error extracting subjects: {str(e)}"
             print(error_message)
-            return None, error_message
+            return pd.DataFrame(columns=["Name", "Description", "Type"]), error_message
 
     def add_proposed_subject(name, description, subject_type, current_df):
         new_subject = pd.DataFrame([[name, description, subject_type]], columns=["Name", "Description", "Type"])
