@@ -61,29 +61,15 @@ class ScriptManager:
         # Always save the full shot list, regardless of the current view
         self.proposed_shot_list.to_csv(file_path, index=False)
 
-    async def extract_proposed_subjects(self, full_script: str, shot_list: pd.DataFrame) -> pd.DataFrame:
+    async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
         try:
-            logger.info(f"Extracting subjects from script and shot list with {len(shot_list)} shots")
-            response = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
-            
-            # Parse the JSON response
-            data = json.loads(response)
-            
-            # Convert to DataFrame
-            df = pd.DataFrame(data['subjects'])
-            
-            # Ensure description length
-            df['Description'] = df['Description'].apply(lambda x: x[:300] if len(x) > 300 else x)
-            
-            self.proposed_subjects = df
-            return df
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON Decode Error: {str(e)}")
-            logger.debug(f"Raw response: {response}")
-            return pd.DataFrame()
+            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script)
+            subjects_json = json.loads(subjects_dict)
+            subjects_df = pd.DataFrame(subjects_json['subjects'])
+            return subjects_df
         except Exception as e:
-            logger.error(f"Unexpected error: {str(e)}")
-            return pd.DataFrame()
+            print(f"Error extracting subjects: {str(e)}")
+            return pd.DataFrame(columns=["name", "description", "type"])
 
     def approve_proposed_subjects(self):
         # Create a set of all unique people from the shot list

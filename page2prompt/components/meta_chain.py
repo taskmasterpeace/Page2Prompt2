@@ -234,56 +234,34 @@ class MetaChain:
             print(error_message)
             return pd.DataFrame()
 
-    async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> str:
-        prompt = f"""
-        Extract and generate a list of proposed subjects from the following script and shot list. 
-        Provide the output in JSON format with the following structure:
-        {{
-            "subjects": [
-                {{
-                    "Name": "Subject name",
-                    "Description": "Detailed description (2-3 sentences)",
-                    "Type": "person/place/prop"
-                }}
-            ]
-        }}
-
-        For each subject, especially people:
-        1. Provide a physical description including body type, unique accessories, and clothing.
-        2. The description should be 2-3 sentences long, with a maximum of 300 characters.
-        3. Focus on visual details that would be important for creating an image or scene.
-        4. Include any recurring or significant props associated with the character.
-        5. Ensure the description is based on both the script and the shot list.
-
-        Important:
-        - Include all unique people mentioned in the 'People' column of the shot list.
-        - For subjects not explicitly described in the script, provide plausible physical descriptions including race, gender, age range, body type, hairstyle, clothing colors, and any accessories (e.g., hats, glasses, jewelry) based on their role and context. Ensure these descriptions are diverse and avoid stereotypes.
-        - Include important places and props mentioned in the 'Places' column or the script.
-        - Do not include any explanatory text or additional formatting.
-
-        Script:
-        {script}
-
-        Shot List:
-        {shot_list.to_json(orient='records')}
-
-        Respond only with the JSON output.
-        """
-        
-        logger.info("Extracting subjects from script and shot list")
-        logger.debug(f"Prompt: {prompt}")
-        
-        try:
-            with get_openai_callback() as cb:
-                chain = RunnableSequence(
-                    PromptTemplate(template=prompt, input_variables=[]),
-                    self.llm
-                )
-                result = await chain.ainvoke({})
-            
-            logger.debug(f"Raw response: {result.content}")
-            return result.content
-        except Exception as e:
-            error_message = f"Error extracting proposed subjects: {str(e)}"
-            logger.error(error_message)
-            return error_message
+    async def extract_proposed_subjects(self, script: str) -> dict:
+        response = await self.client.chat.completions.create(
+            model="gpt-4-1106-preview",  # Use the latest model that supports structured outputs
+            messages=[
+                {"role": "system", "content": "Extract subjects, their descriptions, and types from the given script."},
+                {"role": "user", "content": script}
+            ],
+            response_format={
+                "type": "json_object",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "subjects": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                    "type": {"type": "string", "enum": ["person", "place", "prop"]}
+                                },
+                                "required": ["name", "description", "type"]
+                            }
+                        }
+                    },
+                    "required": ["subjects"]
+                }
+            },
+            temperature=0
+        )
+        return response.choices[0].message.content
