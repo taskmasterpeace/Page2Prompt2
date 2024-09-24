@@ -532,10 +532,22 @@ with gr.Blocks() as demo:
             if col not in df.columns:
                 df[col] = ""
 
-        # Ensure "Shot" column is filled
-        df["Shot"] = df.index + 1  # Assuming each row is a separate shot
+        # Reset shot numbers for each scene
+        def reset_shot_numbers(df):
+            shot_number = 1
+            current_scene = df.iloc[0]["Scene"]
+            for i, row in df.iterrows():
+                if row["Scene"] != current_scene:
+                    shot_number = 1
+                    current_scene = row["Scene"]
+                df.at[i, "Shot"] = shot_number
+                shot_number += 1
+            return df
 
-        feedback = "Shot list generated successfully."
+        # Apply the reset_shot_numbers function
+        df = reset_shot_numbers(df)
+
+        feedback = "Shot list generated successfully with shot numbers reset for each scene."
         return df, update_shot_list_view(df, view_option), feedback
 
     def save_proposed_shot_list():

@@ -33,12 +33,24 @@ class ScriptManager:
         # Reorder columns to match the required order
         df = df[required_columns]
         
-        # Ensure "Shot" column is filled
-        df["Shot"] = df.index + 1  # Assuming each row is a separate shot
-        
+        # Reset shot numbers for each scene
+        def reset_shot_numbers(df):
+            shot_number = 1
+            current_scene = df.iloc[0]["Scene"]
+            for i, row in df.iterrows():
+                if row["Scene"] != current_scene:
+                    shot_number = 1
+                    current_scene = row["Scene"]
+                df.at[i, "Shot"] = shot_number
+                shot_number += 1
+            return df
+
+        # Apply the reset_shot_numbers function
+        df = reset_shot_numbers(df)
+    
         # Convert all columns to strings to ensure compatibility with gr.DataFrame
         df = df.astype(str)
-        
+    
         return df
 
     def save_proposed_shot_list(self, file_path: str):
