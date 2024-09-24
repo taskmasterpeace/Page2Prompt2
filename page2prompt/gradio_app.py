@@ -164,6 +164,8 @@ with gr.Blocks() as demo:
                             detailed_prompt = gr.Textbox(label="Detailed")
                             copy_detailed_btn = gr.Button("📋 Send to Clipboard", scale=1)
                         
+                        send_all_prompts_btn = gr.Button("📤 Send All Prompts to Clipboard")
+                        
                         structured_prompt = gr.Textbox(label="Structured Prompt")
                         generation_message = gr.Textbox(label="Generation Message")
                         active_subjects_display = gr.Textbox(label="Active Subjects")
@@ -195,8 +197,11 @@ with gr.Blocks() as demo:
 
         with gr.TabItem("📋 Bulk Prompt Management"):
             with gr.Accordion("Director's Clipboard 🎬"):
-                directors_clipboard = gr.TextArea(label="Collected Prompts", lines=10, interactive=False)
-                clear_clipboard_btn = gr.Button("Clear Clipboard")
+                directors_clipboard = gr.TextArea(label="Collected Prompts 📝", lines=10, interactive=True)
+                with gr.Row():
+                    clear_clipboard_btn = gr.Button("🗑️ Clear Clipboard")
+                    export_clipboard_btn = gr.Button("💾 Export Clipboard")
+                    import_clipboard_btn = gr.Button("📥 Import Clipboard")
 
         with gr.TabItem("🗂️ Project Management"):
             with gr.Row():
@@ -669,6 +674,15 @@ with gr.Blocks() as demo:
     def clear_directors_clipboard():
         return ""
 
+    def export_directors_clipboard(text):
+        return gr.File.update(value=text.encode(), visible=True, filename="directors_clipboard.txt")
+
+    def import_directors_clipboard(file):
+        if file is not None:
+            content = file.decode('utf-8')
+            return content
+        return ""
+
     copy_full_script_btn.click(
         send_to_directors_clipboard,
         inputs=[full_script_input, directors_clipboard],
@@ -693,8 +707,32 @@ with gr.Blocks() as demo:
         outputs=[directors_clipboard]
     )
 
+    def send_all_prompts(concise, normal, detailed, current_clipboard):
+        all_prompts = f"Concise:\n{concise}\n\nNormal:\n{normal}\n\nDetailed:\n{detailed}"
+        if current_clipboard:
+            return current_clipboard + "\n\n" + all_prompts
+        return all_prompts
+
+    send_all_prompts_btn.click(
+        send_all_prompts,
+        inputs=[concise_prompt, normal_prompt, detailed_prompt, directors_clipboard],
+        outputs=[directors_clipboard]
+    )
+
     clear_clipboard_btn.click(
         clear_directors_clipboard,
+        outputs=[directors_clipboard]
+    )
+
+    export_clipboard_btn.click(
+        export_directors_clipboard,
+        inputs=[directors_clipboard],
+        outputs=[gr.File(label="Download Clipboard", visible=False)]
+    )
+
+    import_clipboard_btn.click(
+        import_directors_clipboard,
+        inputs=[gr.File(label="Upload Clipboard")],
         outputs=[directors_clipboard]
     )
 
