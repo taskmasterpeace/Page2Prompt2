@@ -65,7 +65,11 @@ class ScriptManager:
         people = shot_list['People'].dropna().str.split(',').explode().str.strip()
         return list(set(people))
 
-    def ensure_all_names_included(self, subjects_df: pd.DataFrame, unique_names: List[str]) -> pd.DataFrame:
+    def extract_unique_places(self, shot_list: pd.DataFrame) -> List[str]:
+        places = shot_list['Places'].dropna().str.split(',').explode().str.strip()
+        return list(set(places))
+
+    def ensure_all_names_and_places_included(self, subjects_df: pd.DataFrame, unique_names: List[str], unique_places: List[str]) -> pd.DataFrame:
         existing_names = set(subjects_df[subjects_df['Type'] == 'person']['Name'])
         missing_names = set(unique_names) - existing_names
         
@@ -76,15 +80,27 @@ class ScriptManager:
                 'Type': ['person']
             })], ignore_index=True)
         
+        existing_places = set(subjects_df[subjects_df['Type'] == 'place']['Name'])
+        missing_places = set(unique_places) - existing_places
+        
+        for place in missing_places:
+            subjects_df = pd.concat([subjects_df, pd.DataFrame({
+                'Name': [place],
+                'Description': ['Location mentioned in the shot list'],
+                'Type': ['place']
+            })], ignore_index=True)
+        
         return subjects_df
 
-    async def extract_proposed_subjects(self, full_script: str) -> pd.DataFrame:
+    async def extract_proposed_subjects(self, full_script: str, shot_list: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         try:
-            shot_list = await self.generate_proposed_shot_list(full_script)
+            if shot_list is None:
+                shot_list = await self.generate_proposed_shot_list(full_script)
             unique_names = self.extract_unique_names(shot_list)
-            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list, unique_names)
+            unique_places = self.extract_unique_places(shot_list)
+            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list, unique_names, unique_places)
             subjects_df = pd.DataFrame(subjects_dict['subjects'])
-            subjects_df = self.ensure_all_names_included(subjects_df, unique_names)
+            subjects_df = self.ensure_all_names_and_places_included(subjects_df, unique_names, unique_places)
             return subjects_df
         except Exception as e:
             logger.error(f"Error extracting subjects: {str(e)}")
