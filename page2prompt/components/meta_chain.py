@@ -260,7 +260,10 @@ class MetaChain:
         if subjects:
             subjects_list = "\n".join([f"{s['name']} ({s['type']})" for s in subjects])
             prompt = f"""
-            Given the following list of subjects extracted from a script and shot list, provide a brief description for each based on their likely role or characteristics in the story. If no specific information can be inferred, provide a general description.
+            Given the following list of subjects extracted from a script and shot list, provide a brief description for each.
+            For people, focus on their physical appearance, clothing, accessories, and hairstyle.
+            For locations, describe how they appear at that point in the story.
+            Do not include information about their role in the story or personality traits.
 
             Script:
             {script}
@@ -272,8 +275,8 @@ class MetaChain:
             Subject Name: Description
 
             Example:
-            John: A determined detective in his mid-40s, known for his sharp intuition and dry humor.
-            City Park: A sprawling green space in the heart of the city, often serving as a meeting point for characters.
+            John: A man in his mid-40s with salt-and-pepper hair, wearing a worn leather jacket and carrying a notepad.
+            City Park: A lush green space with winding paths, dotted with colorful flower beds and a central fountain.
             """
 
             try:
