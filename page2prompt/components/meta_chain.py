@@ -263,35 +263,6 @@ class MetaChain:
         """
         print("Subject Extraction Prompt:")
         print(prompt)
-        Extract and generate a list of proposed subjects from the following script and shot list. Provide the output in JSON format with the following structure:
-        {{
-            "subjects": [
-                {{
-                    "Name": "Subject name",
-                    "Description": "Detailed description (2-3 sentences)",
-                    "Type": "person/place/prop"
-                }}
-            ]
-        }}
-        
-        For each subject, especially people:
-        1. Provide a physical description including body type, unique accessories, and clothing.
-        2. The description should be 2-3 sentences long, with a maximum of 300 characters.
-        3. Focus on visual details that would be important for creating an image or scene.
-        4. Include any recurring or significant props associated with the character.
-        5. Ensure the description is based on both the script and the shot list.
-
-        Important:
-        - Include all unique people mentioned in the 'People' column of the shot list.
-        - For subjects not explicitly described in the script, provide a plausible description based on their role and context.
-        - Do not include any explanatory text or additional formatting.
-
-        Script:
-        {script}
-
-        Shot List:
-        {shot_list.to_json(orient='records')}
-        """
         
         try:
             with get_openai_callback() as cb:
