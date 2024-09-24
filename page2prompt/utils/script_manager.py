@@ -100,11 +100,18 @@ class ScriptManager:
             unique_places = self.extract_unique_places(shot_list)
             subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list, unique_names, unique_places)
             subjects_df = pd.DataFrame(subjects_dict['subjects'])
-            subjects_df = self.ensure_all_names_and_places_included(subjects_df, unique_names, unique_places)
             return subjects_df
         except Exception as e:
             logger.error(f"Error extracting subjects: {str(e)}")
             return pd.DataFrame(columns=["Name", "Description", "Type"])
+
+    def extract_unique_names(self, shot_list: pd.DataFrame) -> List[str]:
+        people = shot_list['People'].dropna().str.split(',').explode().str.strip()
+        return list(set(people))
+
+    def extract_unique_places(self, shot_list: pd.DataFrame) -> List[str]:
+        places = shot_list['Places'].dropna().str.split(',').explode().str.strip()
+        return list(set(places))
 
     def approve_proposed_subjects(self):
         # Create a set of all unique people from the shot list

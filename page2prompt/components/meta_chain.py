@@ -236,41 +236,59 @@ class MetaChain:
             return pd.DataFrame()
 
     async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame, unique_names: List[str], unique_places: List[str]) -> dict:
-        combined_input = f"""
-        Script:
-        {script}
+        subjects = []
 
-        Shot List:
-        {shot_list.to_string(index=False)}
+        # Process people
+        for name in unique_names:
+            if name and name.strip():
+                subjects.append({
+                    "name": name.strip(),
+                    "description": "Character from the script",
+                    "type": "person"
+                })
 
-        Unique Names from Shot List:
-        {', '.join(unique_names)}
+        # Process places
+        for place in unique_places:
+            if place and place.strip():
+                subjects.append({
+                    "name": place.strip(),
+                    "description": "Location from the script",
+                    "type": "place"
+                })
 
-        Unique Places from Shot List:
-        {', '.join(unique_places)}
+        # Use LLM to generate descriptions for subjects
+        if subjects:
+            subjects_list = "\n".join([f"{s['name']} ({s['type']})" for s in subjects])
+            prompt = f"""
+            Given the following list of subjects extracted from a script and shot list, provide a brief description for each based on their likely role or characteristics in the story. If no specific information can be inferred, provide a general description.
 
-        Based on the script, shot list, unique names, and unique places provided, extract subjects, their descriptions, and types. Pay special attention to the names listed in the "People" column and the places listed in the "Places" column of the shot list, ensuring all of these are included as subjects of type "person" and "place" respectively. For each subject:
-        1. Provide a name
-        2. Write a brief description based on their role or actions in the script
-        3. Specify the type (person, place, or prop)
+            Script:
+            {script}
 
-        Return the results in the following JSON format:
-        {{
-            "subjects": [
-                {{
-                    "name": "Subject Name",
-                    "description": "Brief description",
-                    "type": "person/place/prop"
-                }},
-                ...
-            ]
-        }}
-        """
+            Subjects:
+            {subjects_list}
 
-        try:
-            response = await self.llm.ainvoke(combined_input)
-            subjects_data = json.loads(response.content)
-            return subjects_data
-        except Exception as e:
-            logger.error(f"Error extracting subjects: {str(e)}")
-            return {"subjects": []}
+            For each subject, provide a brief description in the following format:
+            Subject Name: Description
+
+            Example:
+            John: A determined detective in his mid-40s, known for his sharp intuition and dry humor.
+            City Park: A sprawling green space in the heart of the city, often serving as a meeting point for characters.
+            """
+
+            try:
+                response = await self.llm.ainvoke(prompt)
+                descriptions = response.content.strip().split('\n')
+                
+                for desc in descriptions:
+                    name, description = desc.split(':', 1)
+                    name = name.strip()
+                    description = description.strip()
+                    for subject in subjects:
+                        if subject['name'].lower() == name.lower():
+                            subject['description'] = description
+                            break
+            except Exception as e:
+                logger.error(f"Error generating descriptions: {str(e)}")
+
+        return {"subjects": subjects}
