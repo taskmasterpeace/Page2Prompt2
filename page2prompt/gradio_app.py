@@ -176,7 +176,7 @@ with gr.Blocks() as demo:
                 subject_type = gr.Dropdown(label="Type", choices=["person", "place", "prop"])
                 subject_prefix = gr.Textbox(label="Prefix")
                 subject_suffix = gr.Textbox(label="Suffix")
-            
+        
             with gr.Row():
                 add_subject_btn = gr.Button("Add Subject")
                 update_subject_btn = gr.Button("Update Subject")
@@ -190,6 +190,24 @@ with gr.Blocks() as demo:
                 col_count=(7, "fixed"),
                 interactive=True
             )
+
+        with gr.TabItem("🗂️ Project Management"):
+            with gr.Row():
+                project_name_input = gr.Textbox(label="Project Name")
+                save_project_btn = gr.Button("💾 Save Project")
+                load_project_btn = gr.Button("📂 Load Project")
+                delete_project_btn = gr.Button("🗑️ Delete Project")
+                export_prompts_btn = gr.Button("📤 Export Prompts")
+
+            projects_df = gr.DataFrame(
+                headers=["Project Name", "Last Modified"],
+                label="Saved Projects",
+                interactive=False
+            )
+
+            prompts_display = gr.TextArea(label="Generated Prompts", lines=10, interactive=False)
+        
+            project_info = gr.JSON(label="Project Info", visible=False)
 
             def add_subject(name, description, alias, type, prefix, suffix):
                 new_subject = Subject(name, description, alias, type, prefix, suffix)
