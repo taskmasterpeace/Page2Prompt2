@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 import logging
+import json
 from typing import Dict, Any, List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_community.callbacks.manager import get_openai_callback
@@ -236,6 +237,7 @@ class MetaChain:
             return pd.DataFrame()
 
     async def extract_proposed_subjects(self, script: str, shot_list: pd.DataFrame) -> dict:
+        logger.info("Starting subject extraction process")
         subjects = []
 
         # Extract unique people and places from the shot list
@@ -258,6 +260,8 @@ class MetaChain:
                     "type": "place"
                 })
 
+        logger.info(f"Found {len(subjects)} subjects from shot list")
+
         # Use LLM to generate descriptions for subjects
         if subjects:
             subjects_list = "\n".join([f"{s['name']} ({s['type']})" for s in subjects])
@@ -273,12 +277,26 @@ class MetaChain:
             Subjects:
             {subjects_list}
 
-            For each subject, provide a brief description in the following format:
-            Subject Name: Description
+            For each subject, provide a description in the following JSON format:
+            {{
+                "name": "Subject Name",
+                "description": "Description",
+                "type": "person/place"
+            }}
 
             Example:
-            John: A man in his mid-40s with salt-and-pepper hair, wearing a worn leather jacket and carrying a notepad.
-            City Park: A lush green space with winding paths, dotted with colorful flower beds and a central fountain.
+            {{
+                "name": "John",
+                "description": "A man in his mid-40s with salt-and-pepper hair, wearing a worn leather jacket and carrying a notepad.",
+                "type": "person"
+            }}
+            {{
+                "name": "City Park",
+                "description": "A lush green space with winding paths, dotted with colorful flower beds and a central fountain.",
+                "type": "place"
+            }}
+
+            Provide descriptions for all subjects in the list above.
             """
 
             try:
@@ -286,16 +304,14 @@ class MetaChain:
                 descriptions = response.content.strip().split('\n')
                 
                 for desc in descriptions:
-                    if ':' in desc:
-                        name, description = desc.split(':', 1)
-                        name = name.strip()
-                        description = description.strip()
+                    try:
+                        subject_data = json.loads(desc)
                         for subject in subjects:
-                            if subject['name'].lower() == name.lower():
-                                subject['description'] = description
+                            if subject['name'].lower() == subject_data['name'].lower():
+                                subject.update(subject_data)
                                 break
-                    else:
-                        logger.warning(f"Unexpected description format: {desc}")
+                    except json.JSONDecodeError:
+                        logger.warning(f"Failed to parse JSON: {desc}")
             except Exception as e:
                 logger.error(f"Error generating descriptions: {str(e)}")
                 # If there's an error, we'll use a default description
@@ -303,4 +319,5 @@ class MetaChain:
                     if 'description' not in subject:
                         subject['description'] = f"A {subject['type']} from the script"
 
+        logger.info(f"Completed subject extraction process with {len(subjects)} subjects")
         return {"subjects": subjects}

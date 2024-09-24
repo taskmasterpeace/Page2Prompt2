@@ -89,15 +89,28 @@ class ScriptManager:
         return subjects_df
 
     async def extract_proposed_subjects(self, full_script: str, shot_list: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+        logger.info("Starting subject extraction process in ScriptManager")
         try:
             if shot_list is None:
                 shot_list = await self.generate_proposed_shot_list(full_script)
+            
+            # Validate shot_list DataFrame
+            required_columns = ['People', 'Places']
+            if not all(col in shot_list.columns for col in required_columns):
+                raise ValueError(f"Shot list is missing required columns: {required_columns}")
+            
             subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
+            
+            if 'subjects' not in subjects_dict or not subjects_dict['subjects']:
+                logger.warning("No subjects found or empty subjects list returned")
+                return pd.DataFrame(columns=["name", "description", "type"])
+            
             subjects_df = pd.DataFrame(subjects_dict['subjects'])
-            return subjects_df
+            logger.info(f"Successfully created subjects DataFrame with {len(subjects_df)} entries")
+            return subjects_df[['name', 'description', 'type']]  # Ensure correct column order
         except Exception as e:
-            logger.error(f"Error extracting subjects: {str(e)}")
-            return pd.DataFrame(columns=["Name", "Description", "Type"])
+            logger.exception(f"Error extracting subjects: {str(e)}")
+            return pd.DataFrame(columns=["name", "description", "type"])
 
     def approve_proposed_subjects(self):
         # Create a set of all unique people from the shot list
