@@ -92,7 +92,7 @@ with gr.Blocks() as demo:
         with gr.Accordion("📜 Full Script", open=False):
             with gr.Row():
                 full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
-                copy_full_script_btn = gr.Button("📋", scale=1)
+                copy_full_script_btn = gr.Button("📋 Send to Clipboard", scale=1)
 
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
@@ -156,13 +156,13 @@ with gr.Blocks() as demo:
                     with gr.Accordion("🖼️ Generated Prompts", open=True):
                         with gr.Row():
                             concise_prompt = gr.Textbox(label="Concise")
-                            copy_concise_btn = gr.Button("📋", scale=1)
+                            copy_concise_btn = gr.Button("📋 Send to Clipboard", scale=1)
                         with gr.Row():
                             normal_prompt = gr.Textbox(label="Normal")
-                            copy_normal_btn = gr.Button("📋", scale=1)
+                            copy_normal_btn = gr.Button("📋 Send to Clipboard", scale=1)
                         with gr.Row():
                             detailed_prompt = gr.Textbox(label="Detailed")
-                            copy_detailed_btn = gr.Button("📋", scale=1)
+                            copy_detailed_btn = gr.Button("📋 Send to Clipboard", scale=1)
                         
                         structured_prompt = gr.Textbox(label="Structured Prompt")
                         generation_message = gr.Textbox(label="Generation Message")
@@ -192,6 +192,11 @@ with gr.Blocks() as demo:
                 col_count=(7, "fixed"),
                 interactive=True
             )
+
+        with gr.TabItem("📋 Bulk Prompt Management"):
+            with gr.Accordion("Director's Clipboard 🎬"):
+                directors_clipboard = gr.TextArea(label="Collected Prompts", lines=10, interactive=False)
+                clear_clipboard_btn = gr.Button("Clear Clipboard")
 
         with gr.TabItem("🗂️ Project Management"):
             with gr.Row():
@@ -655,31 +660,41 @@ with gr.Blocks() as demo:
         outputs=[feedback_box]
     )
 
-    def copy_to_clipboard(text):
+    def send_to_directors_clipboard(text, current_clipboard):
+        if current_clipboard:
+            return current_clipboard + "\n\n" + text
         return text
 
+    def clear_directors_clipboard():
+        return ""
+
     copy_full_script_btn.click(
-        copy_to_clipboard,
-        inputs=[full_script_input],
-        outputs=[gr.Textbox(visible=False)]
+        send_to_directors_clipboard,
+        inputs=[full_script_input, directors_clipboard],
+        outputs=[directors_clipboard]
     )
 
     copy_concise_btn.click(
-        copy_to_clipboard,
-        inputs=[concise_prompt],
-        outputs=[gr.Textbox(visible=False)]
+        send_to_directors_clipboard,
+        inputs=[concise_prompt, directors_clipboard],
+        outputs=[directors_clipboard]
     )
 
     copy_normal_btn.click(
-        copy_to_clipboard,
-        inputs=[normal_prompt],
-        outputs=[gr.Textbox(visible=False)]
+        send_to_directors_clipboard,
+        inputs=[normal_prompt, directors_clipboard],
+        outputs=[directors_clipboard]
     )
 
     copy_detailed_btn.click(
-        copy_to_clipboard,
-        inputs=[detailed_prompt],
-        outputs=[gr.Textbox(visible=False)]
+        send_to_directors_clipboard,
+        inputs=[detailed_prompt, directors_clipboard],
+        outputs=[directors_clipboard]
+    )
+
+    clear_clipboard_btn.click(
+        clear_directors_clipboard,
+        outputs=[directors_clipboard]
     )
 
     def create_camera_settings():
