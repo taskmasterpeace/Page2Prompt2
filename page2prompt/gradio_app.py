@@ -758,9 +758,9 @@ with gr.Blocks() as demo:
         outputs=[gr.File(label="Download Clipboard", visible=False)]
     )
 
-    import_clipboard_btn.click(
-        import_directors_clipboard,
-        inputs=[gr.File(label="Upload Clipboard")],
+    import_prompts_btn.click(
+        import_prompts_from_file,
+        inputs=[gr.File(label="Import Prompts from File")],
         outputs=[directors_clipboard]
     )
 
