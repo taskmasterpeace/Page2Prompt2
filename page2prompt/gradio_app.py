@@ -827,18 +827,28 @@ with gr.Blocks() as demo:
     update_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
     delete_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
 
-    def receive_proposed_subjects():
-        # Get the current proposed subjects from the script_manager
-        proposed_subjects_df = script_manager.get_proposed_subjects()
-        # Merge the proposed subjects with the existing subjects in the Subject Management tab
-        updated_df = subject_manager.merge_subjects(subject_manager.get_subjects_dataframe(), proposed_subjects_df)
-        subject_manager.set_subjects(updated_df)
-        return updated_df, "Subjects received and merged successfully."
+    def receive_proposed_subjects(_):
+        try:
+            # Get the current proposed subjects from the script_manager
+            proposed_subjects_df = script_manager.get_proposed_subjects()
+            if proposed_subjects_df.empty:
+                return None, "No proposed subjects available."
+        
+            # Merge the proposed subjects with the existing subjects in the Subject Management tab
+            existing_df = subject_manager.get_subjects_dataframe()
+            updated_df = subject_manager.merge_subjects(existing_df, proposed_subjects_df)
+            subject_manager.set_subjects(updated_df)
+            return updated_df, "Subjects received and merged successfully."
+        except Exception as e:
+            error_message = f"Error receiving proposed subjects: {str(e)}"
+            print(error_message)  # For console logging
+            return None, error_message
 
     # Add this in the Subject Management tab section
     receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
     receive_proposed_subjects_btn.click(
         receive_proposed_subjects,
+        inputs=[gr.State(None)],  # Add a dummy input
         outputs=[subjects_df, feedback_box]
     )
 

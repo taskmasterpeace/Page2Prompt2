@@ -103,24 +103,24 @@ class ScriptManager:
                 for col in missing_columns:
                     shot_list[col] = ""
             
-            subjects_dict = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
+            subjects = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
             
-            if isinstance(subjects_dict, list):
-                subjects_df = pd.DataFrame(subjects_dict)
-            elif isinstance(subjects_dict, dict) and 'subjects' in subjects_dict:
-                subjects_df = pd.DataFrame(subjects_dict['subjects'])
+            if isinstance(subjects, list):
+                subjects_df = pd.DataFrame(subjects)
+            elif isinstance(subjects, dict) and 'subjects' in subjects:
+                subjects_df = pd.DataFrame(subjects['subjects'])
             else:
-                logger.warning("Unexpected format of subjects_dict")
+                logger.warning("Unexpected format of subjects")
                 return pd.DataFrame(columns=["name", "description", "type"])
             
             logger.info(f"Successfully created subjects DataFrame with {len(subjects_df)} entries")
             
-            # Ensure all required columns exist
+            # Ensure all required columns exist and are in the correct order
             for col in ["name", "description", "type"]:
                 if col not in subjects_df.columns:
                     subjects_df[col] = ""
             
-            return subjects_df[['name', 'description', 'type']]  # Ensure correct column order
+            return subjects_df[['name', 'description', 'type']]
         except Exception as e:
             logger.exception(f"Error extracting subjects: {str(e)}")
             return pd.DataFrame(columns=["name", "description", "type"])

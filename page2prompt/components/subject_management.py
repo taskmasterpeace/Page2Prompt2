@@ -113,3 +113,25 @@ class SubjectManager:
             for subject in self.subjects:
                 subject['Active'] = str(subject.get('Active', False))
             writer.writerows(self.subjects)
+
+    def merge_subjects(self, existing_df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
+        """Merges existing subjects with new subjects."""
+        # Combine existing and new dataframes
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        
+        # Remove duplicates based on 'Name' and keep the last occurrence
+        combined_df = combined_df.drop_duplicates(subset='Name', keep='last')
+        
+        # Reset the index
+        combined_df = combined_df.reset_index(drop=True)
+        
+        return combined_df
+
+    def get_subjects_dataframe(self) -> pd.DataFrame:
+        """Returns the subjects as a DataFrame."""
+        return pd.DataFrame(self.subjects)
+
+    def set_subjects(self, subjects_df: pd.DataFrame):
+        """Sets the subjects from a DataFrame."""
+        self.subjects = subjects_df.to_dict('records')
+        self._save_subjects()
