@@ -189,7 +189,6 @@ with gr.Blocks() as demo:
         )
     
     shot_list_df = gr.State()
-    column_view = gr.Radio(["Simple View", "Detailed View"], label="Column View", value="Simple View")
 
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
@@ -625,11 +624,16 @@ with gr.Blocks() as demo:
                     interactive=True
                 )
                 generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
+                column_view = gr.Radio(["Simple View", "Detailed View"], label="Column View", value="Simple View")
+    
+                with gr.Row():
+                    new_row_btn = gr.Button("➕ New Row")
+                    delete_row_btn = gr.Button("➖ Delete Row")
 
             with gr.Row():
                 save_shot_list_btn = gr.Button("💾 Save Shot List")
                 export_shot_list_btn = gr.Button("📤 Export Shot List")
-    
+
             with gr.Row():
                 shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
 
@@ -642,17 +646,16 @@ with gr.Blocks() as demo:
                     interactive=True
                 )
                 extract_subjects_btn = gr.Button("🔍 Extract Subjects")
-    
+
                 with gr.Row():
                     subject_name_input = gr.Textbox(label="Subject Name")
                     subject_description_input = gr.Textbox(label="Subject Description")
                     subject_type_input = gr.Dropdown(label="Subject Type", choices=["person", "place", "prop"])
-    
+
                 with gr.Row():
-                    add_subject_btn = gr.Button("➕ Add Subject")
-                    update_subject_btn = gr.Button("🔄 Update Subject")
-                    delete_subject_btn = gr.Button("🗑️ Delete Subject")
-    
+                    new_subject_btn = gr.Button("➕ New Row")
+                    delete_subject_btn = gr.Button("➖ Delete Row")
+
                 send_to_subject_management_btn = gr.Button("📤 Send All to Subject Management")
                 export_proposed_subjects_btn = gr.Button("💾 Export Proposed Subjects")
 
@@ -825,15 +828,9 @@ with gr.Blocks() as demo:
         outputs=[subjects_df, feedback_box]
     )
 
-    add_subject_btn.click(
+    new_subject_btn.click(
         add_proposed_subject,
         inputs=[subject_name_input, subject_description_input, subject_type_input, subjects_df],
-        outputs=[subjects_df]
-    )
-
-    update_subject_btn.click(
-        update_proposed_subject,
-        inputs=[subjects_df, subject_name_input, subject_description_input, subject_type_input],
         outputs=[subjects_df]
     )
 
@@ -841,6 +838,18 @@ with gr.Blocks() as demo:
         delete_proposed_subject,
         inputs=[subjects_df, subject_name_input],
         outputs=[subjects_df]
+    )
+
+    new_row_btn.click(
+        lambda df: df.append(pd.Series(), ignore_index=True),
+        inputs=[shot_list_df],
+        outputs=[shot_list_df]
+    )
+
+    delete_row_btn.click(
+        lambda df, evt: df.drop(index=evt.index).reset_index(drop=True) if evt else df,
+        inputs=[shot_list_df, gr.SelectData()],
+        outputs=[shot_list_df]
     )
 
     def populate_subject_fields(evt: gr.SelectData, df):
