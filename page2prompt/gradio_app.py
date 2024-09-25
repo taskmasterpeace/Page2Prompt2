@@ -848,7 +848,7 @@ with gr.Blocks() as demo:
 
     delete_row_btn.click(
         lambda df, evt: df.drop(index=evt.index).reset_index(drop=True) if evt else df,
-        inputs=[shot_list_df, gr.SelectData()],
+        inputs=[shot_list_df],
         outputs=[shot_list_df]
     )
 
