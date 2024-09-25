@@ -111,14 +111,21 @@ class SubjectManager:
     def apply_alias(self, text: str) -> str:
         """Replaces subject names with their aliases in the given text."""
         for subject in self.get_active_subjects():
-            text = text.replace(subject.name, subject.alias)
+            if subject.name in text:
+                prefix_suffix = f"{subject.prefix} {subject.suffix}".strip()
+                if prefix_suffix:
+                    text = text.replace(f"{prefix_suffix} {subject.name}", f"{prefix_suffix} {subject.alias}")
+                else:
+                    text = text.replace(subject.name, subject.alias)
         return text
 
     def apply_prefix_suffix(self, text: str) -> str:
         """Applies prefix and suffix to subject mentions in the given text."""
         for subject in self.get_active_subjects():
-            if subject.name in text:
-                text = text.replace(subject.name, f"{subject.prefix} {subject.name} {subject.suffix}".strip())
+            for name in [subject.name, subject.alias]:
+                if name and name in text:
+                    replacement = f"{subject.prefix} {name} {subject.suffix}".strip()
+                    text = text.replace(name, replacement)
         return text
 
     def import_subjects(self, file_path: str) -> None:

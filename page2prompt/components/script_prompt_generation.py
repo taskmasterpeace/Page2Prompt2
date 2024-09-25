@@ -63,15 +63,19 @@ class ScriptPromptGenerator:
             director_style=director_style
         )
 
-        # 3. Apply aliases and prefix/suffix, then format the prompts
+        # 3. Apply prefix/suffix and aliases, then format the prompts
         formatted_prompts = {}
         for prompt_type, prompt in prompts.items():
-            prompt = self.subject_manager.apply_alias(prompt)
-            prompt = self.subject_manager.apply_prefix_suffix(prompt)
+            print(f"Original prompt: {prompt}")
+            prompt = self.subject_manager.apply_prefix_suffix(prompt)  # Apply prefix/suffix first
+            print(f"After apply_prefix_suffix: {prompt}")
+            prompt = self.subject_manager.apply_alias(prompt)  # Then apply alias
+            print(f"After apply_alias: {prompt}")
             formatted_prompt = f"{style_prefix.strip() + ' ' if style_prefix else ''}{prompt.strip()}{' ' + style_suffix.strip() if style_suffix else ''}"
             if end_parameters:
                 formatted_prompt += f" {end_parameters.strip()}"
             formatted_prompts[prompt_type] = formatted_prompt
+            print(f"Final formatted prompt: {formatted_prompt}")
 
         # 4. Prepare the output tuple
         return (
