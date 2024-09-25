@@ -6,6 +6,7 @@ import pandas as pd
 import json
 from datetime import datetime
 import logging
+import aiofiles
 
 def import_prompts_from_file(file):
     if file is not None:
@@ -117,6 +118,12 @@ with gr.Blocks() as demo:
                         stick_to_script_input = gr.Checkbox(label="📜 Stick to Script")
                         highlighted_text_input = gr.Textbox(label="🖍️ Highlighted Text")
 
+                    shot_list_df = gr.DataFrame(
+                        headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
+                        label="Shot List",
+                        interactive=True
+                    )
+
                     with gr.Accordion("👥 Subjects", open=False):
                         with gr.Row():
                             with gr.Column():
@@ -225,6 +232,8 @@ with gr.Blocks() as demo:
                 load_project_btn = gr.Button("📂 Load Project")
                 delete_project_btn = gr.Button("🗑️ Delete Project")
                 export_prompts_btn = gr.Button("📤 Export Prompts")
+
+            feedback_box = gr.Textbox(label="Feedback", interactive=False)
 
             projects_df = gr.DataFrame(
                 headers=["Project Name", "Last Modified"],
