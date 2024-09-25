@@ -187,13 +187,6 @@ with gr.Blocks() as demo:
                 subject_type = gr.Dropdown(label="Type", choices=["person", "place", "prop"])
                 subject_prefix = gr.Textbox(label="Prefix")
                 subject_suffix = gr.Textbox(label="Suffix")
-        
-            with gr.Row():
-                add_subject_btn = gr.Button("Add Subject")
-                update_subject_btn = gr.Button("Update Subject")
-                delete_subject_btn = gr.Button("Delete Subject")
-                import_subjects_btn = gr.Button("Import Subjects")
-                export_subjects_btn = gr.Button("Export Subjects")
 
             subjects_df = gr.DataFrame(
                 headers=["Name", "Description", "Alias", "Type", "Prefix", "Suffix", "Active"],
@@ -202,13 +195,22 @@ with gr.Blocks() as demo:
                 interactive=True
             )
 
+            with gr.Row():
+                add_subject_btn = gr.Button("Add Subject")
+                update_subject_btn = gr.Button("Update Subject")
+                delete_subject_btn = gr.Button("Delete Subject")
+                delete_row_btn = gr.Button("Delete Selected Row")
+                import_subjects_btn = gr.Button("Import Subjects")
+                export_subjects_btn = gr.Button("Export Subjects")
+                receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
+
         with gr.TabItem("📋 Bulk Prompt Management"):
             with gr.Accordion("Director's Clipboard 🎬"):
                 directors_clipboard = gr.TextArea(label="Collected Prompts 📝", lines=10, interactive=True)
                 with gr.Row():
                     clear_clipboard_btn = gr.Button("🗑️ Clear Clipboard")
                     export_clipboard_btn = gr.Button("💾 Export Clipboard")
-                    import_clipboard_btn = gr.Button("📥 Import Clipboard")
+                    import_prompts_btn = gr.Button("📥 Import Prompts from File")
 
         with gr.TabItem("🗂️ Project Management"):
             with gr.Row():
@@ -288,6 +290,15 @@ with gr.Blocks() as demo:
             export_subjects_btn.click(
                 export_subjects,
                 outputs=[gr.Textbox()]
+            )
+
+            def delete_selected_row(df, evt: gr.SelectData):
+                return df.drop(index=evt.index).reset_index(drop=True)
+
+            delete_row_btn.click(
+                delete_selected_row,
+                inputs=[subjects_df],
+                outputs=[subjects_df]
             )
 
             # Load initial subjects
