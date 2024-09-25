@@ -188,13 +188,6 @@ with gr.Blocks() as demo:
             interactive=True
         )
 
-    with gr.Accordion("👥 Subjects Master List", open=True):
-        subjects_master_df = gr.DataFrame(
-            headers=["Name", "Description", "Type"],
-            label="Subjects Master List",
-            interactive=True
-        )
-
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
             with gr.Row():
