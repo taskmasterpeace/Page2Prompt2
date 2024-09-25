@@ -956,76 +956,82 @@ from datetime import datetime
 
 # Add or update these functions at the end of the file
 
-def save_project(project_name, full_script, shot_list, subjects):
+import asyncio
+import os
+import json
+from datetime import datetime
+
+async def save_project(project_name, full_script, shot_list, subjects, generated_prompts):
     if not project_name:
-        return "Please enter a project name.", None
+        return "Please enter a project name.", None, generated_prompts
 
     project_data = {
         "name": project_name,
         "full_script": full_script,
         "shot_list": shot_list.to_dict() if isinstance(shot_list, pd.DataFrame) else {},
         "subjects": subjects.to_dict() if isinstance(subjects, pd.DataFrame) else {},
+        "prompts": generated_prompts,
         "last_modified": datetime.now().isoformat()
     }
     
-    with open(f"{project_name}.json", "w") as f:
-        json.dump(project_data, f)
-    
-    return f"Project '{project_name}' saved successfully.", list_projects()
-
-def load_project(project_name):
     try:
-        with open(f"{project_name}.json", "r") as f:
-            project_data = json.load(f)
+        async with aiofiles.open(f"{project_name}.json", "w") as f:
+            await f.write(json.dumps(project_data))
+        return f"Project '{project_name}' saved successfully.", await list_projects(), generated_prompts
+    except IOError as e:
+        return f"Error saving project: {str(e)}", None, generated_prompts
+
+async def load_project(project_name):
+    try:
+        async with aiofiles.open(f"{project_name}.json", "r") as f:
+            project_data = json.loads(await f.read())
         
         full_script = project_data.get("full_script", "")
         shot_list = pd.DataFrame(project_data.get("shot_list", {}))
         subjects = pd.DataFrame(project_data.get("subjects", {}))
         prompts = project_data.get("prompts", [])
-        director_style = project_data.get("director_style", "")
-        style = project_data.get("style", "")
-        style_prefix = project_data.get("style_prefix", "")
-        style_suffix = project_data.get("style_suffix", "")
         
-        # Update the global generated_prompts
-        global generated_prompts
-        generated_prompts = prompts
-        
-        return full_script, shot_list, subjects, prompts, director_style, style, style_prefix, style_suffix, project_data, f"Project '{project_name}' loaded successfully."
+        return full_script, shot_list, subjects, prompts, f"Project '{project_name}' loaded successfully."
     except FileNotFoundError:
-        return None, None, None, None, None, None, None, None, None, f"Project '{project_name}' not found."
+        return None, None, None, None, f"Project '{project_name}' not found."
     except json.JSONDecodeError:
-        return None, None, None, None, None, None, None, None, None, f"Error reading project file for '{project_name}'. The file may be corrupted."
+        return None, None, None, None, f"Error reading project file for '{project_name}'. The file may be corrupted."
+    except IOError as e:
+        return None, None, None, None, f"Error loading project: {str(e)}"
 
-def delete_project(project_name):
+async def delete_project(project_name):
     try:
         os.remove(f"{project_name}.json")
-        return f"Project '{project_name}' deleted successfully.", list_projects()
+        return f"Project '{project_name}' deleted successfully.", await list_projects()
     except FileNotFoundError:
-        return f"Project '{project_name}' not found.", list_projects()
+        return f"Project '{project_name}' not found.", await list_projects()
+    except IOError as e:
+        return f"Error deleting project: {str(e)}", await list_projects()
 
-def list_projects():
+async def list_projects():
     projects = []
     for file in os.listdir():
         if file.endswith(".json"):
             try:
-                with open(file, "r") as f:
-                    project_data = json.load(f)
+                async with aiofiles.open(file, "r") as f:
+                    project_data = json.loads(await f.read())
                     projects.append({
                         "Project Name": project_data.get("name", "Unknown"),
                         "Last Modified": project_data.get("last_modified", "Unknown")
                     })
-            except json.JSONDecodeError:
-                print(f"Error reading project file: {file}")
+            except (json.JSONDecodeError, IOError) as e:
+                print(f"Error reading project file {file}: {str(e)}")
     return pd.DataFrame(projects)
 
-def export_prompts(prompts, project_name):
+async def export_prompts(prompts, project_name):
     if not project_name:
         return "Please enter a project name."
-    with open(f"{project_name}_prompts.txt", "w") as f:
-        for prompt in prompts:
-            f.write(f"{prompt}\n\n")
-    return f"Prompts exported to '{project_name}_prompts.txt'"
+    try:
+        async with aiofiles.open(f"{project_name}_prompts.txt", "w") as f:
+            await f.write("\n\n".join(prompts))
+        return f"Prompts exported to '{project_name}_prompts.txt'"
+    except IOError as e:
+        return f"Error exporting prompts: {str(e)}"
 
 # Global variable to store generated prompts
 generated_prompts = []
