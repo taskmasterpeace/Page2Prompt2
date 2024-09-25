@@ -921,9 +921,15 @@ def load_project(project_name):
         style_prefix = project_data.get("style_prefix", "")
         style_suffix = project_data.get("style_suffix", "")
         
+        # Update the global generated_prompts
+        global generated_prompts
+        generated_prompts = prompts
+        
         return full_script, shot_list, subjects, prompts, director_style, style, style_prefix, style_suffix, project_data, f"Project '{project_name}' loaded successfully."
     except FileNotFoundError:
         return None, None, None, None, None, None, None, None, None, f"Project '{project_name}' not found."
+    except json.JSONDecodeError:
+        return None, None, None, None, None, None, None, None, None, f"Error reading project file for '{project_name}'. The file may be corrupted."
 
 def delete_project(project_name):
     try:
