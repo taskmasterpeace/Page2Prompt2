@@ -309,11 +309,7 @@ class MetaChain:
                 try:
                     descriptions = json.loads(content)
                     if isinstance(descriptions, list):
-                        for subject_data in descriptions:
-                            for subject in subjects:
-                                if subject['name'].lower() == subject_data['name'].lower():
-                                    subject.update(subject_data)
-                                    break
+                        subjects = descriptions  # Replace the subjects list with the LLM output
                     else:
                         logger.warning("LLM response is not a JSON array")
                 except json.JSONDecodeError as json_error:

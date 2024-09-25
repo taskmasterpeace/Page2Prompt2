@@ -107,8 +107,6 @@ class ScriptManager:
             
             if isinstance(subjects, list):
                 subjects_df = pd.DataFrame(subjects)
-            elif isinstance(subjects, dict) and 'subjects' in subjects:
-                subjects_df = pd.DataFrame(subjects['subjects'])
             else:
                 logger.warning("Unexpected format of subjects")
                 return pd.DataFrame(columns=["name", "description", "type"])
