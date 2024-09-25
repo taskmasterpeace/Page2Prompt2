@@ -890,7 +890,7 @@ from datetime import datetime
 
 # Add or update these functions at the end of the file
 
-def save_project(project_name, full_script, shot_list, subjects, prompts, director_style, style, style_prefix, style_suffix):
+def save_project(project_name, full_script, shot_list, subjects):
     if not project_name:
         return "Please enter a project name.", None
 
@@ -899,11 +899,6 @@ def save_project(project_name, full_script, shot_list, subjects, prompts, direct
         "full_script": full_script,
         "shot_list": shot_list.to_dict() if isinstance(shot_list, pd.DataFrame) else {},
         "subjects": subjects.to_dict() if isinstance(subjects, pd.DataFrame) else {},
-        "prompts": prompts,
-        "director_style": director_style,
-        "style": style,
-        "style_prefix": style_prefix,
-        "style_suffix": style_suffix,
         "last_modified": datetime.now().isoformat()
     }
     
@@ -1002,17 +997,14 @@ async def generate_prompts_wrapper(
 # Add event handlers for project management buttons
 save_project_btn.click(
     save_project,
-    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, gr.State(lambda: generated_prompts),
-            director_style_input, style_input, style_prefix_input, style_suffix_input],
+    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df],
     outputs=[feedback_box, projects_df]
 )
 
 load_project_btn.click(
     load_project,
     inputs=[project_name_input],
-    outputs=[full_script_input, shot_list_df, subjects_df, prompts_display, 
-             director_style_input, style_input, style_prefix_input, style_suffix_input,
-             project_info, feedback_box]
+    outputs=[full_script_input, shot_list_df, subjects_df, feedback_box]
 )
 
 delete_project_btn.click(
