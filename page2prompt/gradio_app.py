@@ -10,6 +10,9 @@ import logging
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Initialize generated_prompts
+generated_prompts = []
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
 from .utils.style_manager import StyleManager
@@ -867,6 +870,13 @@ with gr.Blocks() as demo:
             receive_proposed_subjects,
             inputs=[gr.State(None)],  # Add a dummy input
             outputs=[subjects_df, feedback_box]
+        )
+
+        # Update the prompts display when loading a project
+        load_project_btn.click(
+            lambda prompts: update_prompts_display(prompts),
+            inputs=[gr.State(lambda: generated_prompts)],
+            outputs=[prompts_display]
         )
 
 # Launch the Gradio interface
