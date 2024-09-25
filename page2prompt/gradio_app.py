@@ -420,41 +420,75 @@ with gr.Blocks() as demo:
             # Shot List Generation
             with gr.Accordion("Shot List Generation 🎥", open=False):
                 generate_shot_list_button = gr.Button("Generate Shot List")
-                shot_list_output = gr.Dataframe(
-                    headers=["Scene", "Shot", "Description", "Notes"],
-                    datatype=["str", "str", "str", "str"],
-                    row_count=10,
-                    col_count=(4, "fixed"),
+                proposed_shot_list_music_lab = gr.DataFrame(
+                    headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
+                    datatype=["str", "str", "str", "str", "str", "str", "str", "str"],
+                    label="Proposed Shot List",
+                    interactive=True
                 )
 
-                # Character Management
-                with gr.Row():
-                    character_name = gr.Textbox(label="Character Name")
-                    character_description = gr.Textbox(label="Character Description")
-                    add_character_button = gr.Button("Add Character")
+                # Subject Management
+                with gr.Accordion("Subject Management 👥", open=False):
+                    subjects_df_music_lab = gr.DataFrame(
+                        headers=["Name", "Description", "Alias", "Type", "Prefix", "Suffix", "Active"],
+                        datatype=["str", "str", "str", "str", "str", "str", "bool"],
+                        label="Subjects",
+                        interactive=True
+                    )
 
-                characters_df = gr.Dataframe(
-                    headers=["Name", "Description"],
-                    datatype=["str", "str"],
-                    row_count=5,
-                    col_count=(2, "fixed"),
-                )
+                    with gr.Row():
+                        subject_name_music_lab = gr.Textbox(label="Name")
+                        subject_description_music_lab = gr.Textbox(label="Description")
+                        subject_alias_music_lab = gr.Textbox(label="Alias")
+                        subject_type_music_lab = gr.Dropdown(label="Type", choices=["person", "place", "prop"])
+                        subject_prefix_music_lab = gr.Textbox(label="Prefix")
+                        subject_suffix_music_lab = gr.Textbox(label="Suffix")
 
-                def add_character(name, description, current_df):
-                    new_row = pd.DataFrame([[name, description]], columns=["Name", "Description"])
-                    updated_df = pd.concat([current_df, new_row], ignore_index=True)
-                    return updated_df
-
-                add_character_button.click(
-                    add_character,
-                    inputs=[character_name, character_description, characters_df],
-                    outputs=[characters_df]
-                )
+                    with gr.Row():
+                        add_subject_music_lab_btn = gr.Button("Add Subject")
+                        update_subject_music_lab_btn = gr.Button("Update Subject")
+                        delete_subject_music_lab_btn = gr.Button("Delete Subject")
 
                 generate_shot_list_button.click(
                     lambda *args: asyncio.run(generate_shot_list(*args)),
-                    inputs=[concept_input, genre_input, descriptors_input, lyrics_textbox, chat_history, video_treatment_output, characters_df],
-                    outputs=shot_list_output
+                    inputs=[concept_input, genre_input, descriptors_input, lyrics_textbox, chat_history, video_treatment_output, subjects_df_music_lab],
+                    outputs=proposed_shot_list_music_lab
+                )
+
+                # Add event handlers for subject management in Music Lab
+                def add_subject_music_lab(name, description, alias, type, prefix, suffix, current_df):
+                    new_row = pd.DataFrame([[name, description, alias, type, prefix, suffix, True]], 
+                                           columns=["Name", "Description", "Alias", "Type", "Prefix", "Suffix", "Active"])
+                    updated_df = pd.concat([current_df, new_row], ignore_index=True)
+                    return updated_df
+
+                add_subject_music_lab_btn.click(
+                    add_subject_music_lab,
+                    inputs=[subject_name_music_lab, subject_description_music_lab, subject_alias_music_lab, 
+                            subject_type_music_lab, subject_prefix_music_lab, subject_suffix_music_lab, subjects_df_music_lab],
+                    outputs=[subjects_df_music_lab]
+                )
+
+                def update_subject_music_lab(name, description, alias, type, prefix, suffix, current_df):
+                    mask = current_df['Name'] == name
+                    if mask.any():
+                        current_df.loc[mask, ['Description', 'Alias', 'Type', 'Prefix', 'Suffix']] = [description, alias, type, prefix, suffix]
+                    return current_df
+
+                update_subject_music_lab_btn.click(
+                    update_subject_music_lab,
+                    inputs=[subject_name_music_lab, subject_description_music_lab, subject_alias_music_lab, 
+                            subject_type_music_lab, subject_prefix_music_lab, subject_suffix_music_lab, subjects_df_music_lab],
+                    outputs=[subjects_df_music_lab]
+                )
+
+                def delete_subject_music_lab(name, current_df):
+                    return current_df[current_df['Name'] != name].reset_index(drop=True)
+
+                delete_subject_music_lab_btn.click(
+                    delete_subject_music_lab,
+                    inputs=[subject_name_music_lab, subjects_df_music_lab],
+                    outputs=[subjects_df_music_lab]
                 )
 
         with gr.TabItem("📜 Script Management"):
