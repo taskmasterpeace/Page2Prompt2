@@ -88,11 +88,12 @@ class MetaChain:
            - Incorporate any thematic elements, motifs, or specific visual styles mentioned in the Director's Notes or Director's Style.
            - Reflect the intended mood and atmosphere as per the director's guidance while maintaining factual descriptions.
            - Use any specified terminology or language style preferred by the director.
-        16. Time of Day and Lighting:
+        16. Camera and Lens Information: Only include camera name and lens type if explicitly provided in the input. Do not use placeholders like "[Camera Name]" or "[Lens Type]".
+        17. Time of Day and Lighting:
            - If the time of day is specified, include relevant details about lighting, shadows, and atmosphere.
            - Describe how the lighting conditions affect the appearance of subjects and the setting (e.g., soft morning light, harsh midday sun, warm sunset hues).
            - Incorporate any specific lighting setups or effects if provided in the input.
-        17. Convey Emotion and Atmosphere:
+        18. Convey Emotion and Atmosphere:
            - When specified, integrate emotional tones or atmospheres into the scene description (e.g., tense, joyful, mysterious).
            - Use factual descriptions to convey emotions through actions, expressions, and environmental details without relying on stylistic adjectives unless specified.
            - Ensure that the emotional context aligns with the overall scene and director's vision.
