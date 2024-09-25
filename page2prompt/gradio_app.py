@@ -8,6 +8,79 @@ from datetime import datetime
 import logging
 import aiofiles
 
+# Add these function definitions at the top of the file
+async def list_projects():
+    projects = []
+    for file in os.listdir():
+        if file.endswith(".json"):
+            try:
+                async with aiofiles.open(file, "r") as f:
+                    project_data = json.loads(await f.read())
+                    projects.append({
+                        "Project Name": project_data.get("name", "Unknown"),
+                        "Last Modified": project_data.get("last_modified", "Unknown")
+                    })
+            except (json.JSONDecodeError, IOError) as e:
+                print(f"Error reading project file {file}: {str(e)}")
+    return pd.DataFrame(projects)
+
+async def save_project(project_name, full_script, shot_list, subjects, generated_prompts):
+    if not project_name:
+        return "Please enter a project name.", None, generated_prompts
+
+    project_data = {
+        "name": project_name,
+        "full_script": full_script,
+        "shot_list": shot_list.to_dict() if isinstance(shot_list, pd.DataFrame) else {},
+        "subjects": subjects.to_dict() if isinstance(subjects, pd.DataFrame) else {},
+        "prompts": generated_prompts,
+        "last_modified": datetime.now().isoformat()
+    }
+    
+    try:
+        async with aiofiles.open(f"{project_name}.json", "w") as f:
+            await f.write(json.dumps(project_data))
+        return f"Project '{project_name}' saved successfully.", await list_projects(), generated_prompts
+    except IOError as e:
+        return f"Error saving project: {str(e)}", None, generated_prompts
+
+async def load_project(project_name):
+    try:
+        async with aiofiles.open(f"{project_name}.json", "r") as f:
+            project_data = json.loads(await f.read())
+        
+        full_script = project_data.get("full_script", "")
+        shot_list = pd.DataFrame(project_data.get("shot_list", {}))
+        subjects = pd.DataFrame(project_data.get("subjects", {}))
+        prompts = project_data.get("prompts", [])
+        
+        return full_script, shot_list, subjects, prompts, f"Project '{project_name}' loaded successfully."
+    except FileNotFoundError:
+        return None, None, None, None, f"Project '{project_name}' not found."
+    except json.JSONDecodeError:
+        return None, None, None, None, f"Error reading project file for '{project_name}'. The file may be corrupted."
+    except IOError as e:
+        return None, None, None, None, f"Error loading project: {str(e)}"
+
+async def delete_project(project_name):
+    try:
+        os.remove(f"{project_name}.json")
+        return f"Project '{project_name}' deleted successfully.", await list_projects()
+    except FileNotFoundError:
+        return f"Project '{project_name}' not found.", await list_projects()
+    except IOError as e:
+        return f"Error deleting project: {str(e)}", await list_projects()
+
+async def export_prompts(prompts, project_name):
+    if not project_name:
+        return "Please enter a project name."
+    try:
+        async with aiofiles.open(f"{project_name}_prompts.txt", "w") as f:
+            await f.write("\n\n".join(prompts))
+        return f"Prompts exported to '{project_name}_prompts.txt'"
+    except IOError as e:
+        return f"Error exporting prompts: {str(e)}"
+
 def import_prompts_from_file(file):
     if file is not None:
         content = file.decode('utf-8')
@@ -286,7 +359,7 @@ with gr.Blocks() as demo:
             )
 
             # Initialize the projects list when the app starts
-            demo.load(lambda: asyncio.run(list_projects()), outputs=[projects_df])
+            demo.load(list_projects, outputs=[projects_df])
 
             # Update the projects list after saving or deleting a project
             save_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
