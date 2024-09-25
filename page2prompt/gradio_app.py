@@ -222,6 +222,16 @@ with gr.Blocks() as demo:
             )
 
             prompts_display = gr.TextArea(label="Generated Prompts", lines=10, interactive=False)
+
+            def update_prompts_display(prompts):
+                return "\n\n".join(prompts)
+
+            # Update the prompts display when loading a project
+            load_project_btn.click(
+                lambda prompts: update_prompts_display(prompts),
+                inputs=[gr.State(lambda: generated_prompts)],
+                outputs=[prompts_display]
+            )
         
             project_info = gr.JSON(label="Project Info", visible=False)
 
@@ -849,12 +859,15 @@ with gr.Blocks() as demo:
             return None, error_message
 
     # Add this in the Subject Management tab section
-    receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
-    receive_proposed_subjects_btn.click(
-        receive_proposed_subjects,
-        inputs=[gr.State(None)],  # Add a dummy input
-        outputs=[subjects_df, feedback_box]
-    )
+    with gr.TabItem("👥 Subject Management"):
+        # ... (existing code)
+    
+        receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
+        receive_proposed_subjects_btn.click(
+            receive_proposed_subjects,
+            inputs=[gr.State(None)],  # Add a dummy input
+            outputs=[subjects_df, feedback_box]
+        )
 
 # Launch the Gradio interface
 if __name__ == "__main__":
@@ -874,8 +887,8 @@ def save_project(project_name, full_script, shot_list, subjects, prompts, direct
     project_data = {
         "name": project_name,
         "full_script": full_script,
-        "shot_list": shot_list.to_dict(),
-        "subjects": subjects.to_dict(),
+        "shot_list": shot_list.to_dict() if isinstance(shot_list, pd.DataFrame) else {},
+        "subjects": subjects.to_dict() if isinstance(subjects, pd.DataFrame) else {},
         "prompts": prompts,
         "director_style": director_style,
         "style": style,
@@ -894,10 +907,10 @@ def load_project(project_name):
         with open(f"{project_name}.json", "r") as f:
             project_data = json.load(f)
         
-        full_script = project_data["full_script"]
-        shot_list = pd.DataFrame.from_dict(project_data["shot_list"])
-        subjects = pd.DataFrame.from_dict(project_data["subjects"])
-        prompts = project_data["prompts"]
+        full_script = project_data.get("full_script", "")
+        shot_list = pd.DataFrame(project_data.get("shot_list", {}))
+        subjects = pd.DataFrame(project_data.get("subjects", {}))
+        prompts = project_data.get("prompts", [])
         director_style = project_data.get("director_style", "")
         style = project_data.get("style", "")
         style_prefix = project_data.get("style_prefix", "")
@@ -918,12 +931,15 @@ def list_projects():
     projects = []
     for file in os.listdir():
         if file.endswith(".json"):
-            with open(file, "r") as f:
-                project_data = json.load(f)
-                projects.append({
-                    "Project Name": project_data["name"],
-                    "Last Modified": project_data["last_modified"]
-                })
+            try:
+                with open(file, "r") as f:
+                    project_data = json.load(f)
+                    projects.append({
+                        "Project Name": project_data.get("name", "Unknown"),
+                        "Last Modified": project_data.get("last_modified", "Unknown")
+                    })
+            except json.JSONDecodeError:
+                print(f"Error reading project file: {file}")
     return pd.DataFrame(projects)
 
 def export_prompts(prompts, project_name):
@@ -1003,6 +1019,10 @@ export_prompts_btn.click(
 
 # Add this to initialize the projects list when the app starts
 demo.load(list_projects, outputs=[projects_df])
+
+# Update the projects list after saving or deleting a project
+save_project_btn.click(list_projects, outputs=[projects_df])
+delete_project_btn.click(list_projects, outputs=[projects_df])
 
 # Update the generate_prompts_wrapper function to store prompts globally
 def generate_prompts_wrapper(*args, **kwargs):
