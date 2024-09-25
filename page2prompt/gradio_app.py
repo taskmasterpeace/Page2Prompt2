@@ -226,38 +226,39 @@ with gr.Blocks() as demo:
                     import_prompts_btn = gr.Button("📥 Import Prompts from File")
 
         with gr.TabItem("🗂️ Project Management"):
-            with gr.Row():
-                project_name_input = gr.Textbox(label="Project Name")
-                save_project_btn = gr.Button("💾 Save Project")
-                load_project_btn = gr.Button("📂 Load Project")
-                delete_project_btn = gr.Button("🗑️ Delete Project")
-                export_prompts_btn = gr.Button("📤 Export Prompts")
+            with gr.Accordion("💾/📂 Load/Save Project", open=False):
+                with gr.Row():
+                    project_name_input = gr.Textbox(label="Project Name")
+                    save_project_btn = gr.Button("💾 Save Project")
+                    load_project_btn = gr.Button("📂 Load Project")
+                    delete_project_btn = gr.Button("🗑️ Delete Project")
+                    export_prompts_btn = gr.Button("📤 Export Prompts")
 
-            feedback_box = gr.Textbox(label="Feedback", interactive=False)
+                feedback_box = gr.Textbox(label="Feedback", interactive=False)
 
-            projects_df = gr.DataFrame(
-                headers=["Project Name", "Last Modified"],
-                label="Saved Projects",
-                interactive=False
-            )
+                projects_df = gr.DataFrame(
+                    headers=["Project Name", "Last Modified"],
+                    label="Saved Projects",
+                    interactive=False
+                )
 
-            prompts_display = gr.TextArea(label="Generated Prompts", lines=10, interactive=False)
+                prompts_display = gr.TextArea(label="Generated Prompts", lines=10, interactive=False)
 
-            project_info = gr.JSON(label="Project Info", visible=False)
-    
-            generated_prompts_state = gr.State([])
-
-            def update_prompts_display(prompts):
-                return "\n\n".join(prompts)
-
-            # Update the prompts display when loading a project
-            load_project_btn.click(
-                lambda prompts: update_prompts_display(prompts),
-                inputs=[generated_prompts_state],
-                outputs=[prompts_display]
-            )
+                project_info = gr.JSON(label="Project Info", visible=False)
         
-            project_info = gr.JSON(label="Project Info", visible=False)
+                generated_prompts_state = gr.State([])
+
+                def update_prompts_display(prompts):
+                    return "\n\n".join(prompts)
+
+                # Update the prompts display when loading a project
+                load_project_btn.click(
+                    lambda prompts: update_prompts_display(prompts),
+                    inputs=[generated_prompts_state],
+                    outputs=[prompts_display]
+                )
+            
+                project_info = gr.JSON(label="Project Info", visible=False)
 
             # Event handlers
             save_project_btn.click(
