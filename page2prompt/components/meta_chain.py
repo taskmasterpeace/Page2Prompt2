@@ -240,88 +240,102 @@ class MetaChain:
         logger.info("Starting subject extraction process")
         subjects = []
 
-        # Extract unique people and places from the shot list
-        unique_people = set(shot_list['People'].str.split(',').explode().str.strip().unique())
-        unique_places = set(shot_list['Places'].str.split(',').explode().str.strip().unique())
+        try:
+            logger.info("Extracting unique people and places from shot list")
+            # Extract unique people and places from the shot list
+            unique_people = set(shot_list['People'].str.split(',').explode().str.strip().unique())
+            unique_places = set(shot_list['Places'].str.split(',').explode().str.strip().unique())
 
-        # Process people
-        for name in unique_people:
-            if name and name != 'N/A':
-                subjects.append({
-                    "name": name,
+            logger.info(f"Found {len(unique_people)} unique people and {len(unique_places)} unique places")
+
+            # Process people
+            for name in unique_people:
+                if name and name != 'N/A':
+                    subjects.append({
+                        "name": name,
+                        "type": "person"
+                    })
+
+            # Process places
+            for place in unique_places:
+                if place and place != 'N/A':
+                    subjects.append({
+                        "name": place,
+                        "type": "place"
+                    })
+
+            logger.info(f"Created {len(subjects)} subject entries from shot list")
+
+            # Use LLM to generate descriptions for subjects
+            if subjects:
+                subjects_list = "\n".join([f"{s['name']} ({s['type']})" for s in subjects])
+                prompt = f"""
+                Given the following list of subjects extracted from a script and shot list, provide a brief description for each.
+                For people, focus on their physical appearance, clothing, accessories, and hairstyle.
+                For locations, describe their general appearance and atmosphere.
+                Do not include information about their role in the story or personality traits.
+
+                Script:
+                {script[:500]}...  # Truncated for brevity
+
+                Subjects:
+                {subjects_list}
+
+                For each subject, provide a description in the following JSON format:
+                {{
+                    "name": "Subject Name",
+                    "description": "Description",
+                    "type": "person/place"
+                }}
+
+                Example:
+                {{
+                    "name": "John",
+                    "description": "A man in his mid-40s with salt-and-pepper hair, wearing a worn leather jacket and carrying a notepad.",
                     "type": "person"
-                })
-
-        # Process places
-        for place in unique_places:
-            if place and place != 'N/A':
-                subjects.append({
-                    "name": place,
+                }}
+                {{
+                    "name": "City Park",
+                    "description": "A lush green space with winding paths, dotted with colorful flower beds and a central fountain.",
                     "type": "place"
-                })
+                }}
 
-        logger.info(f"Found {len(subjects)} subjects from shot list")
+                Provide descriptions for all subjects in the list above.
+                """
 
-        # Use LLM to generate descriptions for subjects
-        if subjects:
-            subjects_list = "\n".join([f"{s['name']} ({s['type']})" for s in subjects])
-            prompt = f"""
-            Given the following list of subjects extracted from a script and shot list, provide a brief description for each.
-            For people, focus on their physical appearance, clothing, accessories, and hairstyle.
-            For locations, describe their general appearance and atmosphere.
-            Do not include information about their role in the story or personality traits.
-
-            Script:
-            {script}
-
-            Subjects:
-            {subjects_list}
-
-            For each subject, provide a description in the following JSON format:
-            {{
-                "name": "Subject Name",
-                "description": "Description",
-                "type": "person/place"
-            }}
-
-            Example:
-            {{
-                "name": "John",
-                "description": "A man in his mid-40s with salt-and-pepper hair, wearing a worn leather jacket and carrying a notepad.",
-                "type": "person"
-            }}
-            {{
-                "name": "City Park",
-                "description": "A lush green space with winding paths, dotted with colorful flower beds and a central fountain.",
-                "type": "place"
-            }}
-
-            Provide descriptions for all subjects in the list above.
-            """
-
-            try:
-                response = await self.llm.ainvoke(prompt)
-                content = response.content.strip()
-                
-                # Remove the ```json and ``` markers if present
-                content = content.replace("```json", "").replace("```", "").strip()
-                
+                logger.info("Sending prompt to LLM for subject descriptions")
                 try:
-                    descriptions = json.loads(content)
-                    if isinstance(descriptions, list):
-                        subjects = descriptions  # Replace the subjects list with the LLM output
-                    else:
-                        logger.warning("LLM response is not a JSON array")
-                except json.JSONDecodeError as json_error:
-                    logger.warning(f"Failed to parse JSON: {json_error}")
-                    logger.warning(f"Content: {content}")
-            except Exception as e:
-                logger.error(f"Error generating descriptions: {str(e)}")
-            
-            # Ensure all subjects have a description
-            for subject in subjects:
-                if 'description' not in subject:
-                    subject['description'] = f"A {subject['type']} from the script"
+                    response = await self.llm.ainvoke(prompt)
+                    content = response.content.strip()
+                    
+                    logger.info("Received response from LLM")
+                    logger.debug(f"Raw LLM response: {content[:500]}...")  # Log first 500 characters of the response
+                    
+                    # Remove the ```json and ``` markers if present
+                    content = content.replace("```json", "").replace("```", "").strip()
+                    
+                    try:
+                        descriptions = json.loads(content)
+                        if isinstance(descriptions, list):
+                            logger.info(f"Successfully parsed {len(descriptions)} subject descriptions")
+                            subjects = descriptions  # Replace the subjects list with the LLM output
+                        else:
+                            logger.warning("LLM response is not a JSON array")
+                            logger.debug(f"Parsed content (not an array): {descriptions}")
+                    except json.JSONDecodeError as json_error:
+                        logger.error(f"Failed to parse JSON: {json_error}")
+                        logger.error(f"Content that failed to parse: {content}")
+                except Exception as e:
+                    logger.error(f"Error generating descriptions: {str(e)}")
+                
+                # Ensure all subjects have a description
+                for subject in subjects:
+                    if 'description' not in subject:
+                        logger.warning(f"Missing description for subject: {subject.get('name', 'Unknown')}")
+                        subject['description'] = f"A {subject['type']} from the script"
 
-        logger.info(f"Completed subject extraction process with {len(subjects)} subjects")
-        return subjects
+            logger.info(f"Completed subject extraction process with {len(subjects)} subjects")
+            return subjects
+        except Exception as e:
+            logger.exception(f"Unexpected error in extract_proposed_subjects: {str(e)}")
+            return []

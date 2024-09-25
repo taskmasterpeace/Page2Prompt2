@@ -5,7 +5,11 @@ import os
 import pandas as pd
 import json
 from datetime import datetime
-import json
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
 from .utils.style_manager import StyleManager
