@@ -7,6 +7,12 @@ import json
 from datetime import datetime
 import logging
 
+def import_prompts_from_file(file):
+    if file is not None:
+        content = file.decode('utf-8')
+        return content
+    return ""
+
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
