@@ -356,6 +356,21 @@ with gr.Blocks() as demo:
                     inputs=[lyrics_textbox, find_text, replace_text],
                     outputs=lyrics_textbox
                 )
+        
+            # Music Player
+            with gr.Accordion("Music Player 🎧", open=True):
+                audio_player = gr.Audio(label="Play Uploaded MP3", type="filepath")
+            
+                def update_audio_player(file):
+                    if file is not None:
+                        return file.name
+                    return None
+            
+                audio_upload.change(
+                    update_audio_player,
+                    inputs=[audio_upload],
+                    outputs=[audio_player]
+                )
 
             # Director's Assistant Chat Interface
             with gr.Accordion("Director's Assistant 🎬", open=False):
