@@ -187,6 +187,9 @@ with gr.Blocks() as demo:
             label="Master Shot List",
             interactive=True
         )
+    
+    shot_list_df = gr.State()
+    column_view = gr.Radio(["Simple View", "Detailed View"], label="Column View", value="Simple View")
 
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
@@ -337,14 +340,14 @@ with gr.Blocks() as demo:
             # Event handlers
             save_project_btn.click(
                 lambda *args: asyncio.run(save_project(*args)),
-                inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, generated_prompts_state],
+                inputs=[project_name_input, full_script_input, master_shot_list_df, subjects_df, generated_prompts_state],
                 outputs=[feedback_box, projects_df, generated_prompts_state]
             )
 
             load_project_btn.click(
                 lambda project_name: asyncio.run(load_project(project_name)),
                 inputs=[project_name_input],
-                outputs=[full_script_input, shot_list_df, subjects_df, generated_prompts_state, feedback_box]
+                outputs=[full_script_input, master_shot_list_df, subjects_df, generated_prompts_state, feedback_box]
             )
 
             delete_project_btn.click(
@@ -813,7 +816,7 @@ with gr.Blocks() as demo:
     generate_shot_list_btn.click(
         generate_proposed_shot_list,
         inputs=[full_script_input, column_view],
-        outputs=[full_df, shot_list_df, feedback_box]
+        outputs=[full_df, master_shot_list_df, feedback_box]
     )
 
     extract_subjects_btn.click(
