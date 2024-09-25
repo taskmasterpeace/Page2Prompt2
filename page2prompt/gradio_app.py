@@ -181,6 +181,20 @@ with gr.Blocks() as demo:
                 full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
                 copy_full_script_btn = gr.Button("📋 Send to Clipboard", scale=1)
 
+    with gr.Accordion("🎥 Master Shot List", open=True):
+        master_shot_list_df = gr.DataFrame(
+            headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
+            label="Master Shot List",
+            interactive=True
+        )
+
+    with gr.Accordion("👥 Subjects Master List", open=True):
+        subjects_master_df = gr.DataFrame(
+            headers=["Name", "Description", "Type"],
+            label="Subjects Master List",
+            interactive=True
+        )
+
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
             with gr.Row():
@@ -190,12 +204,6 @@ with gr.Blocks() as demo:
                         directors_notes_input = gr.Textbox(label="🎬 Director's Notes")
                         stick_to_script_input = gr.Checkbox(label="📜 Stick to Script")
                         highlighted_text_input = gr.Textbox(label="🖍️ Highlighted Text")
-
-                    shot_list_df = gr.DataFrame(
-                        headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
-                        label="Shot List",
-                        interactive=True
-                    )
 
                     with gr.Accordion("👥 Subjects", open=False):
                         with gr.Row():
@@ -615,15 +623,10 @@ with gr.Blocks() as demo:
                 # State to store the full DataFrame
                 full_df = gr.State()
 
-                column_view = gr.Radio(
-                    choices=["Simple View", "Detailed View"],
-                    value="Simple View",
-                    label="Shot List View"
-                )
                 shot_list_df = gr.DataFrame(
                     headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
                     label="Proposed Shot List",
-                    interactive=False  # Set to True if you want it editable
+                    interactive=True
                 )
                 generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
 
