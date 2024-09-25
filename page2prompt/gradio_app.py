@@ -250,6 +250,38 @@ with gr.Blocks() as demo:
         
             project_info = gr.JSON(label="Project Info", visible=False)
 
+            # Event handlers
+            save_project_btn.click(
+                lambda *args: asyncio.run(save_project(*args)),
+                inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, generated_prompts_state],
+                outputs=[feedback_box, projects_df, generated_prompts_state]
+            )
+
+            load_project_btn.click(
+                lambda project_name: asyncio.run(load_project(project_name)),
+                inputs=[project_name_input],
+                outputs=[full_script_input, shot_list_df, subjects_df, generated_prompts_state, feedback_box]
+            )
+
+            delete_project_btn.click(
+                lambda project_name: asyncio.run(delete_project(project_name)),
+                inputs=[project_name_input],
+                outputs=[feedback_box, projects_df]
+            )
+
+            export_prompts_btn.click(
+                lambda prompts, project_name: asyncio.run(export_prompts(prompts, project_name)),
+                inputs=[generated_prompts_state, project_name_input],
+                outputs=[feedback_box]
+            )
+
+            # Initialize the projects list when the app starts
+            demo.load(lambda: asyncio.run(list_projects()), outputs=[projects_df])
+
+            # Update the projects list after saving or deleting a project
+            save_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
+            delete_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
+
             def add_subject(name, description, alias, type, prefix, suffix):
                 new_subject = Subject(name, description, alias, type, prefix, suffix)
                 subject_manager.add_subject(new_subject)
@@ -1076,78 +1108,4 @@ async def generate_prompts_wrapper(
     
     return result["concise"], result["normal"], result["detailed"], result["structured"], "Prompts generated and saved.", ", ".join(active_subjects)
 
-# Event handlers
-save_project_btn.click(
-    lambda *args: asyncio.run(save_project(*args)),
-    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, generated_prompts_state],
-    outputs=[feedback_box, projects_df, generated_prompts_state]
-)
 
-load_project_btn.click(
-    lambda project_name: asyncio.run(load_project(project_name)),
-    inputs=[project_name_input],
-    outputs=[full_script_input, shot_list_df, subjects_df, generated_prompts_state, feedback_box]
-)
-
-delete_project_btn.click(
-    lambda project_name: asyncio.run(delete_project(project_name)),
-    inputs=[project_name_input],
-    outputs=[feedback_box, projects_df]
-)
-
-export_prompts_btn.click(
-    lambda prompts, project_name: asyncio.run(export_prompts(prompts, project_name)),
-    inputs=[generated_prompts_state, project_name_input],
-    outputs=[feedback_box]
-)
-
-# Initialize the projects list when the app starts
-demo.load(lambda: asyncio.run(list_projects()), outputs=[projects_df])
-
-# Update the projects list after saving or deleting a project
-save_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
-delete_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
-
-# Update the generate_prompts_wrapper function to store prompts globally
-def generate_prompts_wrapper(*args, **kwargs):
-    global generated_prompts
-    result = asyncio.run(script_prompt_generator.generate_prompts(*args, **kwargs))
-    generated_prompts.extend([result["concise"], result["normal"], result["detailed"]])
-    return (result["concise"], result["normal"], result["detailed"], 
-            result["structured"], "Prompts generated and saved.", ", ".join(kwargs.get('active_subjects', [])))
-
-# Connect the generate_prompts_wrapper to the generate_button
-generate_button.click(
-    fn=generate_prompts_wrapper,
-    inputs=[
-        shot_description_input,
-        directors_notes_input,
-        style_input,
-        style_prefix_input,
-        style_suffix_input,
-        director_style_input,
-        shot,
-        move,
-        size,
-        framing,
-        depth_of_field,
-        camera_type,
-        camera_name,
-        lens_type,
-        end_parameters_input,
-        stick_to_script_input,
-        highlighted_text_input,
-        full_script_input,
-        people,
-        places,
-        props
-    ],
-    outputs=[
-        concise_prompt,
-        normal_prompt,
-        detailed_prompt,
-        structured_prompt,
-        generation_message,
-        active_subjects_display
-    ]
-)
