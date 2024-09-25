@@ -615,16 +615,12 @@ with gr.Blocks() as demo:
 
         with gr.TabItem("📜 Script Management"):
             with gr.Accordion("🎬 Proposed Shot List", open=True):
-                # State to store the full DataFrame
-                full_df = gr.State()
-
                 shot_list_df = gr.DataFrame(
                     headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
                     label="Proposed Shot List",
                     interactive=True
                 )
                 generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
-                column_view = gr.Radio(["Simple View", "Detailed View"], label="Column View", value="Simple View")
     
                 with gr.Row():
                     new_row_btn = gr.Button("➕ New Row")
@@ -662,27 +658,6 @@ with gr.Blocks() as demo:
         with gr.Accordion("System Feedback", open=False):
             feedback_box = gr.Textbox(label="Feedback", interactive=False, lines=3)
 
-            def update_shot_list_view(df, view_option):
-                if df is None or df.empty:
-                    return None
-    
-                required_columns = ["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"]
-    
-                # Ensure all required columns exist
-                for col in required_columns:
-                    if col not in df.columns:
-                        df[col] = ""
-    
-                if view_option == "Simple View":
-                    return df[["Scene", "Shot Description", "Shot Size", "People"]]
-                else:  # Detailed View
-                    return df[required_columns]
-
-            column_view.change(
-                update_shot_list_view,
-                inputs=[shot_list_df, column_view],
-                outputs=[shot_list_df]
-            )
 
     # Event handlers (placeholder functions for now)
     def save_style():
@@ -751,7 +726,7 @@ with gr.Blocks() as demo:
     send_prompts_btn.click(send_prompts)
 
     # Script Management event handlers
-    async def generate_proposed_shot_list(full_script, view_option):
+    async def generate_proposed_shot_list(full_script):
         response = await script_manager.generate_proposed_shot_list(full_script)
         if isinstance(response, pd.DataFrame):
             df = response
@@ -782,7 +757,7 @@ with gr.Blocks() as demo:
         df = reset_shot_numbers(df)
 
         feedback = "Shot list generated successfully with shot numbers reset for each scene."
-        return df, update_shot_list_view(df, view_option), feedback
+        return df, df, feedback
 
     def save_proposed_shot_list():
         script_manager.save_proposed_shot_list("proposed_shot_list.csv")
@@ -818,8 +793,8 @@ with gr.Blocks() as demo:
 
     generate_shot_list_btn.click(
         generate_proposed_shot_list,
-        inputs=[full_script_input, column_view],
-        outputs=[full_df, master_shot_list_df, feedback_box]
+        inputs=[full_script_input],
+        outputs=[shot_list_df, master_shot_list_df, feedback_box]
     )
 
     extract_subjects_btn.click(
