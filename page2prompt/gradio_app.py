@@ -93,6 +93,65 @@ logger = logging.getLogger(__name__)
 
 # Initialize generated_prompts
 generated_prompts = []
+
+def export_styles_to_csv(filename):
+    if not filename:
+        return "No filename provided for export."
+    if not filename.endswith('.csv'):
+        filename += '.csv'
+    try:
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=["name", "prefix", "suffix"])
+            writer.writeheader()
+            for style in style_manager.get_styles():
+                style_data = style_manager.get_style(style)
+                writer.writerow({
+                    "name": style,
+                    "prefix": style_data.get("Prefix", ""),
+                    "suffix": style_data.get("Suffix", "")
+                })
+        return f"Styles exported successfully to {filename}"
+    except Exception as e:
+        return f"Error exporting styles: {str(e)}"
+
+def import_styles_from_csv():
+    try:
+        file_path = gr.File().value
+        if not file_path:
+            return "No file selected for import."
+        
+        new_styles = []
+        with open(file_path, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                new_styles.append({
+                    "name": row["name"],
+                    "prefix": row["prefix"],
+                    "suffix": row["suffix"]
+                })
+        
+        # Update the style_manager with new styles
+        for style in new_styles:
+            style_manager.add_style(style)
+        
+        return f"Styles imported successfully from {file_path}"
+    except Exception as e:
+        return f"Error importing styles: {str(e)}"
+
+def handle_csv_operation(operation, filename):
+    if operation == "Export Styles":
+        return export_styles_to_csv(filename)
+    elif operation == "Import Styles":
+        return import_styles_from_csv()
+    else:
+        return "Invalid operation selected."
+
+# Connect the button to the handler function
+csv_operation_btn.click(
+    handle_csv_operation,
+    inputs=[csv_operation, csv_filename],
+    outputs=[csv_feedback]
+)
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
 from .utils.style_manager import StyleManager
