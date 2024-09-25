@@ -119,14 +119,17 @@ class SubjectManager:
                     text = text.replace(subject.name, subject.alias)
         return text
 
-    def apply_prefix_suffix(self, text: str) -> str:
-        """Applies prefix and suffix to subject mentions in the given text."""
+    def get_subject_prefix_suffix(self, active_subjects: List[str]) -> Tuple[str, str]:
+        """Returns the combined prefix and suffix for all active subjects."""
+        prefixes = []
+        suffixes = []
         for subject in self.get_active_subjects():
-            for name in [subject.name, subject.alias]:
-                if name and name in text:
-                    replacement = f"{subject.prefix} {name} {subject.suffix}".strip()
-                    text = text.replace(name, replacement)
-        return text
+            if subject.name in active_subjects:
+                if subject.prefix:
+                    prefixes.append(subject.prefix)
+                if subject.suffix:
+                    suffixes.append(subject.suffix)
+        return " ".join(prefixes), " ".join(suffixes)
 
     def import_subjects(self, file_path: str) -> None:
         """Imports subjects from a CSV file."""
