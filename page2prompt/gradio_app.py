@@ -680,7 +680,7 @@ with gr.Blocks() as demo:
                     interactive=True
                 )
                 generate_shot_list_btn = gr.Button("🎥 Generate Shot List")
-    
+
                 with gr.Row():
                     new_row_btn = gr.Button("➕ New Row")
                     delete_row_btn = gr.Button("➖ Delete Row")
@@ -688,9 +688,26 @@ with gr.Blocks() as demo:
             with gr.Row():
                 save_shot_list_btn = gr.Button("💾 Save Shot List")
                 export_shot_list_btn = gr.Button("📤 Export Shot List")
+                export_to_csv_btn = gr.Button("📁 Export to CSV")
+                export_to_pdf_btn = gr.Button("📄 Export to PDF")
+                export_to_excel_btn = gr.Button("📊 Export to Excel")
+                export_script_to_pdf_btn = gr.Button("📄 Export Script to PDF")
+                export_script_to_word_btn = gr.Button("📄 Export Script to Word")
 
             with gr.Row():
                 shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
+
+            with gr.Accordion("📊 CSV Operations", open=False):
+                with gr.Row():
+                    csv_operation = gr.Radio(["Export Styles", "Import Styles"], label="CSV Operation")
+        
+                with gr.Row():
+                    csv_filename = gr.Textbox(label="CSV Filename (for export)", placeholder="styles.csv")
+        
+                with gr.Row():
+                    csv_operation_btn = gr.Button("Execute CSV Operation")
+        
+                csv_feedback = gr.Textbox(label="CSV Operation Feedback", interactive=False)
 
             with gr.Accordion("👥 Proposed Subjects", open=True):
                 subjects_df = gr.DataFrame(
