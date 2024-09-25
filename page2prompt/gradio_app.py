@@ -146,12 +146,6 @@ def handle_csv_operation(operation, filename):
     else:
         return "Invalid operation selected."
 
-# Connect the button to the handler function
-csv_operation_btn.click(
-    handle_csv_operation,
-    inputs=[csv_operation, csv_filename],
-    outputs=[csv_feedback]
-)
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
 from .utils.style_manager import StyleManager
@@ -1125,6 +1119,13 @@ with gr.Blocks() as demo:
 
 # Launch the Gradio interface
 if __name__ == "__main__":
+    # Connect the CSV operation button to the handler function
+    csv_operation_btn.click(
+        handle_csv_operation,
+        inputs=[csv_operation, csv_filename],
+        outputs=[csv_feedback]
+    )
+    
     demo.launch()
 
 # Add these imports at the top of the file
