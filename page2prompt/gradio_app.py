@@ -180,13 +180,13 @@ with gr.Blocks() as demo:
             with gr.Row():
                 full_script_input = gr.Textbox(label="📚 Full Script", lines=10)
                 copy_full_script_btn = gr.Button("📋 Send to Clipboard", scale=1)
-
-    with gr.Accordion("🎥 Master Shot List", open=True):
-        master_shot_list_df = gr.DataFrame(
-            headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
-            label="Master Shot List",
-            interactive=True
-        )
+    
+        with gr.Accordion("🎥 Master Shot List", open=True):
+            master_shot_list_df = gr.DataFrame(
+                headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
+                label="Master Shot List",
+                interactive=True
+            )
     
     shot_list_df = gr.State()
 
