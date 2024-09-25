@@ -1,7 +1,7 @@
 import csv
 import os
 import pandas as pd
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 class Subject:
     def __init__(self, name: str, description: str, alias: str, type: str, prefix: str = "", suffix: str = "", active: bool = True):
