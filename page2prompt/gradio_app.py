@@ -96,7 +96,7 @@ generated_prompts = []
 
 def export_styles_to_csv(filename):
     if not filename:
-        return "No filename provided for export."
+        return "No filename provided for export.", gr.update()
     if not filename.endswith('.csv'):
         filename += '.csv'
     try:
@@ -110,41 +110,25 @@ def export_styles_to_csv(filename):
                     "prefix": style_data.get("Prefix", ""),
                     "suffix": style_data.get("Suffix", "")
                 })
-        return f"Styles exported successfully to {filename}"
+        return f"Styles exported successfully to {filename}", gr.update(choices=style_manager.get_styles())
     except Exception as e:
-        return f"Error exporting styles: {str(e)}"
+        return f"Error exporting styles: {str(e)}", gr.update()
 
-def import_styles_from_csv():
+def import_styles_from_csv(file):
+    if file is None:
+        return "No file selected for import.", gr.update()
     try:
-        file_path = gr.File().value
-        if not file_path:
-            return "No file selected for import."
-        
-        new_styles = []
-        with open(file_path, 'r') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                new_styles.append({
-                    "name": row["name"],
-                    "prefix": row["prefix"],
-                    "suffix": row["suffix"]
-                })
-        
-        # Update the style_manager with new styles
-        for style in new_styles:
-            style_manager.add_style(style)
-        
-        return f"Styles imported successfully from {file_path}"
+        content = file.decode('utf-8')
+        reader = csv.DictReader(content.splitlines())
+        for row in reader:
+            style_manager.add_style({
+                "name": row["name"],
+                "prefix": row["prefix"],
+                "suffix": row["suffix"]
+            })
+        return "Styles imported successfully from the uploaded file", gr.update(choices=style_manager.get_styles())
     except Exception as e:
-        return f"Error importing styles: {str(e)}"
-
-def handle_csv_operation(operation, filename):
-    if operation == "Export Styles":
-        return export_styles_to_csv(filename)
-    elif operation == "Import Styles":
-        return import_styles_from_csv()
-    else:
-        return "Invalid operation selected."
+        return f"Error importing styles: {str(e)}", gr.update()
 
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
@@ -376,6 +360,16 @@ with gr.Blocks() as demo:
                 project_info = gr.JSON(label="Project Info", visible=False)
         
                 generated_prompts_state = gr.State([])
+
+            with gr.Accordion("📊 CSV Operations", open=True):
+                with gr.Row():
+                    export_styles_btn = gr.Button("Export Styles to CSV")
+                    export_filename = gr.Textbox(label="Export Filename", placeholder="styles.csv")
+                with gr.Row():
+                    import_styles_btn = gr.Button("Import Styles from CSV")
+                    import_file = gr.File(label="Import CSV File", file_types=[".csv"])
+                csv_feedback = gr.Textbox(label="CSV Operation Feedback", interactive=False)
+                styles_dropdown = gr.Dropdown(label="Available Styles", choices=style_manager.get_styles())
 
                 def update_prompts_display(prompts):
                     return "\n\n".join(prompts)
@@ -691,17 +685,6 @@ with gr.Blocks() as demo:
             with gr.Row():
                 shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
 
-            with gr.Accordion("📊 CSV Operations", open=False):
-                with gr.Row():
-                    csv_operation = gr.Radio(["Export Styles", "Import Styles"], label="CSV Operation")
-        
-                with gr.Row():
-                    csv_filename = gr.Textbox(label="CSV Filename (for export)", placeholder="styles.csv")
-        
-                with gr.Row():
-                    csv_operation_btn = gr.Button("Execute CSV Operation")
-        
-                csv_feedback = gr.Textbox(label="CSV Operation Feedback", interactive=False)
 
             with gr.Accordion("👥 Proposed Subjects", open=True):
                 subjects_df = gr.DataFrame(
