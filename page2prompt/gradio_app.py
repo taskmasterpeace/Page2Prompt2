@@ -234,13 +234,17 @@ with gr.Blocks() as demo:
 
             prompts_display = gr.TextArea(label="Generated Prompts", lines=10, interactive=False)
 
+            project_info = gr.JSON(label="Project Info", visible=False)
+    
+            generated_prompts_state = gr.State([])
+
             def update_prompts_display(prompts):
                 return "\n\n".join(prompts)
 
             # Update the prompts display when loading a project
             load_project_btn.click(
                 lambda prompts: update_prompts_display(prompts),
-                inputs=[gr.State(lambda: generated_prompts)],
+                inputs=[generated_prompts_state],
                 outputs=[prompts_display]
             )
         
@@ -1072,37 +1076,37 @@ async def generate_prompts_wrapper(
     
     return result["concise"], result["normal"], result["detailed"], result["structured"], "Prompts generated and saved.", ", ".join(active_subjects)
 
-# Add event handlers for project management buttons
+# Event handlers
 save_project_btn.click(
-    save_project,
-    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df],
-    outputs=[feedback_box, projects_df]
+    lambda *args: asyncio.run(save_project(*args)),
+    inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, generated_prompts_state],
+    outputs=[feedback_box, projects_df, generated_prompts_state]
 )
 
 load_project_btn.click(
-    load_project,
+    lambda project_name: asyncio.run(load_project(project_name)),
     inputs=[project_name_input],
-    outputs=[full_script_input, shot_list_df, subjects_df, feedback_box]
+    outputs=[full_script_input, shot_list_df, subjects_df, generated_prompts_state, feedback_box]
 )
 
 delete_project_btn.click(
-    delete_project,
+    lambda project_name: asyncio.run(delete_project(project_name)),
     inputs=[project_name_input],
     outputs=[feedback_box, projects_df]
 )
 
 export_prompts_btn.click(
-    export_prompts,
-    inputs=[gr.State(lambda: generated_prompts), project_name_input],
+    lambda prompts, project_name: asyncio.run(export_prompts(prompts, project_name)),
+    inputs=[generated_prompts_state, project_name_input],
     outputs=[feedback_box]
 )
 
-# Add this to initialize the projects list when the app starts
-demo.load(list_projects, outputs=[projects_df])
+# Initialize the projects list when the app starts
+demo.load(lambda: asyncio.run(list_projects()), outputs=[projects_df])
 
 # Update the projects list after saving or deleting a project
-save_project_btn.click(list_projects, outputs=[projects_df])
-delete_project_btn.click(list_projects, outputs=[projects_df])
+save_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
+delete_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
 
 # Update the generate_prompts_wrapper function to store prompts globally
 def generate_prompts_wrapper(*args, **kwargs):
