@@ -827,7 +827,9 @@ with gr.Blocks() as demo:
     update_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
     delete_subject_btn.click(update_subject_checkboxes, outputs=[people, places, props])
 
-    def receive_proposed_subjects(proposed_subjects_df):
+    def receive_proposed_subjects():
+        # Get the current proposed subjects from the script_manager
+        proposed_subjects_df = script_manager.get_proposed_subjects()
         # Merge the proposed subjects with the existing subjects in the Subject Management tab
         updated_df = subject_manager.merge_subjects(subject_manager.get_subjects_dataframe(), proposed_subjects_df)
         subject_manager.set_subjects(updated_df)
@@ -837,7 +839,6 @@ with gr.Blocks() as demo:
     receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
     receive_proposed_subjects_btn.click(
         receive_proposed_subjects,
-        inputs=[],
         outputs=[subjects_df, feedback_box]
     )
 
