@@ -144,10 +144,17 @@ from .utils.shot_list_generator import generate_shot_list
 from .components.director_assistant import DirectorAssistant
 from .music_lab import transcribe_audio, search_and_replace_lyrics
 from .utils.script_manager import ScriptManager
+from .components.shot_list_meta_chain import ShotListMetaChain
 
 # Add debug print statements
 print("Current working directory:", os.getcwd())
 print("Files in current directory:", os.listdir())
+
+api_key = os.environ.get("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OpenAI API key not found in environment variables")
+
+shot_list_meta_chain = ShotListMetaChain(api_key, subject_manager, style_manager, director_assistant)
 
 # Define data directory
 DATA_DIR = os.path.dirname(__file__)
@@ -337,6 +344,15 @@ with gr.Blocks() as demo:
                 receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
 
         with gr.TabItem("📋 Bulk Prompt Management"):
+            with gr.Accordion("Bulk Director's Notes Generation", open=True):
+                style_dropdown = gr.Dropdown(label="Visual Style", choices=style_manager.get_styles())
+                director_style_dropdown = gr.Dropdown(label="Director Style", choices=[style['name'] for style in director_styles])
+                generate_bulk_notes_btn = gr.Button("Generate Bulk Director's Notes")
+                progress_bar = gr.Progress()
+                status_message = gr.Textbox(label="Status", interactive=False)
+                bulk_notes_output = gr.DataFrame(label="Generated Director's Notes")
+                export_btn = gr.Button("Export to CSV")
+
             with gr.Accordion("Director's Clipboard 🎬"):
                 directors_clipboard = gr.TextArea(label="Collected Prompts 📝", lines=10, interactive=True)
                 with gr.Row():
@@ -783,6 +799,44 @@ with gr.Blocks() as demo:
     copy_normal_btn.click(lambda: copy_to_clipboard(normal_prompt.value))
     copy_detailed_btn.click(lambda: copy_to_clipboard(detailed_prompt.value))
     send_prompts_btn.click(send_prompts)
+
+    async def generate_bulk_notes(full_script: str, master_shot_list: pd.DataFrame, style: str, director_style: str) -> Dict[str, Any]:
+        try:
+            notes_df = await shot_list_meta_chain.generate_bulk_directors_notes(
+                full_script, master_shot_list, style, director_style, 
+                progress_callback=progress_bar
+            )
+            return {
+                bulk_notes_output: notes_df,
+                status_message: "Bulk director's notes generated successfully."
+            }
+        except Exception as e:
+            return {
+                status_message: f"Error generating bulk director's notes: {str(e)}"
+            }
+
+    def export_to_csv(df: pd.DataFrame) -> str:
+        if df is not None and not df.empty:
+            df.to_csv("directors_notes.csv", index=False)
+            return "Directors notes exported to directors_notes.csv"
+        return "No data to export"
+
+    generate_bulk_notes_btn.click(
+        generate_bulk_notes,
+        inputs=[
+            full_script_input,
+            master_shot_list_df,
+            style_dropdown,
+            director_style_dropdown
+        ],
+        outputs=[bulk_notes_output, status_message]
+    )
+
+    export_btn.click(
+        export_to_csv,
+        inputs=[bulk_notes_output],
+        outputs=[status_message]
+    )
 
     # Script Management event handlers
     async def generate_proposed_shot_list(full_script):
