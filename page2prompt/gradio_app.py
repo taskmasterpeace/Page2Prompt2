@@ -100,7 +100,9 @@ def export_styles_to_csv(filename):
     if not filename.endswith('.csv'):
         filename += '.csv'
     try:
-        with open(filename, 'w', newline='') as csvfile:
+        # Use an absolute path
+        full_path = os.path.abspath(filename)
+        with open(full_path, 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=["name", "prefix", "suffix"])
             writer.writeheader()
             for style in style_manager.get_styles():
@@ -110,7 +112,7 @@ def export_styles_to_csv(filename):
                     "prefix": style_data.get("Prefix", ""),
                     "suffix": style_data.get("Suffix", "")
                 })
-        return f"Styles exported successfully to {filename}", gr.update(choices=style_manager.get_styles())
+        return f"Styles exported successfully to {full_path}", gr.update(choices=style_manager.get_styles())
     except Exception as e:
         return f"Error exporting styles: {str(e)}", gr.update()
 
@@ -129,6 +131,10 @@ def import_styles_from_csv(file):
         return "Styles imported successfully from the uploaded file", gr.update(choices=style_manager.get_styles())
     except Exception as e:
         return f"Error importing styles: {str(e)}", gr.update()
+
+# Add a function to update the styles dropdown
+def update_styles_dropdown():
+    return gr.update(choices=style_manager.get_styles())
 
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager, Subject
@@ -1116,6 +1122,9 @@ if __name__ == "__main__":
             inputs=[import_file],
             outputs=[csv_feedback, styles_dropdown]
         )
+
+        # Update styles dropdown when the app starts
+        demo.load(update_styles_dropdown, outputs=[styles_dropdown])
     
     demo.launch()
 
