@@ -141,10 +141,13 @@ from .utils.subject_manager import SubjectManager, Subject
 from .utils.style_manager import StyleManager
 from .components.meta_chain import MetaChain
 from .utils.shot_list_generator import generate_shot_list
+from typing import Dict, Any
 from .components.director_assistant import DirectorAssistant
 from .music_lab import transcribe_audio, search_and_replace_lyrics
 from .utils.script_manager import ScriptManager
 from .components.shot_list_meta_chain import ShotListMetaChain
+from .utils.subject_manager import SubjectManager
+from .utils.style_manager import StyleManager
 
 # Add debug print statements
 print("Current working directory:", os.getcwd())
@@ -154,6 +157,13 @@ api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OpenAI API key not found in environment variables")
 
+# Define data directory
+DATA_DIR = os.path.dirname(__file__)
+
+# Initialize components
+subject_manager = SubjectManager(os.path.join(DATA_DIR, "subjects.csv"))
+style_manager = StyleManager(os.path.join(DATA_DIR, "styles.csv"))
+director_assistant = DirectorAssistant(os.path.join(DATA_DIR, "director_styles.csv"))
 shot_list_meta_chain = ShotListMetaChain(api_key, subject_manager, style_manager, director_assistant)
 
 # Define data directory
