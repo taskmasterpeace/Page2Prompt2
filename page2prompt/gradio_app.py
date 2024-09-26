@@ -120,7 +120,7 @@ def import_styles_from_csv(file):
     if file is None:
         return "No file selected for import.", gr.update()
     try:
-        content = file.decode('utf-8')
+        content = file.read().decode('utf-8')
         reader = csv.DictReader(content.splitlines())
         for row in reader:
             style_manager.add_style({
