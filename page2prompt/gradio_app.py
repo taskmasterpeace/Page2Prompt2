@@ -857,7 +857,7 @@ with gr.Blocks() as demo:
         inputs=[
             full_script_input,
             master_shot_list_df,
-            style_dropdown,
+            visual_style_dropdown,
             director_style_dropdown
         ],
         outputs=[bulk_notes_output, status_message]
