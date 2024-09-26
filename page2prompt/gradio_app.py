@@ -354,14 +354,35 @@ with gr.Blocks() as demo:
                 receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
 
         with gr.TabItem("📋 Bulk Prompt Management"):
+            with gr.Accordion("Master Shot List", open=True):
+                master_shot_list_df = gr.DataFrame(
+                    headers=["Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People"],
+                    label="Master Shot List",
+                    interactive=True
+                )
+                update_master_shot_list_btn = gr.Button("Update Master Shot List")
+
             with gr.Accordion("Bulk Director's Notes Generation", open=True):
-                style_dropdown = gr.Dropdown(label="Visual Style", choices=style_manager.get_styles())
+                visual_style_dropdown = gr.Dropdown(label="Visual Style", choices=style_manager.get_styles())
                 director_style_dropdown = gr.Dropdown(label="Director Style", choices=[style['name'] for style in director_styles])
                 generate_bulk_notes_btn = gr.Button("Generate Bulk Director's Notes")
-                progress_bar = gr.Progress()
-                status_message = gr.Textbox(label="Status", interactive=False)
-                bulk_notes_output = gr.DataFrame(label="Generated Director's Notes")
-                export_btn = gr.Button("Export to CSV")
+                bulk_notes_output = gr.DataFrame(
+                    headers=["Scene", "Shot", "Script Reference", "Director's Notes", "Shot Description", "Shot Size", "People"],
+                    label="Generated Director's Notes",
+                    interactive=True
+                )
+            
+            with gr.Accordion("Bulk Prompt Generation", open=True):
+                generate_bulk_prompts_btn = gr.Button("Generate Bulk Prompts")
+                bulk_prompts_output = gr.DataFrame(
+                    headers=["Scene", "Shot", "Concise Prompt", "Medium Prompt", "Detailed Prompt"],
+                    label="Generated Prompts"
+                )
+
+            generate_all_btn = gr.Button("Generate All (Notes + Prompts)")
+            export_btn = gr.Button("Export to CSV")
+            progress_bar = gr.Progress()
+            status_message = gr.Textbox(label="Status", interactive=False)
 
             with gr.Accordion("Director's Clipboard 🎬"):
                 directors_clipboard = gr.TextArea(label="Collected Prompts 📝", lines=10, interactive=True)
