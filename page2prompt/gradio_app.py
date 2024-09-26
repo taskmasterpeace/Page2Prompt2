@@ -1102,19 +1102,20 @@ with gr.Blocks() as demo:
 
 # Launch the Gradio interface
 if __name__ == "__main__":
-    # Connect the export styles button to the handler function
-    export_styles_btn.click(
-        export_styles_to_csv,
-        inputs=[export_filename],
-        outputs=[csv_feedback, styles_dropdown]
-    )
-    
-    # Connect the import styles button to the handler function
-    import_styles_btn.click(
-        import_styles_from_csv,
-        inputs=[import_file],
-        outputs=[csv_feedback, styles_dropdown]
-    )
+    with demo:
+        # Connect the export styles button to the handler function
+        export_styles_btn.click(
+            export_styles_to_csv,
+            inputs=[export_filename],
+            outputs=[csv_feedback, styles_dropdown]
+        )
+        
+        # Connect the import styles button to the handler function
+        import_styles_btn.click(
+            import_styles_from_csv,
+            inputs=[import_file],
+            outputs=[csv_feedback, styles_dropdown]
+        )
     
     demo.launch()
 
