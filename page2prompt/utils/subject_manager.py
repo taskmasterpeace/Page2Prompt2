@@ -104,6 +104,11 @@ class SubjectManager:
                     "Active": str(subject.active)
                 })
 
+    def get_subjects_for_shot(self, people: str) -> str:
+        active_subjects = self.get_active_subjects()
+        shot_subjects = [p.strip() for p in people.split(',')] if people else []
+        return ", ".join([s.name for s in active_subjects if s.name in shot_subjects])
+
     def get_subjects_dataframe(self) -> pd.DataFrame:
         """Returns the subjects as a pandas DataFrame."""
         return pd.DataFrame([vars(s) for s in self.subjects])
