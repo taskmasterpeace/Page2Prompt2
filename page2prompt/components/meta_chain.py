@@ -190,7 +190,6 @@ class MetaChain:
     async def generate_proposed_shot_list(self, script: str) -> pd.DataFrame:
         prompt = f"""
         Given the following script, generate a proposed detailed shot list. 
-        This is not the final shot list, but a starting point for discussion.
         Include the following information for each shot, separated by pipe characters (|):
         1. Timestamp
         2. Scene
@@ -208,15 +207,17 @@ class MetaChain:
         - Do not include any headers, labels, or titles in the output.
         - Start each new line with the timestamp.
         - Use N/A for any fields that are not applicable or cannot be determined from the script.
-        - For the Script Reference, include the exact line or brief excerpt from the script that the shot is based on.
+        - For the Script Reference, include the exact portion of the script this shot is based on, word-for-word. This should be a direct quote from the script.
         - Scene numbers should change when the script indicates a new scene (e.g., INT. ROOM - DAY).
         - Shot numbers should restart at 1 for each new scene.
         - Ensure that the Shot Description provides more detail than just repeating the Script Reference.
 
-        Example format:
-        00:00|1|1|INT. ROOM - DAY|Character A walks into the room, looking around cautiously|Wide Shot|Character A|Living Room
-        00:30|1|2|Character A sits down slowly|Character A lowers themselves into a chair, sighing heavily|Medium Shot|Character A|Living Room
-        01:00|2|1|INT. HALLWAY - DAY. Character B enters|Character B rushes in, their face etched with worry|Close-up|Character B|Hallway
+        Example:
+        00:00|1|1|INT. COFFEE SHOP - DAY. Sarah enters, looking around nervously.|Sarah walks into the bustling coffee shop, her eyes darting from table to table as if searching for someone.|Wide Shot|Sarah|Coffee Shop
+        00:15|1|2|She fidgets with her necklace, a tell-tale sign of her anxiety.|Close-up of Sarah's hands fidgeting with her necklace, emphasizing her nervous state.|Close-up|Sarah|Coffee Shop
+        00:30|1|3|A man waves from the corner. Sarah's face lights up with recognition.|Sarah spots a man waving at her from a corner table. Her expression shifts from anxiety to relief and excitement.|Medium Shot|Sarah, Man|Coffee Shop
+
+        Please generate the shot list in this format, ensuring that the Reference column contains exact quotes from the provided script.
         """
 
         try:
