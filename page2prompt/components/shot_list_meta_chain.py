@@ -17,23 +17,27 @@ class ShotListMetaChain:
         
         total_shots = len(shot_list_df)
         for index, row in shot_list_df.iterrows():
-            script_excerpt = script[row['Script Start']:row['Script End']]
+            script_excerpt = row.get('Script Reference', '')
             subjects = self.subject_manager.get_subjects_for_shot(row.get('People', ''))
             notes = await self.generate_directors_notes(
                 script_excerpt, 
-                row['Shot Description'], 
+                row.get('Shot Description', ''), 
                 visual_style_desc,
                 director_style['notes'], 
                 subjects,
-                row['Scene'],
-                row['Shot'],
-                row['Shot Size'],
-                row.get('Location', '')
+                row.get('Scene', ''),
+                row.get('Shot', ''),
+                row.get('Shot Size', ''),
+                ''  # Location is not present in the DataFrame
             )
             shot_list_df.at[index, 'Director\'s Notes'] = notes
             if progress_callback:
                 progress_callback((index + 1) / total_shots)
             await asyncio.sleep(0)  # Allow other tasks to run
+
+        # Add 'Setting' column if it doesn't exist
+        if 'Setting' not in shot_list_df.columns:
+            shot_list_df['Setting'] = ''
 
         return shot_list_df
 
