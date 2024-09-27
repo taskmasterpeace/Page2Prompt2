@@ -108,29 +108,26 @@ class ScriptManager:
             places = set(shot_list['Places'].str.split(',').explode().str.strip().unique())
         
             # Create subjects list
-            subjects = [{"name": name, "type": "person", "description": ""} for name in people if name and name != 'N/A']
-            subjects += [{"name": place, "type": "place", "description": ""} for place in places if place and place != 'N/A']
-        
-            # Use LLM to generate descriptions (you can keep this part from your existing code)
-            # ...
+            subjects = [{"Name": name, "Type": "person", "Description": ""} for name in people if name and name != 'N/A']
+            subjects += [{"Name": place, "Type": "place", "Description": ""} for place in places if place and place != 'N/A']
         
             if not subjects:
                 logger.warning("No subjects extracted")
-                return {"subjects": pd.DataFrame(columns=["name", "description", "type"])}
+                return {"subjects": pd.DataFrame(columns=["Name", "Description", "Type"])}
         
             subjects_df = pd.DataFrame(subjects)
         
             logger.info(f"Successfully created subjects DataFrame with {len(subjects_df)} entries")
         
             # Ensure all required columns exist and are in the correct order
-            for col in ["name", "description", "type"]:
+            for col in ["Name", "Description", "Type"]:
                 if col not in subjects_df.columns:
                     subjects_df[col] = ""
         
-            return {"subjects": subjects_df[['name', 'description', 'type']]}
+            return {"subjects": subjects_df[['Name', 'Description', 'Type']]}
         except Exception as e:
             logger.exception(f"Error extracting subjects: {str(e)}")
-            return {"subjects": pd.DataFrame(columns=["name", "description", "type"])}
+            return {"subjects": pd.DataFrame(columns=["Name", "Description", "Type"])}
 
     def approve_proposed_subjects(self):
         # Create a set of all unique people from the shot list
