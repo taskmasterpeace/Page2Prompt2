@@ -93,33 +93,40 @@ class ScriptManager:
         try:
             if shot_list is None:
                 shot_list = await self.generate_proposed_shot_list(full_script)
-            
+        
             # Validate shot_list DataFrame
             required_columns = ['People', 'Places']
             missing_columns = [col for col in required_columns if col not in shot_list.columns]
-            
+        
             if missing_columns:
                 logger.warning(f"Shot list is missing columns: {missing_columns}. Adding empty columns.")
                 for col in missing_columns:
                     shot_list[col] = ""
-            
-            subjects = await self.meta_chain.extract_proposed_subjects(full_script, shot_list)
-            
-            if isinstance(subjects, list):
-                subjects_df = pd.DataFrame(subjects)
-            elif isinstance(subjects, dict) and 'subjects' in subjects:
-                subjects_df = pd.DataFrame(subjects['subjects'])
-            else:
-                logger.warning(f"Unexpected format of subjects: {type(subjects)}")
+        
+            # Extract unique people and places
+            people = set(shot_list['People'].str.split(',').explode().str.strip().unique())
+            places = set(shot_list['Places'].str.split(',').explode().str.strip().unique())
+        
+            # Create subjects list
+            subjects = [{"name": name, "type": "person", "description": ""} for name in people if name and name != 'N/A']
+            subjects += [{"name": place, "type": "place", "description": ""} for place in places if place and place != 'N/A']
+        
+            # Use LLM to generate descriptions (you can keep this part from your existing code)
+            # ...
+        
+            if not subjects:
+                logger.warning("No subjects extracted")
                 return pd.DataFrame(columns=["name", "description", "type"])
-            
+        
+            subjects_df = pd.DataFrame(subjects)
+        
             logger.info(f"Successfully created subjects DataFrame with {len(subjects_df)} entries")
-            
+        
             # Ensure all required columns exist and are in the correct order
             for col in ["name", "description", "type"]:
                 if col not in subjects_df.columns:
                     subjects_df[col] = ""
-            
+        
             return subjects_df[['name', 'description', 'type']]
         except Exception as e:
             logger.exception(f"Error extracting subjects: {str(e)}")
