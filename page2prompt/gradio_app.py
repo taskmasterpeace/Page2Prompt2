@@ -139,7 +139,10 @@ def export_proposed_subjects_to_csv(filename):
         filename += '.csv'
     try:
         full_path = os.path.abspath(filename)
-        subjects_df.to_csv(full_path, index=False)
+        if isinstance(subjects_df, pd.DataFrame):
+            subjects_df.to_csv(full_path, index=False)
+        else:
+            pd.DataFrame(subjects_df).to_csv(full_path, index=False)
         return f"Proposed subjects exported successfully to {full_path}", gr.update()
     except Exception as e:
         return f"Error exporting proposed subjects: {str(e)}", gr.update()
