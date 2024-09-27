@@ -133,18 +133,25 @@ def import_styles_from_csv(file):
         return f"Error importing styles: {str(e)}", gr.update()
 
 def export_proposed_subjects_to_csv(filename):
+    global subjects_df
     if not filename:
         return "No filename provided for export.", gr.update()
     if not filename.endswith('.csv'):
         filename += '.csv'
     try:
         full_path = os.path.abspath(filename)
-        if isinstance(subjects_df, pd.DataFrame):
-            subjects_df.to_csv(full_path, index=False)
-        else:
-            pd.DataFrame(subjects_df).to_csv(full_path, index=False)
+        print(f"Type of subjects_df: {type(subjects_df)}")
+        print(f"Contents of subjects_df:\n{subjects_df}")
+        
+        if not isinstance(subjects_df, pd.DataFrame):
+            subjects_df = pd.DataFrame(subjects_df)
+        
+        subjects_df.to_csv(full_path, index=False)
         return f"Proposed subjects exported successfully to {full_path}", gr.update()
     except Exception as e:
+        import traceback
+        error_message = traceback.format_exc()
+        print(error_message)
         return f"Error exporting proposed subjects: {str(e)}", gr.update()
 
 def import_proposed_subjects_from_csv(file):
