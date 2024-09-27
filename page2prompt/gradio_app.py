@@ -132,6 +132,30 @@ def import_styles_from_csv(file):
     except Exception as e:
         return f"Error importing styles: {str(e)}", gr.update()
 
+def export_proposed_subjects_to_csv(filename):
+    if not filename:
+        return "No filename provided for export.", gr.update()
+    if not filename.endswith('.csv'):
+        filename += '.csv'
+    try:
+        full_path = os.path.abspath(filename)
+        subjects_df.to_csv(full_path, index=False)
+        return f"Proposed subjects exported successfully to {full_path}", gr.update()
+    except Exception as e:
+        return f"Error exporting proposed subjects: {str(e)}", gr.update()
+
+def import_proposed_subjects_from_csv(file):
+    if file is None:
+        return "No file selected for import.", gr.update()
+    try:
+        content = file.read().decode('utf-8')
+        imported_df = pd.read_csv(pd.compat.StringIO(content))
+        global subjects_df
+        subjects_df = imported_df
+        return "Proposed subjects imported successfully from the uploaded file", gr.update()
+    except Exception as e:
+        return f"Error importing proposed subjects: {str(e)}", gr.update()
+
 # Add a function to update the styles dropdown
 def update_styles_dropdown():
     return gr.update(choices=style_manager.get_styles())
@@ -417,10 +441,16 @@ with gr.Blocks() as demo:
             with gr.Accordion("📊 CSV Operations", open=True):
                 with gr.Row():
                     export_styles_btn = gr.Button("Export Styles to CSV")
-                    export_filename = gr.Textbox(label="Export Filename", placeholder="styles.csv")
+                    export_styles_filename = gr.Textbox(label="Export Styles Filename", placeholder="styles.csv")
                 with gr.Row():
                     import_styles_btn = gr.Button("Import Styles from CSV")
-                    import_file = gr.File(label="Import CSV File", file_types=[".csv"])
+                    import_styles_file = gr.File(label="Import Styles CSV File", file_types=[".csv"])
+                with gr.Row():
+                    export_subjects_btn = gr.Button("Export Proposed Subjects to CSV")
+                    export_subjects_filename = gr.Textbox(label="Export Subjects Filename", placeholder="proposed_subjects.csv")
+                with gr.Row():
+                    import_subjects_btn = gr.Button("Import Proposed Subjects from CSV")
+                    import_subjects_file = gr.File(label="Import Subjects CSV File", file_types=[".csv"])
                 csv_feedback = gr.Textbox(label="CSV Operation Feedback", interactive=False)
                 styles_dropdown = gr.Dropdown(label="Available Styles", choices=style_manager.get_styles())
 
@@ -1208,15 +1238,29 @@ if __name__ == "__main__":
         # Connect the export styles button to the handler function
         export_styles_btn.click(
             export_styles_to_csv,
-            inputs=[export_filename],
+            inputs=[export_styles_filename],
             outputs=[csv_feedback, styles_dropdown]
         )
         
         # Connect the import styles button to the handler function
         import_styles_btn.click(
             import_styles_from_csv,
-            inputs=[import_file],
+            inputs=[import_styles_file],
             outputs=[csv_feedback, styles_dropdown]
+        )
+
+        # Connect the export proposed subjects button to the handler function
+        export_subjects_btn.click(
+            export_proposed_subjects_to_csv,
+            inputs=[export_subjects_filename],
+            outputs=[csv_feedback]
+        )
+
+        # Connect the import proposed subjects button to the handler function
+        import_subjects_btn.click(
+            import_proposed_subjects_from_csv,
+            inputs=[import_subjects_file],
+            outputs=[csv_feedback, subjects_df]
         )
 
         # Update styles dropdown when the app starts
