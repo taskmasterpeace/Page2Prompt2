@@ -88,7 +88,7 @@ class ScriptManager:
         
         return subjects_df
 
-    async def extract_proposed_subjects(self, full_script: str, shot_list: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    async def extract_proposed_subjects(self, full_script: str, shot_list: Optional[pd.DataFrame] = None) -> Dict[str, pd.DataFrame]:
         logger.info("Starting subject extraction process in ScriptManager")
         try:
             if shot_list is None:
@@ -116,7 +116,7 @@ class ScriptManager:
         
             if not subjects:
                 logger.warning("No subjects extracted")
-                return pd.DataFrame(columns=["name", "description", "type"])
+                return {"subjects": pd.DataFrame(columns=["name", "description", "type"])}
         
             subjects_df = pd.DataFrame(subjects)
         
@@ -127,10 +127,10 @@ class ScriptManager:
                 if col not in subjects_df.columns:
                     subjects_df[col] = ""
         
-            return subjects_df[['name', 'description', 'type']]
+            return {"subjects": subjects_df[['name', 'description', 'type']]}
         except Exception as e:
             logger.exception(f"Error extracting subjects: {str(e)}")
-            return pd.DataFrame(columns=["name", "description", "type"])
+            return {"subjects": pd.DataFrame(columns=["name", "description", "type"])}
 
     def approve_proposed_subjects(self):
         # Create a set of all unique people from the shot list
