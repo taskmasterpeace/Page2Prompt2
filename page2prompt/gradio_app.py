@@ -200,9 +200,11 @@ DATA_DIR = os.path.dirname(__file__)
 # Initialize components with error handling
 try:
     style_manager = StyleManager(os.path.join(DATA_DIR, "styles.csv"))
+    print("StyleManager initialized. Printing styles:")
+    style_manager.print_styles()
     print(f"Available styles: {style_manager.get_styles()}")
 except Exception as e:
-    print(f"Error loading styles: {str(e)}")
+    print(f"Error initializing StyleManager: {str(e)}")
     style_manager = None
 
 try:
@@ -321,6 +323,9 @@ with gr.Blocks() as demo:
                             style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles() if style_manager else [])
                             style_prefix_input = gr.Textbox(label="Prefix")
                             style_suffix_input = gr.Textbox(label="Suffix")
+                        
+                        def update_styles_dropdown():
+                            return gr.update(choices=style_manager.get_styles() if style_manager else [])
                         
                         with gr.Row():
                             save_style_btn = gr.Button("💾 Save Style")
