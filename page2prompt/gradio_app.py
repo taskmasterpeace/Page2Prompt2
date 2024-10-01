@@ -54,6 +54,9 @@ async def load_project(project_name):
         subjects = pd.DataFrame(project_data.get("subjects", {}))
         prompts = project_data.get("prompts", [])
         
+        # Update the subject_manager with the loaded subjects
+        subject_manager.set_subjects(subjects)
+        
         return full_script, shot_list, subjects, prompts, f"Project '{project_name}' loaded successfully."
     except FileNotFoundError:
         return None, None, None, None, f"Project '{project_name}' not found."
