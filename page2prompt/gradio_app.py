@@ -311,7 +311,6 @@ with gr.Blocks() as demo:
                 new_row_btn = gr.Button("➕ New Row")
                 delete_row_btn = gr.Button("➖ Delete Row")
                 select_shot_btn = gr.Button("🎬 Select Shot")
-                select_shot_btn = gr.Button("🎬 Select Shot")
     
     shot_list_df = gr.DataFrame(
         headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
@@ -980,20 +979,24 @@ with gr.Blocks() as demo:
         return f"Shot list exported as {filename}"
 
     def send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
-        print("send_to_master_shot_list function called")
-        print(f"Proposed shot list type: {type(proposed_shot_list)}")
-        print(f"Proposed shot list shape: {proposed_shot_list.shape if isinstance(proposed_shot_list, pd.DataFrame) else 'Not a DataFrame'}")
-        print(f"Current master shot list type: {type(current_master_shot_list)}")
-        print(f"Current master shot list shape: {current_master_shot_list.shape if isinstance(current_master_shot_list, pd.DataFrame) else 'Not a DataFrame'}")
-    
-        # Combine the proposed shot list with the current master shot list
-        updated_master_shot_list = pd.concat([current_master_shot_list, proposed_shot_list], ignore_index=True)
-    
-        # Remove duplicates if any
-        updated_master_shot_list = updated_master_shot_list.drop_duplicates().reset_index(drop=True)
-    
-        print(f"Updated master shot list shape: {updated_master_shot_list.shape}")
-        return updated_master_shot_list
+        print("Sending to Master Shot List")
+        if isinstance(proposed_shot_list, pd.DataFrame) and isinstance(current_master_shot_list, pd.DataFrame):
+            updated_master_shot_list = pd.concat([current_master_shot_list, proposed_shot_list], ignore_index=True)
+            updated_master_shot_list = updated_master_shot_list.drop_duplicates().reset_index(drop=True)
+            return gr.update(value=updated_master_shot_list)
+        else:
+            print("Error: Invalid DataFrame type")
+            return gr.update()
+
+    def send_to_bulk_shot_list(proposed_shot_list, current_bulk_shot_list):
+        print("Sending to Bulk Shot List")
+        if isinstance(proposed_shot_list, pd.DataFrame) and isinstance(current_bulk_shot_list, pd.DataFrame):
+            updated_bulk_shot_list = pd.concat([current_bulk_shot_list, proposed_shot_list], ignore_index=True)
+            updated_bulk_shot_list = updated_bulk_shot_list.drop_duplicates().reset_index(drop=True)
+            return gr.update(value=updated_bulk_shot_list)
+        else:
+            print("Error: Invalid DataFrame type")
+            return gr.update()
 
     async def extract_proposed_subjects(full_script, shot_list):
         try:
@@ -1051,9 +1054,15 @@ with gr.Blocks() as demo:
             return gr.update()  # Return an empty update if there's an error
 
     send_to_master_btn.click(
-        safe_send_to_master_shot_list,
+        send_to_master_shot_list,
         inputs=[shot_list_df, master_shot_list_df],
         outputs=[master_shot_list_df]
+    )
+
+    send_to_bulk_btn.click(
+        send_to_bulk_shot_list,
+        inputs=[shot_list_df, bulk_shot_list_df],
+        outputs=[bulk_shot_list_df]
     )
 
     extract_subjects_btn.click(
