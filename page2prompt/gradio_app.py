@@ -427,13 +427,13 @@ with gr.Blocks() as demo:
                 receive_proposed_subjects_btn = gr.Button("Receive Proposed Subjects")
 
         with gr.TabItem("📋 Bulk Prompt Management"):
-            with gr.Accordion("Master Shot List", open=True):
-                master_shot_list_df = gr.DataFrame(
+            with gr.Accordion("Bulk Shot List", open=True):
+                bulk_shot_list_df = gr.DataFrame(
                     headers=["Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People"],
-                    label="Master Shot List",
+                    label="Bulk Shot List",
                     interactive=True
                 )
-                update_master_shot_list_btn = gr.Button("Update Master Shot List")
+                update_bulk_shot_list_btn = gr.Button("Update Bulk Shot List")
 
             with gr.Accordion("Bulk Director's Notes Generation", open=True):
                 visual_style_dropdown = gr.Dropdown(label="Visual Style", choices=style_manager.get_styles())
@@ -809,6 +809,7 @@ with gr.Blocks() as demo:
                 save_shot_list_btn = gr.Button("💾 Save Shot List")
                 export_to_csv_btn = gr.Button("📁 Export to CSV")
                 send_to_master_btn = gr.Button("⬆️ Send to Master Shot List")
+                send_to_bulk_btn = gr.Button("⬆️ Send to Bulk Shot List")
 
             shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
 
