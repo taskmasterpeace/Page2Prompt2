@@ -84,9 +84,9 @@ async def export_prompts(prompts, project_name):
     except IOError as e:
         return f"Error exporting prompts: {str(e)}"
 
-def select_shot_and_populate(master_shot_list_df, evt: gr.SelectData):
+def select_shot_and_populate(evt: gr.SelectData):
     if evt.index is not None:
-        selected_row = master_shot_list_df.iloc[evt.index[0]]
+        selected_row = master_shot_list_df.value.iloc[evt.index[0]]
         shot_description = selected_row.get("Shot Description", "")
         return shot_description
     return ""
@@ -304,8 +304,7 @@ with gr.Blocks() as demo:
             master_shot_list_df = gr.DataFrame(
                 headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
                 label="Master Shot List",
-                interactive=True,
-                row_select="single"
+                interactive=True
             )
             with gr.Row():
                 new_row_btn = gr.Button("➕ New Row")
@@ -1153,10 +1152,10 @@ with gr.Blocks() as demo:
         outputs=[directors_clipboard]
     )
 
-    select_shot_btn.click(
+    master_shot_list_df.select(
         select_shot_and_populate,
-        inputs=[master_shot_list_df],
-        outputs=[shot_description_input]
+        None,
+        shot_description_input
     )
 
     def create_camera_settings():
