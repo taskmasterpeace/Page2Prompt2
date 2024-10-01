@@ -804,15 +804,10 @@ with gr.Blocks() as demo:
 
             with gr.Row():
                 save_shot_list_btn = gr.Button("💾 Save Shot List")
-                export_shot_list_btn = gr.Button("📤 Export Shot List")
                 export_to_csv_btn = gr.Button("📁 Export to CSV")
-                export_to_pdf_btn = gr.Button("📄 Export to PDF")
-                export_to_excel_btn = gr.Button("📊 Export to Excel")
-                export_script_to_pdf_btn = gr.Button("📄 Export Script to PDF")
-                export_script_to_word_btn = gr.Button("📄 Export Script to Word")
+                send_to_master_btn = gr.Button("⬆️ Send to Master Shot List")
 
-            with gr.Row():
-                shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
+            shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
 
 
             with gr.Accordion("👥 Proposed Subjects", open=True):
