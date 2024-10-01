@@ -14,19 +14,24 @@ class StyleManager:
         try:
             with open(self.styles_file, 'r', newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
+                fieldnames = reader.fieldnames
+                if not fieldnames or "Style Name" not in fieldnames:
+                    print(f"Error: 'Style Name' column not found in {self.styles_file}")
+                    print(f"Available columns: {', '.join(fieldnames) if fieldnames else 'None'}")
+                    return []
                 for row in reader:
                     styles.append(row)
+            if not styles:
+                print(f"Warning: No styles found in {self.styles_file}")
         except FileNotFoundError:
-            # Create the file if it doesn't exist
-            os.makedirs(os.path.dirname(self.styles_file), exist_ok=True)
-            with open(self.styles_file, 'w', newline='', encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=["Style Name", "Prefix", "Suffix", "Genre", "Descriptors"])
-                writer.writeheader()
+            print(f"Error: Styles file not found at {self.styles_file}")
+        except csv.Error as e:
+            print(f"Error reading CSV file: {e}")
         return styles
 
     def get_styles(self) -> List[str]:
         """Returns the list of style names."""
-        return [style["Style Name"] for style in self.styles]
+        return [style.get("Style Name", "") for style in self.styles if "Style Name" in style]
 
     def get_style(self, style_name: str) -> Dict:
         """Returns the style with the given name."""
@@ -91,3 +96,9 @@ class StyleManager:
             writer = csv.DictWriter(csvfile, fieldnames=["Style Name", "Prefix", "Suffix", "Genre", "Descriptors"])
             writer.writeheader()
             writer.writerows(self.styles)
+
+    def print_styles(self):
+        """Prints the contents of the styles for debugging."""
+        print(f"Styles loaded from {self.styles_file}:")
+        for style in self.styles:
+            print(style)
