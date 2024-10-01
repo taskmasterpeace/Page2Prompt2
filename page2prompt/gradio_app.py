@@ -963,27 +963,29 @@ with gr.Blocks() as demo:
             if col not in df.columns:
                 df[col] = ""
 
-        # Reset shot numbers for each scene
-        def reset_shot_numbers(df):
-            shot_number = 1
-            current_scene = df.iloc[0]["Scene"]
-            for i, row in df.iterrows():
-                if row["Scene"] != current_scene:
-                    shot_number = 1
-                    current_scene = row["Scene"]
-                df.at[i, "Shot"] = shot_number
-                shot_number += 1
-            return df
+        feedback = "Shot list generated successfully."
+        return df, feedback
 
-        # Apply the reset_shot_numbers function
-        df = reset_shot_numbers(df)
+    def save_shot_list(shot_list, project_name):
+        if not project_name:
+            project_name = "untitled_project"
+        filename = f"{project_name}_shot_list.csv"
+        shot_list.to_csv(filename, index=False)
+        return f"Shot list saved as {filename}"
 
-        feedback = "Shot list generated successfully with shot numbers reset for each scene."
-        return df, df, feedback
+    def export_to_csv(shot_list, project_name):
+        if not project_name:
+            project_name = "untitled_project"
+        filename = f"{project_name}_shot_list.csv"
+        shot_list.to_csv(filename, index=False)
+        return f"Shot list exported as {filename}"
 
-    def save_proposed_shot_list():
-        script_manager.save_proposed_shot_list("proposed_shot_list.csv")
-        return "Proposed shot list saved to proposed_shot_list.csv"
+    def send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
+        # Combine the proposed shot list with the current master shot list
+        updated_master_shot_list = pd.concat([current_master_shot_list, proposed_shot_list], ignore_index=True)
+        # Remove duplicates if any
+        updated_master_shot_list = updated_master_shot_list.drop_duplicates().reset_index(drop=True)
+        return updated_master_shot_list
 
     async def extract_proposed_subjects(full_script, shot_list):
         try:
@@ -1016,7 +1018,25 @@ with gr.Blocks() as demo:
     generate_shot_list_btn.click(
         generate_proposed_shot_list,
         inputs=[full_script_input],
-        outputs=[shot_list_df, master_shot_list_df, feedback_box]
+        outputs=[shot_list_df, feedback_box]
+    )
+
+    save_shot_list_btn.click(
+        save_shot_list,
+        inputs=[shot_list_df, project_name_input],
+        outputs=[feedback_box]
+    )
+
+    export_to_csv_btn.click(
+        export_to_csv,
+        inputs=[shot_list_df, project_name_input],
+        outputs=[feedback_box]
+    )
+
+    send_to_master_btn.click(
+        send_to_master_shot_list,
+        inputs=[shot_list_df, master_shot_list_df],
+        outputs=[master_shot_list_df]
     )
 
     extract_subjects_btn.click(
