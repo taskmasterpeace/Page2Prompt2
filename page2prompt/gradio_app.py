@@ -1302,7 +1302,7 @@ if __name__ == "__main__":
         )
 
         # Update styles dropdown when the app starts
-        demo.load(update_styles_dropdown, outputs=[styles_dropdown])
+        demo.load(update_styles_dropdown, outputs=[style_input])
     
     demo.launch()
 
