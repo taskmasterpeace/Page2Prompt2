@@ -313,7 +313,11 @@ with gr.Blocks() as demo:
                 select_shot_btn = gr.Button("🎬 Select Shot")
                 select_shot_btn = gr.Button("🎬 Select Shot")
     
-    shot_list_df = gr.State()
+    shot_list_df = gr.DataFrame(
+        headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
+        label="Proposed Shot List",
+        interactive=True
+    )
 
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
@@ -976,10 +980,19 @@ with gr.Blocks() as demo:
         return f"Shot list exported as {filename}"
 
     def send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
+        print("send_to_master_shot_list function called")
+        print(f"Proposed shot list type: {type(proposed_shot_list)}")
+        print(f"Proposed shot list shape: {proposed_shot_list.shape if isinstance(proposed_shot_list, pd.DataFrame) else 'Not a DataFrame'}")
+        print(f"Current master shot list type: {type(current_master_shot_list)}")
+        print(f"Current master shot list shape: {current_master_shot_list.shape if isinstance(current_master_shot_list, pd.DataFrame) else 'Not a DataFrame'}")
+    
         # Combine the proposed shot list with the current master shot list
         updated_master_shot_list = pd.concat([current_master_shot_list, proposed_shot_list], ignore_index=True)
+    
         # Remove duplicates if any
         updated_master_shot_list = updated_master_shot_list.drop_duplicates().reset_index(drop=True)
+    
+        print(f"Updated master shot list shape: {updated_master_shot_list.shape}")
         return updated_master_shot_list
 
     async def extract_proposed_subjects(full_script, shot_list):
@@ -1028,8 +1041,17 @@ with gr.Blocks() as demo:
         outputs=[feedback_box]
     )
 
+    def safe_send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
+        try:
+            result = send_to_master_shot_list(proposed_shot_list, current_master_shot_list)
+            print("send_to_master_shot_list completed successfully")
+            return gr.update(value=result)
+        except Exception as e:
+            print(f"Error in send_to_master_shot_list: {str(e)}")
+            return gr.update()  # Return an empty update if there's an error
+
     send_to_master_btn.click(
-        send_to_master_shot_list,
+        safe_send_to_master_shot_list,
         inputs=[shot_list_df, master_shot_list_df],
         outputs=[master_shot_list_df]
     )
