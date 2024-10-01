@@ -194,12 +194,6 @@ if not api_key:
 # Define data directory
 DATA_DIR = os.path.dirname(__file__)
 
-# Initialize components
-subject_manager = SubjectManager(os.path.join(DATA_DIR, "subjects.csv"))
-style_manager = StyleManager(os.path.join(DATA_DIR, "styles.csv"))
-director_assistant = DirectorAssistant(os.path.join(DATA_DIR, "director_styles.csv"))
-shot_list_meta_chain = ShotListMetaChain(api_key, subject_manager, style_manager, director_assistant)
-
 # Define data directory
 DATA_DIR = os.path.dirname(__file__)
 
@@ -209,6 +203,25 @@ try:
     print(f"Available styles: {style_manager.get_styles()}")
 except Exception as e:
     print(f"Error loading styles: {str(e)}")
+    style_manager = None
+
+try:
+    subject_manager = SubjectManager(os.path.join(DATA_DIR, "subjects.csv"))
+except Exception as e:
+    print(f"Error loading subjects: {str(e)}")
+    subject_manager = None
+
+try:
+    director_assistant = DirectorAssistant(os.path.join(DATA_DIR, "director_styles.csv"))
+except Exception as e:
+    print(f"Error loading director styles: {str(e)}")
+    director_assistant = None
+
+if style_manager and subject_manager and director_assistant:
+    shot_list_meta_chain = ShotListMetaChain(api_key, subject_manager, style_manager, director_assistant)
+else:
+    print("Error: Unable to initialize ShotListMetaChain due to missing components.")
+    shot_list_meta_chain = None
 
 try:
     subject_manager = SubjectManager(os.path.join(DATA_DIR, "subjects.csv"))
@@ -305,7 +318,7 @@ with gr.Blocks() as demo:
 
                     with gr.Accordion("🎨 Style", open=False):
                         with gr.Row():
-                            style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles())
+                            style_input = gr.Dropdown(label="Style", choices=style_manager.get_styles() if style_manager else [])
                             style_prefix_input = gr.Textbox(label="Prefix")
                             style_suffix_input = gr.Textbox(label="Suffix")
                         
@@ -318,8 +331,10 @@ with gr.Blocks() as demo:
                         end_parameters_input = gr.Textbox(label="🔚 End Parameters")
 
                         def update_style_fields(style_name):
-                            style = style_manager.get_style(style_name)
-                            return style.get("Prefix", ""), style.get("Suffix", "")
+                            if style_manager:
+                                style = style_manager.get_style(style_name)
+                                return style.get("Prefix", ""), style.get("Suffix", "")
+                            return "", ""
 
                         style_input.change(
                             update_style_fields,
@@ -848,9 +863,11 @@ with gr.Blocks() as demo:
         }
 
     def generate_random_style():
-        new_style = create_random_style()
-        style_manager.add_style(new_style)
-        return f"Generated new style: {new_style['Style Name']}", gr.update(choices=style_manager.get_styles())
+        if style_manager:
+            new_style = create_random_style()
+            style_manager.add_style(new_style)
+            return f"Generated new style: {new_style['Style Name']}", gr.update(choices=style_manager.get_styles())
+        return "Error: StyleManager not initialized", gr.update()
 
     def generate_style_details():
         return "Style details generated"
@@ -1196,10 +1213,16 @@ with gr.Blocks() as demo:
     )
 
     def update_subject_checkboxes():
+        if subject_manager:
+            return {
+                people: gr.update(choices=subject_manager.get_people()),
+                places: gr.update(choices=subject_manager.get_places()),
+                props: gr.update(choices=subject_manager.get_props())
+            }
         return {
-            people: gr.update(choices=subject_manager.get_people()),
-            places: gr.update(choices=subject_manager.get_places()),
-            props: gr.update(choices=subject_manager.get_props())
+            people: gr.update(choices=[]),
+            places: gr.update(choices=[]),
+            props: gr.update(choices=[])
         }
 
     # Add this to your existing event handlers
