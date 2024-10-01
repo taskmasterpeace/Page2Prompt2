@@ -173,3 +173,18 @@ class SubjectManager:
                     })
         except Exception as e:
             print(f"Error exporting subjects: {str(e)}")
+
+    def set_subjects(self, subjects_df: pd.DataFrame):
+        self.subjects = []
+        for _, row in subjects_df.iterrows():
+            subject = Subject(
+                name=row['Name'],
+                description=row['Description'],
+                alias=row['Alias'],
+                type=row['Type'],
+                prefix=row.get('Prefix', ''),
+                suffix=row.get('Suffix', ''),
+                active=row.get('Active', True)
+            )
+            self.subjects.append(subject)
+        self._save_subjects()
