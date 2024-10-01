@@ -84,6 +84,13 @@ async def export_prompts(prompts, project_name):
     except IOError as e:
         return f"Error exporting prompts: {str(e)}"
 
+def select_shot_and_populate(master_shot_list_df, evt: gr.SelectData):
+    if evt.index is not None:
+        selected_row = master_shot_list_df.iloc[evt.index[0]]
+        shot_description = selected_row.get("Shot Description", "")
+        return shot_description
+    return ""
+
 def import_prompts_from_file(file):
     if file is not None:
         content = file.decode('utf-8')
@@ -297,8 +304,13 @@ with gr.Blocks() as demo:
             master_shot_list_df = gr.DataFrame(
                 headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
                 label="Master Shot List",
-                interactive=True
+                interactive=True,
+                row_select="single"
             )
+            with gr.Row():
+                new_row_btn = gr.Button("➕ New Row")
+                delete_row_btn = gr.Button("➖ Delete Row")
+                select_shot_btn = gr.Button("🎬 Select Shot")
     
     shot_list_df = gr.State()
 
@@ -1139,6 +1151,12 @@ with gr.Blocks() as demo:
         import_prompts_from_file,
         inputs=[gr.File(label="Import Prompts from File")],
         outputs=[directors_clipboard]
+    )
+
+    select_shot_btn.click(
+        select_shot_and_populate,
+        inputs=[master_shot_list_df],
+        outputs=[shot_description_input]
     )
 
     def create_camera_settings():
