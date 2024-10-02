@@ -312,12 +312,6 @@ with gr.Blocks() as demo:
                 delete_row_btn = gr.Button("➖ Delete Row")
                 select_shot_btn = gr.Button("🎬 Select Shot")
     
-    shot_list_df = gr.DataFrame(
-        headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"],
-        label="Proposed Shot List",
-        interactive=True
-    )
-
     with gr.Tabs():
         with gr.TabItem("🎥 Shot and Prompt Generation"):
             with gr.Row():
