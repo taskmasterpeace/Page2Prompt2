@@ -38,8 +38,8 @@ async def save_project(project_name, full_script, shot_list, subjects, generated
     }
     
     try:
-        async with aiofiles.open(f"{project_name}.json", "w") as f:
-            await f.write(json.dumps(project_data))
+        with open(f"{project_name}.json", "w") as f:
+            json.dump(project_data, f)
         return f"Project '{project_name}' saved successfully.", await list_projects(), generated_prompts
     except IOError as e:
         return f"Error saving project: {str(e)}", None, generated_prompts
@@ -942,36 +942,39 @@ with gr.Blocks() as demo:
 
     # Script Management event handlers
     async def generate_proposed_shot_list(full_script):
-        response = await script_manager.generate_proposed_shot_list(full_script)
-        if isinstance(response, pd.DataFrame):
-            df = response
-        else:
-            # Process the response and convert it to a DataFrame
-            shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
-            df = pd.DataFrame(shots, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
+        try:
+            response = await script_manager.generate_proposed_shot_list(full_script)
+            if isinstance(response, pd.DataFrame):
+                df = response
+            else:
+                # Process the response and convert it to a DataFrame
+                shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
+                df = pd.DataFrame(shots, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
 
-        # Ensure all necessary columns exist
-        required_columns = ["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"]
-        for col in required_columns:
-            if col not in df.columns:
-                df[col] = ""
+            # Ensure all necessary columns exist
+            required_columns = ["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"]
+            for col in required_columns:
+                if col not in df.columns:
+                    df[col] = ""
 
-        feedback = "Shot list generated successfully."
-        return df, feedback
+            feedback = "Shot list generated successfully."
+            return df, feedback
+        except Exception as e:
+            return None, f"Error generating shot list: {str(e)}"
 
     def save_shot_list(shot_list, project_name):
         if not project_name:
             project_name = "untitled_project"
         filename = f"{project_name}_shot_list.csv"
         shot_list.to_csv(filename, index=False)
-        return f"Shot list saved as {filename}"
+        return gr.File.update(value=filename, visible=True, label="Download Shot List"), f"Shot list saved as {filename}"
 
     def export_to_csv(shot_list, project_name):
         if not project_name:
             project_name = "untitled_project"
         filename = f"{project_name}_shot_list.csv"
         shot_list.to_csv(filename, index=False)
-        return f"Shot list exported as {filename}"
+        return gr.File.update(value=filename, visible=True, label="Download Shot List"), f"Shot list exported as {filename}"
 
     def send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
         print("Sending to Master Shot List")
@@ -1027,16 +1030,18 @@ with gr.Blocks() as demo:
         outputs=[shot_list_df, feedback_box]
     )
 
+    shot_list_download = gr.File(visible=False, label="Download Shot List")
+
     save_shot_list_btn.click(
         save_shot_list,
         inputs=[shot_list_df, project_name_input],
-        outputs=[feedback_box]
+        outputs=[shot_list_download, feedback_box]
     )
 
     export_to_csv_btn.click(
         export_to_csv,
         inputs=[shot_list_df, project_name_input],
-        outputs=[feedback_box]
+        outputs=[shot_list_download, feedback_box]
     )
 
     def safe_send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
