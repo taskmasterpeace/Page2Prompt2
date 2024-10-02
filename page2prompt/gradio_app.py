@@ -517,35 +517,31 @@ with gr.Blocks() as demo:
 
             # Event handlers
             save_project_btn.click(
-                lambda *args: asyncio.run(save_project(*args)),
+                save_project,
                 inputs=[project_name_input, full_script_input, master_shot_list_df, subjects_df, gr.State(lambda: generated_prompts)],
-                outputs=[feedback_box, projects_df, gr.State(lambda: generated_prompts)]
+                outputs=[feedback_box, projects_df]
             )
 
             load_project_btn.click(
-                lambda project_name: asyncio.run(load_project(project_name)),
+                load_project,
                 inputs=[project_name_input],
-                outputs=[full_script_input, master_shot_list_df, subjects_df, generated_prompts_state, feedback_box]
+                outputs=[full_script_input, master_shot_list_df, subjects_df, gr.State(lambda: generated_prompts), feedback_box]
             )
 
             delete_project_btn.click(
-                lambda project_name: asyncio.run(delete_project(project_name)),
+                delete_project,
                 inputs=[project_name_input],
                 outputs=[feedback_box, projects_df]
             )
 
             export_prompts_btn.click(
-                lambda prompts, project_name: asyncio.run(export_prompts(prompts, project_name)),
-                inputs=[generated_prompts_state, project_name_input],
+                export_prompts,
+                inputs=[gr.State(lambda: generated_prompts), project_name_input],
                 outputs=[feedback_box]
             )
 
             # Initialize the projects list when the app starts
             demo.load(list_projects, outputs=[projects_df])
-
-            # Update the projects list after saving or deleting a project
-            save_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
-            delete_project_btn.click(lambda: asyncio.run(list_projects()), outputs=[projects_df])
 
             def add_subject(name, description, alias, type, prefix, suffix):
                 new_subject = Subject(name, description, alias, type, prefix, suffix)
@@ -1586,3 +1582,4 @@ subjects_df.select(
     inputs=[subjects_df],
     outputs=[subject_name_input, subject_description_input, subject_type_input]
 )
+import shutil
