@@ -1091,19 +1091,16 @@ with gr.Blocks() as demo:
         outputs=[shot_list_df]
     )
 
-    def populate_subject_fields(evt: gr.SelectData, df):
-        if evt.index is not None:
+    def safe_populate_subject_fields(evt, df):
+        try:
+            if df is None or df.empty or evt is None or evt.index is None:
+                return "", "", ""
             row = df.iloc[evt.index[0]]
             return (
                 row.get('Name', ''),
                 row.get('Description', ''),
                 row.get('Type', '')
             )
-        return "", "", ""
-
-    def safe_populate_subject_fields(evt, df):
-        try:
-            return populate_subject_fields(evt, df)
         except Exception as e:
             print(f"Error in populate_subject_fields: {str(e)}")
             return "", "", ""
