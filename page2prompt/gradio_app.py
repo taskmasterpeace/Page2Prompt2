@@ -806,11 +806,12 @@ with gr.Blocks() as demo:
                     delete_row_btn = gr.Button("➖ Delete Row")
 
             with gr.Row():
-                save_shot_list_btn = gr.Button("💾 Save Shot List")
-                export_to_csv_btn = gr.Button("📁 Export to CSV")
-                send_to_master_btn = gr.Button("⬆️ Send to Master Shot List")
+                export_shot_list_btn = gr.Button("📁 Export Shot List")
+                export_subjects_btn = gr.Button("📁 Export Subjects")
+                send_to_master_btn = gr.Button("➡️ Send to Master Shot List")
                 send_to_bulk_btn = gr.Button("⬆️ Send to Bulk Shot List")
-                shot_list_download = gr.File(label="Download Shot List")
+                shot_list_download = gr.File(label="Download Shot List", visible=False)
+                subjects_download = gr.File(label="Download Subjects", visible=False)
 
             shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
 
@@ -965,12 +966,19 @@ with gr.Blocks() as demo:
         shot_list.to_csv(filename, index=False)
         return filename, f"Shot list saved as {filename}"
 
-    def export_to_csv(shot_list, project_name):
+    def export_shot_list(shot_list, project_name):
         if not project_name:
             project_name = "untitled_project"
         filename = f"{project_name}_shot_list.csv"
         shot_list.to_csv(filename, index=False)
         return filename, f"Shot list exported as {filename}"
+
+    def export_subjects(subjects, project_name):
+        if not project_name:
+            project_name = "untitled_project"
+        filename = f"{project_name}_subjects.csv"
+        subjects.to_csv(filename, index=False)
+        return filename, f"Subjects exported as {filename}"
 
     def send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
         print("Sending to Master Shot List")
@@ -1028,16 +1036,16 @@ with gr.Blocks() as demo:
 
     shot_list_download = gr.File(visible=False, label="Download Shot List")
 
-    save_shot_list_btn.click(
-        lambda x, y: save_shot_list(x, y),
+    export_shot_list_btn.click(
+        export_shot_list,
         inputs=[shot_list_df, project_name_input],
         outputs=[shot_list_download, feedback_box]
     )
 
-    export_to_csv_btn.click(
-        lambda x, y: export_to_csv(x, y),
-        inputs=[shot_list_df, project_name_input],
-        outputs=[shot_list_download, feedback_box]
+    export_subjects_btn.click(
+        export_subjects,
+        inputs=[subjects_df, project_name_input],
+        outputs=[subjects_download, feedback_box]
     )
 
     def safe_send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
