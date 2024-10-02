@@ -804,6 +804,7 @@ with gr.Blocks() as demo:
                 export_to_csv_btn = gr.Button("📁 Export to CSV")
                 send_to_master_btn = gr.Button("⬆️ Send to Master Shot List")
                 send_to_bulk_btn = gr.Button("⬆️ Send to Bulk Shot List")
+                shot_list_download = gr.File(label="Download Shot List")
 
             shot_list_notes = gr.Textbox(label="Shot List Notes", placeholder="Add any additional notes about the shot list here...")
 
@@ -941,24 +942,13 @@ with gr.Blocks() as demo:
     )
 
     # Script Management event handlers
-    async def generate_proposed_shot_list(full_script):
+    async def generate_shot_list(full_script):
         try:
             response = await script_manager.generate_proposed_shot_list(full_script)
             if isinstance(response, pd.DataFrame):
-                df = response
+                return response, "Shot list generated successfully."
             else:
-                # Process the response and convert it to a DataFrame
-                shots = [shot.split('|') for shot in response.split('\n') if shot.strip()]
-                df = pd.DataFrame(shots, columns=["Timestamp", "Scene", "Shot", "Script Reference", "Shot Description", "Shot Size", "People", "Places"])
-
-            # Ensure all necessary columns exist
-            required_columns = ["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"]
-            for col in required_columns:
-                if col not in df.columns:
-                    df[col] = ""
-
-            feedback = "Shot list generated successfully."
-            return df, feedback
+                return None, f"Error generating shot list: Unexpected response type"
         except Exception as e:
             return None, f"Error generating shot list: {str(e)}"
 
@@ -967,14 +957,14 @@ with gr.Blocks() as demo:
             project_name = "untitled_project"
         filename = f"{project_name}_shot_list.csv"
         shot_list.to_csv(filename, index=False)
-        return gr.File.update(value=filename, visible=True, label="Download Shot List"), f"Shot list saved as {filename}"
+        return filename, f"Shot list saved as {filename}"
 
     def export_to_csv(shot_list, project_name):
         if not project_name:
             project_name = "untitled_project"
         filename = f"{project_name}_shot_list.csv"
         shot_list.to_csv(filename, index=False)
-        return gr.File.update(value=filename, visible=True, label="Download Shot List"), f"Shot list exported as {filename}"
+        return filename, f"Shot list exported as {filename}"
 
     def send_to_master_shot_list(proposed_shot_list, current_master_shot_list):
         print("Sending to Master Shot List")
@@ -1399,15 +1389,15 @@ async def save_project(project_name, full_script, shot_list, subjects, generated
     project_data = {
         "name": project_name,
         "full_script": full_script,
-        "shot_list": shot_list.to_dict() if isinstance(shot_list, pd.DataFrame) else {},
-        "subjects": subjects.to_dict() if isinstance(subjects, pd.DataFrame) else {},
+        "shot_list": shot_list.to_dict('records') if isinstance(shot_list, pd.DataFrame) else [],
+        "subjects": subjects.to_dict('records') if isinstance(subjects, pd.DataFrame) else [],
         "prompts": generated_prompts,
         "last_modified": datetime.now().isoformat()
     }
     
     try:
-        async with aiofiles.open(f"{project_name}.json", "w") as f:
-            await f.write(json.dumps(project_data))
+        with open(f"{project_name}.json", "w") as f:
+            json.dump(project_data, f)
         return f"Project '{project_name}' saved successfully.", await list_projects(), generated_prompts
     except IOError as e:
         return f"Error saving project: {str(e)}", None, generated_prompts
@@ -1504,3 +1494,18 @@ async def generate_prompts_wrapper(
     return result["concise"], result["normal"], result["detailed"], result["structured"], "Prompts generated and saved.", ", ".join(active_subjects)
 
 
+def wrapped_function(original_function):
+    def wrapper(*args, **kwargs):
+        try:
+            return original_function(*args, **kwargs)
+        except Exception as e:
+            error_message = f"An error occurred: {str(e)}"
+            print(error_message)  # This will print to the console/terminal
+            return None, error_message
+    return wrapper
+
+# Apply this wrapper to all your UI interaction functions
+save_project = wrapped_function(save_project)
+save_shot_list = wrapped_function(save_shot_list)
+export_to_csv = wrapped_function(export_to_csv)
+generate_shot_list = wrapped_function(generate_shot_list)
