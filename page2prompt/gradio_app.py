@@ -91,7 +91,7 @@ async def export_prompts(prompts, project_name):
 def select_shot_and_populate(df):
     if df is None or df.empty:
         return ""
-    selected_indices = df.index
+    selected_indices = df.index[df.index.isin(df.index)]
     if len(selected_indices) > 0:
         selected_row = df.iloc[selected_indices[0]]
         shot_description = selected_row.get("Shot Description", "")
@@ -821,7 +821,8 @@ with gr.Blocks() as demo:
                     datatype=["str", "str", "str"],
                     col_count=(3, "fixed"),
                     label="Proposed Subjects",
-                    interactive=True
+                    interactive=True,
+                    row_select=True
                 )
                 extract_subjects_btn = gr.Button("🔍 Extract Subjects")
 
@@ -1528,8 +1529,12 @@ def safe_populate_subject_fields(evt, df):
     except Exception as e:
         print(f"Error in populate_subject_fields: {str(e)}")
         return "", "", ""
-def delete_selected_row(df, evt: gr.SelectData):
-    return df.drop(index=evt.index).reset_index(drop=True)
+def delete_selected_row(df):
+    if df is not None and not df.empty:
+        selected_indices = df.index[df.index.isin(df.index)]
+        if len(selected_indices) > 0:
+            return df.drop(index=selected_indices).reset_index(drop=True)
+    return df
 
 async def extract_proposed_subjects(full_script, shot_list):
     try:
@@ -1564,6 +1569,12 @@ delete_subject_btn.click(
     delete_selected_row,
     inputs=[subjects_df],
     outputs=[subjects_df]
+)
+
+select_shot_btn.click(
+    select_shot_and_populate,
+    inputs=[master_shot_list_df],
+    outputs=[shot_description_input]
 )
 
 subjects_df.select(
