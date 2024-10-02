@@ -1015,7 +1015,7 @@ with gr.Blocks() as demo:
         return "All subjects sent to Subject Management successfully."
 
     generate_shot_list_btn.click(
-        generate_proposed_shot_list,
+        lambda x: asyncio.run(generate_shot_list(x)),
         inputs=[full_script_input],
         outputs=[shot_list_df, feedback_box]
     )
@@ -1023,13 +1023,13 @@ with gr.Blocks() as demo:
     shot_list_download = gr.File(visible=False, label="Download Shot List")
 
     save_shot_list_btn.click(
-        save_shot_list,
+        lambda x, y: save_shot_list(x, y),
         inputs=[shot_list_df, project_name_input],
         outputs=[shot_list_download, feedback_box]
     )
 
     export_to_csv_btn.click(
-        export_to_csv,
+        lambda x, y: export_to_csv(x, y),
         inputs=[shot_list_df, project_name_input],
         outputs=[shot_list_download, feedback_box]
     )
