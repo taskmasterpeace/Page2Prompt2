@@ -89,6 +89,8 @@ async def export_prompts(prompts, project_name):
         return f"Error exporting prompts: {str(e)}"
 
 def select_shot_and_populate(df):
+    if df is None or df.empty:
+        return ""
     selected_indices = df.index
     if len(selected_indices) > 0:
         selected_row = df.iloc[selected_indices[0]]
@@ -826,7 +828,7 @@ with gr.Blocks() as demo:
                 with gr.Row():
                     subject_name_input = gr.Textbox(label="Subject Name")
                     subject_description_input = gr.Textbox(label="Subject Description")
-                    subject_type_input = gr.Dropdown(label="Subject Type", choices=["person", "place", "prop"])
+                    subject_type_input = gr.Dropdown(label="Subject Type", choices=["person", "place", "prop"], allow_custom_value=True)
 
                 with gr.Row():
                     new_subject_btn = gr.Button("➕ New Row")
@@ -1513,3 +1515,59 @@ save_project = wrapped_function(save_project)
 save_shot_list = wrapped_function(save_shot_list)
 export_to_csv = wrapped_function(export_to_csv)
 generate_shot_list = wrapped_function(generate_shot_list)
+def safe_populate_subject_fields(evt, df):
+    try:
+        if df is None or df.empty or evt is None or evt.index is None:
+            return "", "", ""
+        row = df.iloc[evt.index[0]]
+        return (
+            row.get('Name', ''),
+            row.get('Description', ''),
+            row.get('Type', '')
+        )
+    except Exception as e:
+        print(f"Error in populate_subject_fields: {str(e)}")
+        return "", "", ""
+def delete_selected_row(df, evt: gr.SelectData):
+    return df.drop(index=evt.index).reset_index(drop=True)
+
+async def extract_proposed_subjects(full_script, shot_list):
+    try:
+        subjects_dict = await script_manager.extract_proposed_subjects(full_script, shot_list)
+        subjects_df = subjects_dict['subjects']
+        feedback = "Subjects extracted successfully."
+        return subjects_df, feedback
+    except Exception as e:
+        error_message = f"Error extracting subjects: {str(e)}"
+        print(error_message)
+        return pd.DataFrame(columns=["Name", "Description", "Type"]), error_message
+
+def add_proposed_subject(name, description, subject_type, current_df):
+    new_subject = pd.DataFrame([[name, description, subject_type]], columns=["Name", "Description", "Type"])
+    updated_df = pd.concat([current_df, new_subject], ignore_index=True)
+    return updated_df
+
+# Add these event handlers after the existing ones in your script
+extract_subjects_btn.click(
+    extract_proposed_subjects,
+    inputs=[full_script_input, shot_list_df],
+    outputs=[subjects_df, feedback_box]
+)
+
+new_subject_btn.click(
+    add_proposed_subject,
+    inputs=[subject_name_input, subject_description_input, subject_type_input, subjects_df],
+    outputs=[subjects_df]
+)
+
+delete_subject_btn.click(
+    delete_selected_row,
+    inputs=[subjects_df],
+    outputs=[subjects_df]
+)
+
+subjects_df.select(
+    safe_populate_subject_fields,
+    inputs=[subjects_df],
+    outputs=[subject_name_input, subject_description_input, subject_type_input]
+)
