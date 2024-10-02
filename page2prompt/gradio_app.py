@@ -28,11 +28,15 @@ async def save_project(project_name, full_script, shot_list, subjects, generated
     if not project_name:
         return "Please enter a project name.", None, generated_prompts
 
+    # Convert DataFrames to dict if they're not already
+    shot_list_dict = shot_list.to_dict('records') if isinstance(shot_list, pd.DataFrame) else []
+    subjects_dict = subjects.to_dict('records') if isinstance(subjects, pd.DataFrame) else []
+
     project_data = {
         "name": project_name,
         "full_script": full_script,
-        "shot_list": shot_list.to_dict() if isinstance(shot_list, pd.DataFrame) else {},
-        "subjects": subjects.to_dict() if isinstance(subjects, pd.DataFrame) else {},
+        "shot_list": shot_list_dict,
+        "subjects": subjects_dict,
         "prompts": generated_prompts,
         "last_modified": datetime.now().isoformat()
     }
@@ -50,8 +54,8 @@ async def load_project(project_name):
             project_data = json.loads(await f.read())
         
         full_script = project_data.get("full_script", "")
-        shot_list = pd.DataFrame(project_data.get("shot_list", {}))
-        subjects = pd.DataFrame(project_data.get("subjects", {}))
+        shot_list = pd.DataFrame(project_data.get("shot_list", []))
+        subjects = pd.DataFrame(project_data.get("subjects", []))
         prompts = project_data.get("prompts", [])
         
         # Update the subject_manager with the loaded subjects
@@ -512,14 +516,14 @@ with gr.Blocks() as demo:
             # Event handlers
             save_project_btn.click(
                 lambda *args: asyncio.run(save_project(*args)),
-                inputs=[project_name_input, full_script_input, master_shot_list_df, subjects_df, generated_prompts_state],
-                outputs=[feedback_box, projects_df, generated_prompts_state]
+                inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, gr.State(lambda: generated_prompts)],
+                outputs=[feedback_box, projects_df, gr.State(lambda: generated_prompts)]
             )
 
             load_project_btn.click(
                 lambda project_name: asyncio.run(load_project(project_name)),
                 inputs=[project_name_input],
-                outputs=[full_script_input, master_shot_list_df, subjects_df, generated_prompts_state, feedback_box]
+                outputs=[full_script_input, shot_list_df, subjects_df, generated_prompts_state, feedback_box]
             )
 
             delete_project_btn.click(
