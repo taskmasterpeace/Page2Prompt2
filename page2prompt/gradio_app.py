@@ -1001,7 +1001,7 @@ with gr.Blocks() as demo:
         except Exception as e:
             error_message = f"Error extracting subjects: {str(e)}"
             print(error_message)
-            return pd.DataFrame(columns=["name", "description", "type"]), error_message
+            return pd.DataFrame(columns=["Name", "Description", "Type"]), error_message
 
     def add_proposed_subject(name, description, subject_type, current_df):
         new_subject = pd.DataFrame([[name, description, subject_type]], columns=["Name", "Description", "Type"])
@@ -1550,7 +1550,7 @@ def add_proposed_subject(name, description, subject_type, current_df):
 
 # Add these event handlers after the existing ones in your script
 extract_subjects_btn.click(
-    extract_proposed_subjects,
+    lambda x, y: asyncio.run(extract_proposed_subjects(x, y)),
     inputs=[full_script_input, shot_list_df],
     outputs=[subjects_df, feedback_box]
 )
@@ -1574,7 +1574,7 @@ select_shot_btn.click(
 )
 
 subjects_df.select(
-    safe_populate_subject_fields,
+    lambda evt, df: safe_populate_subject_fields(evt, df),
     inputs=[subjects_df],
     outputs=[subject_name_input, subject_description_input, subject_type_input]
 )
