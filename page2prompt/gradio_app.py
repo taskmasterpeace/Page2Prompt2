@@ -516,14 +516,14 @@ with gr.Blocks() as demo:
             # Event handlers
             save_project_btn.click(
                 lambda *args: asyncio.run(save_project(*args)),
-                inputs=[project_name_input, full_script_input, shot_list_df, subjects_df, gr.State(lambda: generated_prompts)],
+                inputs=[project_name_input, full_script_input, master_shot_list_df, subjects_df, gr.State(lambda: generated_prompts)],
                 outputs=[feedback_box, projects_df, gr.State(lambda: generated_prompts)]
             )
 
             load_project_btn.click(
                 lambda project_name: asyncio.run(load_project(project_name)),
                 inputs=[project_name_input],
-                outputs=[full_script_input, shot_list_df, subjects_df, generated_prompts_state, feedback_box]
+                outputs=[full_script_input, master_shot_list_df, subjects_df, generated_prompts_state, feedback_box]
             )
 
             delete_project_btn.click(
