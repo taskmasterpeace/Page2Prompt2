@@ -1496,6 +1496,9 @@ def export_prompts(prompts, project_name):
 # Global variable to store generated prompts
 generated_prompts = []
 
+from typing import List
+from .utils.subject import Subject
+
 # Modify the generate_prompts_wrapper function to append prompts
 def apply_alias(text: str, subjects: List[Subject]) -> str:
     logger.debug(f"Applying aliases to text: {text[:50]}...")  # Log first 50 chars of text
