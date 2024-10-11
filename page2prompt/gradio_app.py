@@ -188,7 +188,8 @@ def update_styles_dropdown():
     return gr.update(choices=style_manager.get_styles())
 
 from .components.script_prompt_generation import ScriptPromptGenerator
-from .utils.subject_manager import SubjectManager, Subject
+from .utils.subject_manager import SubjectManager
+from .utils.subject import Subject
 from .utils.style_manager import StyleManager
 from .components.meta_chain import MetaChain
 from .utils.shot_list_generator import generate_shot_list
@@ -1493,6 +1494,12 @@ def export_prompts(prompts, project_name):
 generated_prompts = []
 
 # Modify the generate_prompts_wrapper function to append prompts
+def apply_alias(text: str, subjects: List[Subject]) -> str:
+    for subject in subjects:
+        replacement = subject.alias if subject.alias else subject.name
+        text = text.replace(subject.name, replacement)
+    return text
+
 async def generate_prompts_wrapper(
     shot_description, directors_notes, style, style_prefix, style_suffix,
     director_style, shot, move, size, framing, depth_of_field, camera_type,
@@ -1523,10 +1530,17 @@ async def generate_prompts_wrapper(
         active_subjects=active_subjects
     )
     
-    # Append generated prompts to the global list
-    generated_prompts.extend([result["concise"], result["normal"], result["detailed"]])
+    active_subjects = subject_manager.get_active_subjects()
+
+    concise = apply_alias(result.get("concise", ""), active_subjects)
+    normal = apply_alias(result.get("normal", ""), active_subjects)
+    detailed = apply_alias(result.get("detailed", ""), active_subjects)
+    structured = apply_alias(result.get("structured", ""), active_subjects)
     
-    return result["concise"], result["normal"], result["detailed"], result["structured"], "Prompts generated and saved.", ", ".join(active_subjects)
+    # Append generated prompts to the global list
+    generated_prompts.extend([concise, normal, detailed])
+    
+    return concise, normal, detailed, structured, "Prompts generated and saved.", ", ".join([s.name for s in active_subjects])
 
 
 def wrapped_function(original_function):
