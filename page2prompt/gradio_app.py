@@ -8,6 +8,9 @@ from datetime import datetime
 import logging
 import aiofiles
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 # Add these function definitions at the top of the file
 async def list_projects():
     projects = []
@@ -1495,9 +1498,13 @@ generated_prompts = []
 
 # Modify the generate_prompts_wrapper function to append prompts
 def apply_alias(text: str, subjects: List[Subject]) -> str:
+    logger.debug(f"Applying aliases to text: {text[:50]}...")  # Log first 50 chars of text
     for subject in subjects:
-        replacement = subject.alias if subject.alias else subject.name
-        text = text.replace(subject.name, replacement)
+        if subject.alias:
+            logger.debug(f"Replacing '{subject.name}' with alias '{subject.alias}'")
+            text = text.replace(subject.name, subject.alias)
+        else:
+            logger.debug(f"No alias for subject '{subject.name}'")
     return text
 
 async def generate_prompts_wrapper(
@@ -1531,6 +1538,7 @@ async def generate_prompts_wrapper(
     )
     
     active_subjects = subject_manager.get_active_subjects()
+    logger.debug(f"Active subjects: {[s.name for s in active_subjects]}")
 
     concise = apply_alias(result.get("concise", ""), active_subjects)
     normal = apply_alias(result.get("normal", ""), active_subjects)
