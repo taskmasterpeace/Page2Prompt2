@@ -1642,7 +1642,7 @@ subjects_df.select(
     outputs=[subject_name_input, subject_description_input, subject_type_input]
 )
 import shutil
-from typing import List
+from typing import List, Dict
 def post_process_prompt(prompt: str, subjects: List[Subject]) -> str:
     print(f"Original prompt: {prompt[:100]}...")  # Print first 100 chars
     for subject in subjects:
