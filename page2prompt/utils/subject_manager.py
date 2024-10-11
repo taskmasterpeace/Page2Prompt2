@@ -194,3 +194,5 @@ class SubjectManager:
             )
             self.subjects.append(subject)
         self._save_subjects()
+    def get_all_subjects(self) -> List[Subject]:
+        return self.subjects

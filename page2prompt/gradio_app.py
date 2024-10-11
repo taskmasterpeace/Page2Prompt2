@@ -1538,14 +1538,14 @@ async def generate_prompts_wrapper(
         active_subjects=active_subjects
     )
     
-    # Convert active_subjects to Subject objects
-    subject_objects = [Subject(name=s, description="", type="", alias=s) for s in active_subjects]
-    logger.debug(f"Active subjects: {[s.name for s in subject_objects]}")
-
-    concise = apply_alias(result.get("concise", ""), subject_objects)
-    normal = apply_alias(result.get("normal", ""), subject_objects)
-    detailed = apply_alias(result.get("detailed", ""), subject_objects)
-    structured = apply_alias(result.get("structured", ""), subject_objects)
+    # Get all subjects from the subject manager
+    all_subjects = subject_manager.get_all_subjects()
+    
+    # Post-process each prompt
+    concise = post_process_prompt(result.get("concise", ""), all_subjects)
+    normal = post_process_prompt(result.get("normal", ""), all_subjects)
+    detailed = post_process_prompt(result.get("detailed", ""), all_subjects)
+    structured = post_process_prompt(result.get("structured", ""), all_subjects)
     
     # Append generated prompts to the global list
     generated_prompts.extend([concise, normal, detailed])
@@ -1636,3 +1636,11 @@ subjects_df.select(
 )
 import shutil
 from typing import List
+def post_process_prompt(prompt: str, subjects: List[Subject]) -> str:
+    print(f"Original prompt: {prompt[:100]}...")  # Print first 100 chars
+    for subject in subjects:
+        if subject.alias and subject.alias != subject.name:
+            print(f"Replacing '{subject.name}' with '{subject.alias}'")
+            prompt = prompt.replace(subject.name, subject.alias)
+    print(f"Processed prompt: {prompt[:100]}...")  # Print first 100 chars
+    return prompt
