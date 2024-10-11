@@ -5,4 +5,4 @@ class Subject:
         self.type = type
         self.prefix = prefix
         self.suffix = suffix
-        self.alias = alias
+        self.alias = alias if alias else name  # Use name as alias if not provided
