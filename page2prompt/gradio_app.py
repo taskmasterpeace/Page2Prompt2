@@ -1518,6 +1518,8 @@ async def generate_prompts_wrapper(
     full_script, people, places, props
 ):
     active_subjects = people + places + props
+    logger.debug(f"Active subjects: {active_subjects}")
+
     result = await script_prompt_generator.generate_prompts(
         script_excerpt=full_script,
         shot_description=shot_description,
@@ -1541,26 +1543,26 @@ async def generate_prompts_wrapper(
         active_subjects=active_subjects
     )
     
-    # Get name-alias dictionary
-    name_alias_dict = subject_manager.get_name_alias_dict()
+    # Get alias-name dictionary
+    alias_name_dict = subject_manager.get_name_alias_dict()
+    logger.debug(f"Alias-name dictionary: {alias_name_dict}")
     
     # Simple replacement function
-    def replace_names_with_aliases(text):
-        for name, alias in name_alias_dict.items():
-            text = text.replace(name, alias)
+    def replace_aliases_with_names(text):
+        original_text = text
+        for alias, name in alias_name_dict.items():
+            text = text.replace(alias, name)
+        logger.debug(f"Original text: {original_text[:100]}")
+        logger.debug(f"Processed text: {text[:100]}")
         return text
     
     # Apply replacement to each prompt
-    concise = replace_names_with_aliases(result.get("concise", ""))
-    normal = replace_names_with_aliases(result.get("normal", ""))
-    detailed = replace_names_with_aliases(result.get("detailed", ""))
-    structured = replace_names_with_aliases(result.get("structured", ""))
+    concise = replace_aliases_with_names(result.get("concise", ""))
+    normal = replace_aliases_with_names(result.get("normal", ""))
+    detailed = replace_aliases_with_names(result.get("detailed", ""))
+    structured = replace_aliases_with_names(result.get("structured", ""))
     
-    # Append generated prompts to the global list
-    global generated_prompts
-    generated_prompts.extend([concise, normal, detailed])
-    
-    return concise, normal, detailed, structured, "Prompts generated and saved.", ", ".join(active_subjects)
+    return concise, normal, detailed, structured, "Prompts generated and aliases replaced with names.", ", ".join(active_subjects)
 
 
 def wrapped_function(original_function):
