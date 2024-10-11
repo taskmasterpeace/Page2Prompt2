@@ -1500,11 +1500,12 @@ generated_prompts = []
 def apply_alias(text: str, subjects: List[Subject]) -> str:
     logger.debug(f"Applying aliases to text: {text[:50]}...")  # Log first 50 chars of text
     for subject in subjects:
-        if subject.alias:
+        if subject.alias and subject.name in text:
             logger.debug(f"Replacing '{subject.name}' with alias '{subject.alias}'")
             text = text.replace(subject.name, subject.alias)
+            logger.debug(f"Text after replacement: {text[:50]}...")
         else:
-            logger.debug(f"No alias for subject '{subject.name}'")
+            logger.debug(f"No replacement for subject '{subject.name}'")
     return text
 
 async def generate_prompts_wrapper(
@@ -1537,18 +1538,19 @@ async def generate_prompts_wrapper(
         active_subjects=active_subjects
     )
     
-    active_subjects = subject_manager.get_active_subjects()
-    logger.debug(f"Active subjects: {[s.name for s in active_subjects]}")
+    # Convert active_subjects to Subject objects
+    subject_objects = [Subject(name=s, description="", type="", alias=s) for s in active_subjects]
+    logger.debug(f"Active subjects: {[s.name for s in subject_objects]}")
 
-    concise = apply_alias(result.get("concise", ""), active_subjects)
-    normal = apply_alias(result.get("normal", ""), active_subjects)
-    detailed = apply_alias(result.get("detailed", ""), active_subjects)
-    structured = apply_alias(result.get("structured", ""), active_subjects)
+    concise = apply_alias(result.get("concise", ""), subject_objects)
+    normal = apply_alias(result.get("normal", ""), subject_objects)
+    detailed = apply_alias(result.get("detailed", ""), subject_objects)
+    structured = apply_alias(result.get("structured", ""), subject_objects)
     
     # Append generated prompts to the global list
     generated_prompts.extend([concise, normal, detailed])
     
-    return concise, normal, detailed, structured, "Prompts generated and saved.", ", ".join([s.name for s in active_subjects])
+    return concise, normal, detailed, structured, "Prompts generated and saved.", ", ".join(active_subjects)
 
 
 def wrapped_function(original_function):
