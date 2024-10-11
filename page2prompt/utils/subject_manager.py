@@ -13,15 +13,21 @@ class Subject:
         self.suffix = suffix
         self.active = active
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class SubjectManager:
     def __init__(self, subjects_file: str):
         self.subjects_file = subjects_file
         self.subjects: List[Subject] = self._load_subjects()
+        logger.debug(f"Loaded {len(self.subjects)} subjects")
 
     def _load_subjects(self) -> List[Subject]:
         """Loads subjects from the CSV file."""
         subjects = []
         try:
+            logger.debug(f"Attempting to load subjects from {self.subjects_file}")
             with open(self.subjects_file, 'r', newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
