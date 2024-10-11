@@ -1538,16 +1538,23 @@ async def generate_prompts_wrapper(
         active_subjects=active_subjects
     )
     
-    # Get all subjects from the subject manager
-    all_subjects = subject_manager.get_all_subjects()
+    # Get name-alias dictionary
+    name_alias_dict = subject_manager.get_name_alias_dict()
     
-    # Post-process each prompt
-    concise = post_process_prompt(result.get("concise", ""), all_subjects)
-    normal = post_process_prompt(result.get("normal", ""), all_subjects)
-    detailed = post_process_prompt(result.get("detailed", ""), all_subjects)
-    structured = post_process_prompt(result.get("structured", ""), all_subjects)
+    # Simple replacement function
+    def replace_names_with_aliases(text):
+        for name, alias in name_alias_dict.items():
+            text = text.replace(name, alias)
+        return text
+    
+    # Apply replacement to each prompt
+    concise = replace_names_with_aliases(result.get("concise", ""))
+    normal = replace_names_with_aliases(result.get("normal", ""))
+    detailed = replace_names_with_aliases(result.get("detailed", ""))
+    structured = replace_names_with_aliases(result.get("structured", ""))
     
     # Append generated prompts to the global list
+    global generated_prompts
     generated_prompts.extend([concise, normal, detailed])
     
     return concise, normal, detailed, structured, "Prompts generated and saved.", ", ".join(active_subjects)

@@ -197,5 +197,6 @@ class SubjectManager:
 
     def get_all_subjects(self) -> List[Subject]:
         return self.subjects
-    def get_all_subjects(self) -> List[Subject]:
-        return self.subjects
+
+    def get_name_alias_dict(self) -> Dict[str, str]:
+        return {subject.name: subject.alias for subject in self.subjects if subject.alias != subject.name}
