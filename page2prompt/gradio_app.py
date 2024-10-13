@@ -1518,8 +1518,6 @@ async def generate_prompts_wrapper(
     full_script, people, places, props
 ):
     active_subjects = people + places + props
-    logger.debug(f"Active subjects: {active_subjects}")
-
     result = await script_prompt_generator.generate_prompts(
         script_excerpt=full_script,
         shot_description=shot_description,
@@ -1544,17 +1542,18 @@ async def generate_prompts_wrapper(
     )
     
     name_alias_pairs = subject_manager.get_name_alias_pairs()
-    print("Name-alias pairs:", name_alias_pairs)
     
-    concise = replace_names_with_aliases(result.get("concise", ""), name_alias_pairs)
-    normal = replace_names_with_aliases(result.get("normal", ""), name_alias_pairs)
-    detailed = replace_names_with_aliases(result.get("detailed", ""), name_alias_pairs)
-    structured = replace_names_with_aliases(result.get("structured", ""), name_alias_pairs)
+    def apply_aliases(text):
+        for name, alias in name_alias_pairs:
+            text = text.replace(name, alias)
+        return text
+    
+    concise = apply_aliases(result.get("concise", ""))
+    normal = apply_aliases(result.get("normal", ""))
+    detailed = apply_aliases(result.get("detailed", ""))
+    structured = apply_aliases(result.get("structured", ""))
 
-    print("Original prompt:", result.get("concise", "")[:100])  # First 100 chars
-    print("Processed prompt:", concise[:100])  # First 100 chars
-
-    return concise, normal, detailed, structured, "Prompts generated and names replaced with aliases.", ", ".join(active_subjects)
+    return concise, normal, detailed, structured, "Prompts generated and aliases applied.", ", ".join(active_subjects)
 
 
 def wrapped_function(original_function):

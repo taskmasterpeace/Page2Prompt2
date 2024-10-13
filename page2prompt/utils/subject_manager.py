@@ -24,10 +24,8 @@ class SubjectManager:
         logger.debug(f"Loaded subjects: {self.subjects}")
 
     def _load_subjects(self) -> List[Subject]:
-        """Loads subjects from the CSV file."""
         subjects = []
         try:
-            logger.debug(f"Attempting to load subjects from {self.subjects_file}")
             with open(self.subjects_file, 'r', newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
@@ -198,13 +196,8 @@ class SubjectManager:
     def get_all_subjects(self) -> List[Subject]:
         return self.subjects
 
-    def get_name_alias_dict(self) -> Dict[str, str]:
-        name_alias_dict = {subject.alias: subject.name for subject in self.subjects if subject.alias != subject.name}
-        logger.debug(f"Alias-name dictionary: {name_alias_dict}")
-        return name_alias_dict
-
-    def get_name_alias_dict(self) -> Dict[str, str]:
-        return {subject.name: subject.alias for subject in self.subjects if subject.alias != subject.name}
+    def get_name_alias_pairs(self):
+        return [(subject.name, subject.alias) for subject in self.subjects if subject.alias != subject.name]
 
     def get_name_alias_pairs(self):
         return [(subject.name, subject.alias) for subject in self.subjects if subject.alias != subject.name]
