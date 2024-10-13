@@ -1543,26 +1543,18 @@ async def generate_prompts_wrapper(
         active_subjects=active_subjects
     )
     
-    # Get alias-name dictionary
-    alias_name_dict = subject_manager.get_name_alias_dict()
-    logger.debug(f"Alias-name dictionary: {alias_name_dict}")
+    name_alias_pairs = subject_manager.get_name_alias_pairs()
+    print("Name-alias pairs:", name_alias_pairs)
     
-    # Simple replacement function
-    def replace_aliases_with_names(text):
-        original_text = text
-        for alias, name in alias_name_dict.items():
-            text = text.replace(alias, name)
-        logger.debug(f"Original text: {original_text[:100]}")
-        logger.debug(f"Processed text: {text[:100]}")
-        return text
-    
-    # Apply replacement to each prompt
-    concise = replace_aliases_with_names(result.get("concise", ""))
-    normal = replace_aliases_with_names(result.get("normal", ""))
-    detailed = replace_aliases_with_names(result.get("detailed", ""))
-    structured = replace_aliases_with_names(result.get("structured", ""))
-    
-    return concise, normal, detailed, structured, "Prompts generated and aliases replaced with names.", ", ".join(active_subjects)
+    concise = replace_names_with_aliases(result.get("concise", ""), name_alias_pairs)
+    normal = replace_names_with_aliases(result.get("normal", ""), name_alias_pairs)
+    detailed = replace_names_with_aliases(result.get("detailed", ""), name_alias_pairs)
+    structured = replace_names_with_aliases(result.get("structured", ""), name_alias_pairs)
+
+    print("Original prompt:", result.get("concise", "")[:100])  # First 100 chars
+    print("Processed prompt:", concise[:100])  # First 100 chars
+
+    return concise, normal, detailed, structured, "Prompts generated and names replaced with aliases.", ", ".join(active_subjects)
 
 
 def wrapped_function(original_function):
@@ -1648,6 +1640,12 @@ subjects_df.select(
 )
 import shutil
 from typing import List, Dict
+
+def replace_names_with_aliases(text, name_alias_pairs):
+    for name, alias in name_alias_pairs:
+        text = text.replace(name, alias)
+    return text
+
 def post_process_prompt(prompt: str, subjects: List[Subject]) -> str:
     print(f"Original prompt: {prompt[:100]}...")  # Print first 100 chars
     for subject in subjects:

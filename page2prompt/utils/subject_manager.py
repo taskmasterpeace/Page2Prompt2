@@ -205,3 +205,6 @@ class SubjectManager:
 
     def get_name_alias_dict(self) -> Dict[str, str]:
         return {subject.name: subject.alias for subject in self.subjects if subject.alias != subject.name}
+
+    def get_name_alias_pairs(self):
+        return [(subject.name, subject.alias) for subject in self.subjects if subject.alias != subject.name]
