@@ -66,9 +66,17 @@ class ScriptPromptGenerator:
         # 3. Apply prefix/suffix and aliases, then format the prompts
         formatted_prompts = {}
         for prompt_type, prompt in prompts.items():
+            print("Active subjects:")
+            for subject in active_subject_objects:
+                print(f"Name: {subject.name}, Alias: {subject.alias}")
             print(f"Original prompt: {prompt}")
-            prompt = self.subject_manager.apply_alias(prompt)  # Apply alias first
-            print(f"After apply_alias: {prompt}")
+            
+            for subject in active_subject_objects:
+                if subject.name != subject.alias:
+                    prompt = prompt.replace(subject.name, subject.alias)
+            
+            print(f"Prompt after alias replacement: {prompt}")
+            
             subject_prefix, subject_suffix = self.subject_manager.get_subject_prefix_suffix(active_subjects)
             formatted_prompt = f"{subject_prefix.strip() + ' ' if subject_prefix else ''}{style_prefix.strip() + ' ' if style_prefix else ''}{prompt.strip()}{' ' + style_suffix.strip() if style_suffix else ''}{' ' + subject_suffix.strip() if subject_suffix else ''}"
             if end_parameters:

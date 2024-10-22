@@ -120,12 +120,8 @@ class SubjectManager:
     def apply_alias(self, text: str) -> str:
         """Replaces subject names with their aliases in the given text."""
         for subject in self.get_active_subjects():
-            if subject.name in text:
-                prefix_suffix = f"{subject.prefix} {subject.suffix}".strip()
-                if prefix_suffix:
-                    text = text.replace(f"{prefix_suffix} {subject.name}", f"{prefix_suffix} {subject.alias}")
-                else:
-                    text = text.replace(subject.name, subject.alias)
+            if subject.name != subject.alias:
+                text = text.replace(subject.name, subject.alias)
         return text
 
     def get_subject_prefix_suffix(self, active_subjects: List[str]) -> Tuple[str, str]:
