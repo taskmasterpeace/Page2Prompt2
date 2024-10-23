@@ -559,7 +559,7 @@ with gr.Blocks() as demo:
             demo.load(list_projects, outputs=[projects_df])
 
             def add_subject(name, description, alias, type, prefix, suffix):
-                new_subject = Subject(name, description, alias, type, prefix, suffix)
+                new_subject = Subject(name, description, alias, type, prefix, suffix, active=True)
                 subject_manager.add_subject(new_subject)
                 return subject_manager.get_subjects_dataframe()
 
