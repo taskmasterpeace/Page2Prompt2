@@ -11,6 +11,9 @@ import aiofiles
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+def get_initial_subjects_data():
+    return subject_manager.get_subjects_dataframe()
+
 # Add these function definitions at the top of the file
 async def list_projects():
     projects = []
@@ -335,11 +338,11 @@ with gr.Blocks() as demo:
                     with gr.Accordion("👥 Subjects", open=False):
                         with gr.Row():
                             with gr.Column():
-                                people = gr.CheckboxGroup(label="People", choices=subject_manager.get_people())
+                                people = gr.CheckboxGroup(label="People", choices=subject_manager.get_people, value=[])
                             with gr.Column():
-                                places = gr.CheckboxGroup(label="Places", choices=subject_manager.get_places())
+                                places = gr.CheckboxGroup(label="Places", choices=subject_manager.get_places, value=[])
                             with gr.Column():
-                                props = gr.CheckboxGroup(label="Props", choices=subject_manager.get_props())
+                                props = gr.CheckboxGroup(label="Props", choices=subject_manager.get_props, value=[])
 
                     with gr.Accordion("🎨 Style", open=False):
                         with gr.Row():
@@ -418,7 +421,8 @@ with gr.Blocks() as demo:
                 headers=["Name", "Description", "Alias", "Type", "Prefix", "Suffix", "Active"],
                 datatype=["str", "str", "str", "str", "str", "str", "bool"],
                 col_count=(7, "fixed"),
-                interactive=True
+                interactive=True,
+                value=get_initial_subjects_data
             )
 
             with gr.Row():
@@ -734,7 +738,8 @@ with gr.Blocks() as demo:
                         headers=["Name", "Description", "Alias", "Type", "Prefix", "Suffix", "Active"],
                         datatype=["str", "str", "str", "str", "str", "str", "bool"],
                         label="Subjects",
-                        interactive=True
+                        interactive=True,
+                        value=get_initial_subjects_data
                     )
 
                     with gr.Row():
