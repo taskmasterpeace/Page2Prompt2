@@ -193,6 +193,13 @@ def import_proposed_subjects_from_csv(file):
 def update_styles_dropdown():
     return gr.update(choices=style_manager.get_styles())
 
+def update_subject_checkboxes():
+    return {
+        people: gr.update(choices=subject_manager.get_people()),
+        places: gr.update(choices=subject_manager.get_places()),
+        props: gr.update(choices=subject_manager.get_props())
+    }
+
 from .components.script_prompt_generation import ScriptPromptGenerator
 from .utils.subject_manager import SubjectManager
 from .utils.subject import Subject
@@ -338,11 +345,11 @@ with gr.Blocks() as demo:
                     with gr.Accordion("👥 Subjects", open=False):
                         with gr.Row():
                             with gr.Column():
-                                people = gr.CheckboxGroup(label="People", choices=subject_manager.get_people, value=[])
+                                people = gr.CheckboxGroup(label="People", choices=subject_manager.get_people(), value=[])
                             with gr.Column():
-                                places = gr.CheckboxGroup(label="Places", choices=subject_manager.get_places, value=[])
+                                places = gr.CheckboxGroup(label="Places", choices=subject_manager.get_places(), value=[])
                             with gr.Column():
-                                props = gr.CheckboxGroup(label="Props", choices=subject_manager.get_props, value=[])
+                                props = gr.CheckboxGroup(label="Props", choices=subject_manager.get_props(), value=[])
 
                     with gr.Accordion("🎨 Style", open=False):
                         with gr.Row():
@@ -578,19 +585,19 @@ with gr.Blocks() as demo:
                 add_subject,
                 inputs=[subject_name, subject_description, subject_alias, subject_type, subject_prefix, subject_suffix],
                 outputs=[subjects_df]
-            )
+            ).then(update_subject_checkboxes, outputs=[people, places, props])
 
             update_subject_btn.click(
                 update_subject,
                 inputs=[subject_name, subject_description, subject_alias, subject_type, subject_prefix, subject_suffix],
                 outputs=[subjects_df]
-            )
+            ).then(update_subject_checkboxes, outputs=[people, places, props])
 
             delete_subject_btn.click(
                 delete_subject,
                 inputs=[subject_name],
                 outputs=[subjects_df]
-            )
+            ).then(update_subject_checkboxes, outputs=[people, places, props])
 
             import_subjects_btn.click(
                 import_subjects,
