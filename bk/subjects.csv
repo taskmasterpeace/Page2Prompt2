@@ -1,0 +1,9 @@
+Name,Description,Alias,Type,Prefix,Suffix,Active
+,,,,,,True
+Jason,The man who wears a black sweater with little white turtles on it ,ukj jason,person,<jason_lora>,,True
+Robert,"black man, dressed in a tailored gucci suit that is grey and black",,,,,True
+Slim,An old skinny Black man who never wears a shirt and always wears blue jeans,<slim_alias>,person,<slim_prefix>,<slim_suffix>,True
+Tru Foe,A black man wearing a beanie and wearing a black robe with silver trim.,trufoe,person, <lora:trufoe:1>,,True
+Warehouse,"A dimly lit warehouse covered in layers of graffiti art stretches out with exposed brick walls and steel beams crisscrossing the ceiling. The concrete floor is scuffed and worn, with faint marks of past events. Industrial lights hang low, casting scattered shadows across the walls, and there’s a faint haze from smoke lingering in the air. The space feels gritty, raw, and urban, with standing room only and no visible seating.",,place,,,True
+MsBethune,68 year old fat black woman with wide shoulders,,person,,,True
+Dolph,"A Black man with a fashion style that is bold, flashy, and rooted in hip-hop culture with prominent jewelry.",yungdolh,person,<lora:yungdolh:1>,,True

@@ -1,0 +1,65 @@
+You're right, my apologies for the confusion. If you're only interested in exporting the core functionality of the Music Lab without the UI components, we can simplify it significantly. Here's what you need to do:
+
+ 1 Keep the music_lab.py file with just the core functions:
+
+
+ from openai import OpenAI
+ import os
+
+ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+ def transcribe_audio(audio_file, include_timestamps=False):
+     if audio_file is None:
+         return "Please upload an MP3 file."
+
+     try:
+         with open(audio_file.name, "rb") as file:
+             response = client.audio.transcriptions.create(
+                 model="whisper-1",
+                 file=file,
+                 response_format='srt' if include_timestamps else 'text'
+             )
+
+         if include_timestamps:
+             formatted_transcript = ""
+             for line in response.strip().split('\n\n'):
+                 parts = line.split('\n')
+                 if len(parts) >= 3:
+                     time_range, text = parts[1], parts[2]
+                     formatted_transcript += f"{time_range} {text}\n"
+             return formatted_transcript if formatted_transcript else "Error: Unable to parse SRT format."
+         else:
+             return response
+     except Exception as e:
+         return f"Error during transcription: {str(e)}"
+
+ def search_and_replace_lyrics(lyrics: str, search_term: str, replace_term: str) -> str:
+     import re
+     pattern = re.compile(re.escape(search_term), re.IGNORECASE)
+     return pattern.sub(replace_term, lyrics)
+
+
+ 2 Update the __init__.py file in the page2prompt directory to export these functions:
+
+
+ from .music_lab import transcribe_audio, search_and_replace_lyrics
+
+
+ 3 Ensure that the OpenAI API key is set in the environment variables where you'll be using these functions.
+ 4 Make sure the openai package is installed and listed in your requirements.txt file.
+
+This approach exports just the core functionality without any UI components. Users of your package can then import and use these functions in their own code or UI as needed:
+
+
+ from page2prompt import transcribe_audio, search_and_replace_lyrics
+
+ # Use the functions as needed
+
+
+Remember to document the usage of these functions, including:
+
+ • The expected input format for transcribe_audio (it expects a file-like object)
+ • The return format of transcribe_audio (plain text or SRT format)
+ • The usage of search_and_replace_lyrics
+
+This way, you're exporting the core functionality of the Music Lab without any UI dependencies, making it more flexible for integration into various projects or interfaces.

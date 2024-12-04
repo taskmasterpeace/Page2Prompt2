@@ -1,0 +1,30 @@
+Timestamp,Scene,Shot,Script Reference,Shot Description,Shot Size,People,Places
+Sure! Below is a proposed detailed shot list formatted with each field separated by a pipe (,") character, which can easily be converted to a CSV format.",,,,,,
+```,,,,,,,
+Timestamp,Scene Number,Shot Number,Script Reference,Shot Description,Shot Size,People in the Shot,Places or Locations
+00:00:00,1,1,K-Shine arrives in Chicago.,"Wide shot of K-Shine stepping off the plane, looking determined as he surveys the airport.",Wide Shot,K-Shine,Chicago Airport
+00:00:05,1,2,K-Shine senses the tension.,"Close-up of K-Shine's face, showing intensity and focus, the airport's hustle in the background.",Close-up,K-Shine,Chicago Airport
+00:00:10,1,3,K-Shine thinks about Cooley Cash.,"Medium shot of K-Shine walking through the airport, a voiceover reflecting on his past experiences in Chicago.",Medium Shot,K-Shine,Airport hallway
+00:00:15,1,4,K-Shine prepares for battle.,"Close-up of K-Shine's hands as he clenches them into fists, symbolizing his readiness for the fight ahead.",Close-up,K-Shine,Airport lounge area
+00:00:20,2,1,K-Shine enters the venue.,"Wide shot of K-Shine entering the buzzing venue, the crowd's energy palpable.",Wide Shot,"K-Shine, crew",Battle rap venue
+00:00:25,2,2,K-Shine feels the crowd's eyes.,"Medium shot capturing K-Shine's perspective as he walks through the crowd, people staring at him.",Medium Shot,"K-Shine, crowd",Inside the venue
+00:00:30,2,3,K-Shine locks eyes with Young Kannon.,"Close-up of K-Shine and Young Kannon locking eyes, tension building between them.",Close-up,"K-Shine, Young Kannon",Battle rap stage
+00:00:35,2,4,K-Shine performs.,"Wide shot of K-Shine on stage, delivering his bars with passion, crowd reacting.",Wide Shot,"K-Shine, Young Kannon, crowd",Battle rap stage
+00:00:40,2,5,The crowd's energy shifts.,"Medium shot of the crowd leaning in, captivated by K-Shine’s performance.",Medium Shot,Crowd,Battle rap venue
+00:00:45,2,6,K-Shine controls the battle.,"Close-up of K-Shine mid-performance, showcasing his confidence and skill.",Close-up,K-Shine,Battle rap stage
+00:00:50,2,7,The battle ends.,"Wide shot of the crowd erupting in applause after K-Shine's last verse, capturing the excitement.",Wide Shot,"K-Shine, crowd",Battle rap venue
+00:00:55,3,1,K-Shine searches for Cooley Cash.,"Medium shot of K-Shine weaving through the crowd, scanning faces.",Medium Shot,"K-Shine, crowd",Battle rap venue
+00:01:00,3,2,K-Shine confronts Cooley Cash.,"Close-up of K-Shine's face as he spots Cooley, anger and determination present.",Close-up,"K-Shine, Cooley Cash",Battle rap venue
+00:01:05,3,3,Tension escalates.,Medium shot of Cooley looking nervous as K-Shine approaches him; the crowd watches.,Medium Shot,"K-Shine, Cooley Cash, crowd",Battle rap venue
+00:01:10,3,4,The confrontation.,"Close-up of K-Shine stating, ""Let's step outside,"" capturing the seriousness of the moment.",Close-up,"K-Shine, Cooley Cash",Battle rap venue
+00:01:15,3,5,The fight begins.,"Wide shot of K-Shine throwing the punch, Cooley falling; the crowd gasps.",Wide Shot,"K-Shine, Cooley Cash, crowd",Battle rap venue
+00:01:20,3,6,Aftermath of the fight.,"Medium shot of Cooley scrambling to his feet, Drugs and Prep watching from a distance.",Medium Shot,"Cooley Cash, Drugs, Prep",Battle rap venue
+00:01:25,3,7,K-Shine walks away.,"Wide shot of K-Shine turning away from Cooley, the crowd reacting in awe.",Wide Shot,"K-Shine, crowd",Battle rap venue
+00:01:30,4,1,Cooley cheers despite the loss.,"Close-up of Cooley smiling and cheering, contrasting his earlier defeat.",Close-up,Cooley Cash,Battle rap venue
+00:01:35,4,2,Gracie watches the altercation.,Medium shot of Gracie observing the scene with a neutral expression.,Medium Shot,Gracie,Battle rap venue
+00:01:40,4,3,K-Shine prepares for Big Kannon.,Close-up of K-Shine's intense expression as he readies for his next battle.,Close-up,K-Shine,Battle rap stage
+00:01:45,4,4,K-Shine delivers another flawless performance.,"Wide shot of K-Shine on stage again, the crowd fully engaged and cheering.",Wide Shot,"K-Shine, crowd",Battle rap stage
+00:01:50,4,5,K-Shine exits the venue.,"Wide shot of K-Shine leaving the venue, the crowd's applause fading behind him.",Wide Shot,"K-Shine, crowd",Outside the venue
+00:01:55,4,6,K-Shine reflects on the night.,"Close-up of K-Shine walking away with a smirk, knowing he conquered the night.",Close-up,K-Shine,Chicago streets
+```,,,,,,,
+Feel free to adjust the timestamps and any other specifics as needed for your project!,,,,,,,

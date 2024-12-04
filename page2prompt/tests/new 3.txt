@@ -1,0 +1,288 @@
+So I want you to analyze that file and I want you to tell me how we could best implement it within the current implementation of our entire application where I want the directors t 
+o help with music videos. I want them. to help with. I want to be to select them from a bulk process, but the bulk process, the only thing you that I set is the style and the. you have a  
+style is the only thing that goes across for all of them. But the director has to decide on the Shot description I am. also thinking aboutI am also thinking about. adding something where  
+I could select the shot and scene because we're going to have we already have proposed shot these proposed shot list. We're going to have like the master shot list at the top. on an accor 
+dion. and then we could have that to select the actual shot description. I'll shut that might work. It'll put together a plan for me on that. So I want to be able to. First I want to add  
+the same shot list that we have the proposed shot list setup that we have under. script management. I want to have another shot list but this is the real one. So we don't you know just pr 
+oposed. underneath the script under the accordion shot list we should be able to select shot and. scene. from somewhere near the shot description because if we select that then it should  
+automatically populate this. shot description. and then we should also have a button we can generate the director's note the director has a prompt which of course I want you to put togeth 
+er and They generate directors notes for it. and then I can just generate it from there. But I need to check off the subjects when I need to. And I need to select the style. I have that s 
+tyle be implemented across all the prompts if I want. If I want to. So put together complete plan from top to bottom include functions classes anything. that a developer would need who ju 
+st joined the team and wants to do all this for us. and he doesn't have access to the code base.
+
+Certainly! I'll put together a comprehensive plan to implement the director styles and improve the shot list management in your application. This plan will focus on integrating director styles, creating a master shot list, and enhancing the prompt generation process.
+
+Plan for Implementing Director Styles and Enhanced Shot List Management:
+
+1. Create a DirectorAssistant class:
+
+```python
+# page2prompt/components/director_assistant.py
+
+import csv
+from typing import Dict, List
+
+class DirectorAssistant:
+    def __init__(self, styles_csv_path: str):
+        self.directors: Dict[str, Dict[str, str]] = {}
+        self.load_director_styles(styles_csv_path)
+
+    def load_director_styles(self, csv_path: str):
+        with open(csv_path, 'r', newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                self.directors[row['name']] = row
+
+    def get_director_style(self, director_name: str) -> Dict[str, str]:
+        return self.directors.get(director_name, {})
+
+    async def generate_directors_notes(self, director_name: str, shot_description: str, scene: str, shot: str) -> str:
+        director_style = self.get_director_style(director_name)
+        prompt = f"""
+        As director {director_name}, known for {director_style.get('visual_style', '')}, 
+        {director_style.get('narrative_approach', '')}, and {director_style.get('cinematography', '')},
+        provide brief director's notes for the following shot in a music video:
+
+        Scene: {scene}
+        Shot: {shot}
+        Shot Description: {shot_description}
+
+        Consider your unique style elements such as {director_style.get('color_palette', '')},
+        {director_style.get('lighting_style', '')}, and {director_style.get('composition_technique', '')}.
+
+        Director's Notes:
+        """
+
+        # Use self.llm to generate the director's notes based on the prompt
+        # This is a placeholder for the actual LLM call
+        directors_notes = "Generated director's notes based on the style and shot description."
+
+        return directors_notes
+```
+
+2. Modify the ScriptManager to handle the master shot list:
+
+```python
+# page2prompt/utils/script_manager.py
+
+import pandas as pd
+from typing import List, Dict, Optional
+from .subject_manager import SubjectManager
+from ..components.director_assistant import DirectorAssistant
+from ..components.meta_chain import MetaChain
+
+class ScriptManager:
+    def __init__(self, meta_chain: MetaChain, subject_manager: SubjectManager, director_assistant: DirectorAssistant):
+        self.meta_chain = meta_chain
+        self.subject_manager = subject_manager
+        self.director_assistant = director_assistant
+        self.master_shot_list = pd.DataFrame(columns=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places", "Director's Notes"])
+        self.proposed_shot_list = pd.DataFrame(columns=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places"])
+
+    def set_master_shot_list(self, shot_list: pd.DataFrame):
+        self.master_shot_list = shot_list
+
+    def get_master_shot_list(self) -> pd.DataFrame:
+        return self.master_shot_list
+
+    def get_shot_description(self, scene: str, shot: str) -> Optional[str]:
+        filtered = self.master_shot_list[(self.master_shot_list['Scene'] == scene) & (self.master_shot_list['Shot'] == shot)]
+        return filtered['Shot Description'].iloc[0] if not filtered.empty else None
+
+    async def generate_directors_notes(self, director_name: str, scene: str, shot: str) -> str:
+        shot_description = self.get_shot_description(scene, shot)
+        if shot_description:
+            return await self.director_assistant.generate_directors_notes(director_name, shot_description, scene, shot)
+        return "Shot not found in the master shot list."
+
+    async def generate_prompt(self, director_name: str, scene: str, shot: str, style: str, active_subjects: List[str]) -> Dict[str, str]:
+        shot_description = self.get_shot_description(scene, shot)
+        if not shot_description:
+            return {"error": "Shot not found in the master shot list."}
+
+        directors_notes = await self.generate_directors_notes(director_name, scene, shot)
+
+        subject_details = [self.subject_manager.get_subject_details(subject) for subject in active_subjects]
+
+        return await self.meta_chain.generate_prompt(
+            style=style,
+            shot_description=shot_description,
+            directors_notes=directors_notes,
+            script=None,  # We're not using the full script in this context
+            stick_to_script=False,
+            end_parameters="",
+            active_subjects=subject_details
+        )
+
+    # ... (other methods like save_master_shot_list, load_master_shot_list, etc.)
+```
+
+3. Update the Gradio interface in `gradio_app.py`:
+
+```python
+# page2prompt/gradio_app.py
+
+import gradio as gr
+import pandas as pd
+from .utils.script_manager import ScriptManager
+from .utils.subject_manager import SubjectManager
+from .components.director_assistant import DirectorAssistant
+from .components.meta_chain import MetaChain
+
+# Initialize components
+meta_chain = MetaChain()
+subject_manager = SubjectManager("subjects.csv")
+director_assistant = DirectorAssistant("director_styles.csv")
+script_manager = ScriptManager(meta_chain, subject_manager, director_assistant)
+
+with gr.Blocks() as demo:
+    with gr.Tab("Script Management"):
+        with gr.Accordion("Master Shot List", open=True):
+            master_shot_list = gr.DataFrame(
+                headers=["Timestamp", "Scene", "Shot", "Reference", "Shot Description", "Shot Size", "People", "Places", "Director's Notes"],
+                label="Master Shot List",
+                interactive=True
+            )
+            upload_master_shot_list = gr.File(label="Upload Master Shot List CSV")
+            save_master_shot_list_btn = gr.Button("Save Master Shot List")
+
+        with gr.Accordion("Prompt Generation", open=True):
+            with gr.Row():
+                scene_input = gr.Textbox(label="Scene")
+                shot_input = gr.Textbox(label="Shot")
+                get_shot_description_btn = gr.Button("Get Shot Description")
+
+            shot_description_display = gr.Textbox(label="Shot Description", interactive=False)
+
+            director_style_input = gr.Dropdown(label="Director Style", choices=[director for director in director_assistant.directors.keys()])
+            generate_directors_notes_btn = gr.Button("Generate Director's Notes")
+            directors_notes_display = gr.Textbox(label="Director's Notes", interactive=False)
+
+            style_input = gr.Dropdown(label="Visual Style", choices=style_manager.get_styles())
+
+            subjects_checkboxes = gr.CheckboxGroup(label="Active Subjects", choices=subject_manager.get_all_subjects())
+
+            generate_prompt_btn = gr.Button("Generate Prompt")
+
+            with gr.Accordion("Generated Prompts", open=True):
+                concise_prompt = gr.Textbox(label="Concise Prompt")
+                normal_prompt = gr.Textbox(label="Normal Prompt")
+                detailed_prompt = gr.Textbox(label="Detailed Prompt")
+
+    # Event handlers
+    def upload_shot_list(file):
+        if file:
+            df = pd.read_csv(file.name)
+            script_manager.set_master_shot_list(df)
+            return df
+
+    upload_master_shot_list.upload(upload_shot_list, inputs=[upload_master_shot_list], outputs=[master_shot_list])
+
+    def save_shot_list(df):
+        script_manager.set_master_shot_list(df)
+        df.to_csv("master_shot_list.csv", index=False)
+        return "Master shot list saved successfully."
+
+    save_master_shot_list_btn.click(save_shot_list, inputs=[master_shot_list], outputs=[gr.Textbox()])
+
+    def get_shot_description(scene, shot):
+        return script_manager.get_shot_description(scene, shot) or "Shot not found."
+
+    get_shot_description_btn.click(get_shot_description, inputs=[scene_input, shot_input], outputs=[shot_description_display])
+
+    async def generate_directors_notes(director_name, scene, shot):
+        return await script_manager.generate_directors_notes(director_name, scene, shot)
+
+    generate_directors_notes_btn.click(generate_directors_notes, inputs=[director_style_input, scene_input, shot_input], outputs=[directors_notes_display])
+
+    async def generate_prompt(director_name, scene, shot, style, active_subjects):
+        prompts = await script_manager.generate_prompt(director_name, scene, shot, style, active_subjects)
+        return prompts.get("concise", ""), prompts.get("normal", ""), prompts.get("detailed", "")
+
+    generate_prompt_btn.click(generate_prompt, inputs=[director_style_input, scene_input, shot_input, style_input, subjects_checkboxes], outputs=[concise_prompt, normal_prompt, detailed_prompt])
+
+# Launch the app
+if __name__ == "__main__":
+    demo.launch()
+```
+
+This plan incorporates the following key features:
+
+1. A `DirectorAssistant` class that loads director styles from the CSV and generates director's notes based on the selected style and shot description.
+2. An enhanced `ScriptManager` that manages both the master shot list and proposed shot list, and coordinates the prompt generation process.
+3. An updated Gradio interface that allows users to:
+   - Upload and manage a master shot list
+   - Select a scene and shot to populate the shot description
+   - Choose a director style and generate director's notes
+   - Select active subjects and a visual style
+   - Generate prompts based on all these inputs
+
+To implement this plan:
+
+1. Create the `DirectorAssistant` class in a new file `page2prompt/components/director_assistant.py`.
+2. Update the `ScriptManager` class in `page2prompt/utils/script_manager.py`.
+3. Modify the `gradio_app.py` file to include the new interface elements and logic.
+4. Ensure that the `MetaChain` class in `page2prompt/components/meta_chain.py` can handle the new inputs (director's notes, etc.) in its prompt generation process.
+5. Update the `SubjectManager` class in `page2prompt/utils/subject_manager.py` to include methods for getting all subjects and subject details.
+
+This implementation allows for a flexible workflow where users can:
+- Manage a master shot list
+- Generate director-specific notes for each shot
+- Select relevant subjects and styles for each prompt
+- Generate prompts that incorporate all these elements
+
+
+Thank you for providing the `director_assistant.py` file. I've reviewed its contents, and it looks like we already have a good foundation for working with director styles. However, to fully implement the plan I outlined earlier, we'll need to make some modifications to this file and others.
+
+To proceed with the implementation, it would be helpful to see the following files if they're available:
+
+1. `page2prompt\utils\script_manager.py`
+2. `page2prompt\utils\subject_manager.py`
+3. `page2prompt\components\meta_chain.py`
+
+These files are crucial for implementing the enhanced shot list management and prompt generation process we discussed. If you can add these files to the chat, I can provide more specific and accurate recommendations for modifications.
+
+Based on the `director_assistant.py` file you provided, here are some initial thoughts and modifications we can make:
+
+1. The `DirectorAssistant` class already has methods for loading director styles and generating director's notes. We can enhance the `generate_directors_notes` method to incorporate more elements from the director's style:
+
+```python
+async def generate_directors_notes(self, director_name: Optional[str], shot_description: str, script: str) -> str:
+    style = self.get_director_style(director_name)
+    if not style:
+        return f"Standard director's notes based on:\nShot description: {shot_description}\nScript context: {script}"
+
+    # Generate director's notes based on style
+    notes = f"Director's Notes ({director_name}):\n"
+    notes += f"1. Apply {style['visual_style']} visual style to this shot.\n"
+    notes += f"2. Focus on {style['narrative_approach']} in storytelling.\n"
+    notes += f"3. Utilize {style['cinematography']} techniques.\n"
+    notes += f"4. Incorporate {style['color_palette']} color palette.\n"
+    notes += f"5. Use {style['lighting_style']} lighting approach.\n"
+    notes += f"6. Frame the shot using {style['composition_technique']} composition.\n"
+    notes += f"7. Consider the following for this specific shot:\n   {shot_description}\n"
+    notes += f"8. Ensure consistency with the overall script context:\n   {script[:100]}...\n"
+
+    return notes
+```
+
+2. We should add a method to apply the director's style to the prompt generation process:
+
+```python
+def apply_director_style(self, director_name: Optional[str], prompt: str) -> str:
+    style = self.get_director_style(director_name)
+    if not style:
+        return prompt
+
+    styled_prompt = f"In the style of {director_name}, known for {style['visual_style']} and {style['narrative_approach']}: "
+    styled_prompt += prompt
+    styled_prompt += f" Incorporate {style['color_palette']} colors and {style['lighting_style']} lighting."
+
+    return styled_prompt
+```
+
+These modifications will allow us to more fully integrate the director's style into the prompt generation process.
+
+Once you provide the other requested files, we can make more comprehensive modifications to implement the full plan, including the enhanced shot list management and the integration with the `ScriptManager` and `MetaChain` classes.
+Tokens: 36k sent, 697 received.
+Cost: $0.12 message, $5.04 session. Use --no-stream for accurate caching costs.
