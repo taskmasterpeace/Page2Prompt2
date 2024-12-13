@@ -200,19 +200,17 @@ def update_subject_checkboxes():
         props: gr.update(choices=subject_manager.get_props())
     }
 
-from .components.script_prompt_generation import ScriptPromptGenerator
-from .utils.subject_manager import SubjectManager
-from .utils.subject import Subject
-from .utils.style_manager import StyleManager
-from .components.meta_chain import MetaChain
-from .utils.shot_list_generator import generate_shot_list
+from page2prompt.components.script_prompt_generation import ScriptPromptGenerator
+from page2prompt.utils.subject_manager import SubjectManager
+from page2prompt.utils.subject import Subject
+from page2prompt.utils.style_manager import StyleManager
+from page2prompt.components.meta_chain import MetaChain
+from page2prompt.utils.shot_list_generator import generate_shot_list
 from typing import Dict, Any
-from .components.director_assistant import DirectorAssistant
-from .music_lab import transcribe_audio, search_and_replace_lyrics
-from .utils.script_manager import ScriptManager
-from .components.shot_list_meta_chain import ShotListMetaChain
-from .utils.subject_manager import SubjectManager
-from .utils.style_manager import StyleManager
+from page2prompt.components.director_assistant import DirectorAssistant
+from page2prompt.music_lab import transcribe_audio, search_and_replace_lyrics
+from page2prompt.utils.script_manager import ScriptManager
+from page2prompt.components.shot_list_meta_chain import ShotListMetaChain
 
 # Add debug print statements
 print("Current working directory:", os.getcwd())
